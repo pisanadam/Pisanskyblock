@@ -22,7 +22,7 @@ public final class CrateManager {
     public record Reward(String id, double weight, ItemStack item, double coins, List<String> commands,
                          String displayName, boolean broadcast) { }
 
-    public record Crate(String id, String name, Material icon, int slot, List<String> lore, List<Reward> rewards) {
+    public record Crate(String id, String name, String keyName, Material icon, int slot, List<String> lore, List<Reward> rewards) {
         double totalWeight() { double t = 0; for (Reward r : rewards) t += r.weight(); return t; }
     }
 
@@ -53,7 +53,7 @@ public final class CrateManager {
                 catch (Exception ex) { plugin.getLogger().warning("Kasa " + id + " odul " + rid + " hatali: " + ex.getMessage()); }
             }
             Material icon = Material.matchMaterial(c.getString("icon", "CHEST"));
-            crates.put(id, new Crate(id, c.getString("name", id), icon == null ? Material.CHEST : icon,
+            crates.put(id, new Crate(id, c.getString("name", id), c.getString("key-name", null), icon == null ? Material.CHEST : icon,
                     c.getInt("slot", -1), c.getStringList("lore"), rewards));
         }
         plugin.getLogger().info(crates.size() + " kasa yuklendi.");
@@ -112,13 +112,85 @@ public final class CrateManager {
     public Collection<Crate> crates() { return crates.values(); }
     public Crate crate(String id) { return crates.get(id.toLowerCase(Locale.ROOT)); }
 
-    public int keys(UUID id, String crate) { return keys.getOrDefault(id, Map.of()).getOrDefault(crate, 0); }
+    // ---- fiziksel anahtar esyasi ----
+    public org.bukkit.NamespacedKey tag() { return new NamespacedKey(plugin, "crate_key"); }
 
+    public String keyName(Crate c) {
+        return c.keyName() != null ? c.keyName()
+                : c.name().replace("Sandığı", "Anahtarı").replace("Sandık", "Anahtar");
+    }
+
+    public ItemStack keyItem(Crate c, int amount) {
+        ItemStack it = new ItemStack(Material.TRIPWIRE_HOOK, Math.max(1, Math.min(64, amount)));
+        ItemMeta m = it.getItemMeta();
+        m.setDisplayName(PisanCore.color(keyName(c)));
+        m.setLore(List.of(
+                PisanCore.color("&7Bu anahtar " + c.name() + " &7kasasını açar."),
+                "",
+                PisanCore.color("&eSağ tık &7» Kasayı aç"),
+                PisanCore.color("&eSol tık &7» İçeriğe bak"),
+                PisanCore.color("&8Yere koyulamaz • İsmi değiştirilemez")));
+        m.setEnchantmentGlintOverride(true);
+        m.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
+        m.getPersistentDataContainer().set(tag(), org.bukkit.persistence.PersistentDataType.STRING, c.id());
+        it.setItemMeta(m);
+        return it;
+    }
+
+    /** Esya bir kasa anahtariysa kasa id'sini, degilse null dondurur. */
+    public String keyId(ItemStack it) {
+        if (it == null || it.getType() != Material.TRIPWIRE_HOOK || !it.hasItemMeta()) return null;
+        return it.getItemMeta().getPersistentDataContainer().get(tag(), org.bukkit.persistence.PersistentDataType.STRING);
+    }
+
+    public int count(Player p, String crate) {
+        int n = 0;
+        for (ItemStack it : p.getInventory().getContents()) if (crate.equals(keyId(it))) n += it.getAmount();
+        return n;
+    }
+
+    /** Envanterden bir anahtar alir. Elindekini oncelikli kullanir. */
+    private boolean takeKey(Player p, String crate) {
+        ItemStack hand = p.getInventory().getItemInMainHand();
+        if (crate.equals(keyId(hand))) { hand.setAmount(hand.getAmount() - 1); return true; }
+        ItemStack[] cont = p.getInventory().getContents();
+        for (int i = 0; i < cont.length; i++) {
+            if (crate.equals(keyId(cont[i]))) {
+                cont[i].setAmount(cont[i].getAmount() - 1);
+                p.getInventory().setItem(i, cont[i].getAmount() <= 0 ? null : cont[i]);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Oyuncuya anahtar esyasi verir. Cevrimdisiysa bir sonraki girisinde teslim edilir. */
     public void addKeys(UUID id, String crate, int amt) {
-        Map<String, Integer> m = keys.computeIfAbsent(id, k -> new ConcurrentHashMap<>());
-        m.merge(crate, amt, Integer::sum);
-        if (m.get(crate) <= 0) m.remove(crate);
+        Crate c = crate(crate);
+        if (c == null || amt <= 0) return;
+        Player p = Bukkit.getPlayer(id);
+        if (p != null && p.isOnline()) {
+            int left = amt;
+            while (left > 0) {
+                int n = Math.min(64, left);
+                for (ItemStack over : p.getInventory().addItem(keyItem(c, n)).values())
+                    p.getWorld().dropItemNaturally(p.getLocation(), over);
+                left -= n;
+            }
+            return;
+        }
+        keys.computeIfAbsent(id, k -> new ConcurrentHashMap<>()).merge(c.id(), amt, Integer::sum);
         dirty = true;
+    }
+
+    /** Bekleyen (eski sanal / cevrimdisi verilmis) anahtarlari esya olarak teslim eder. */
+    public void deliverPending(Player p) {
+        Map<String, Integer> m = keys.remove(p.getUniqueId());
+        if (m == null || m.isEmpty()) return;
+        dirty = true;
+        int total = 0;
+        for (var e : m.entrySet()) { if (e.getValue() > 0) { addKeys(p.getUniqueId(), e.getKey(), e.getValue()); total += e.getValue(); } }
+        if (total > 0) p.sendMessage(PisanCore.color(plugin.getConfig().getString("messages.prefix", "") + "&eBekleyen &f" + total + " &ekasa anahtarın envanterine eklendi."));
     }
 
     public synchronized void saveKeys(boolean force) {
@@ -138,12 +210,11 @@ public final class CrateManager {
 
     public boolean open(Player p, Crate c) {
         if (c.rewards().isEmpty()) { p.sendMessage(PisanCore.color("&cBu kasa boş.")); return false; }
-        if (keys(p.getUniqueId(), c.id()) <= 0) {
+        if (!takeKey(p, c.id())) {
             p.sendMessage(PisanCore.color(plugin.getConfig().getString("messages.prefix", "") + "&cBu kasa için anahtarın yok. &7Taş jeneratöründe taş kırarak bulabilirsin."));
             p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
             return false;
         }
-        addKeys(p.getUniqueId(), c.id(), -1);
         Reward r = roll(c);
         give(p, r);
         String rn = rewardName(r);

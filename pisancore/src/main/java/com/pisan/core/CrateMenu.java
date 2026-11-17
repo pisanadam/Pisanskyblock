@@ -44,7 +44,7 @@ public final class CrateMenu implements Listener, CommandExecutor, TabCompleter 
         for (CrateManager.Crate c : cm.crates()) {
             int slot = c.slot() >= 0 ? c.slot() : (i < defSlots.length ? defSlots[i] : i);
             i++;
-            int k = cm.keys(p.getUniqueId(), c.id());
+            int k = cm.count(p, c.id());
             List<String> lore = new ArrayList<>();
             for (String l : c.lore()) lore.add(PisanCore.color(l));
             lore.add("");
@@ -112,7 +112,8 @@ public final class CrateMenu implements Listener, CommandExecutor, TabCompleter 
             OfflinePlayer t = Bukkit.getPlayerExact(a[1]);
             if (t == null) t = Bukkit.getOfflinePlayer(a[1]);
             cm.addKeys(t.getUniqueId(), c.id(), amt);
-            s.sendMessage(pre + "§f" + t.getName() + " §7oyuncusuna §f" + amt + "x " + PisanCore.color(c.name()) + " §7anahtarı verildi.");
+            s.sendMessage(pre + "§f" + t.getName() + " §7oyuncusuna §f" + amt + "x " + PisanCore.color(cm.keyName(c)) + " §7verildi"
+                    + (t.isOnline() ? "." : " §8(girişte teslim edilecek)"));
             return true;
         }
         if (!(s instanceof Player p)) { s.sendMessage("/kasa ver <oyuncu> <kasa> [adet]"); return true; }
@@ -125,7 +126,7 @@ public final class CrateMenu implements Listener, CommandExecutor, TabCompleter 
         if (a.length >= 1 && a[0].equalsIgnoreCase("anahtar")) {
             s.sendMessage(pre + "§6Anahtarların:");
             for (CrateManager.Crate c : cm.crates())
-                s.sendMessage(" " + PisanCore.color(c.name()) + " §8» §f" + cm.keys(p.getUniqueId(), c.id()));
+                s.sendMessage(" " + PisanCore.color(c.name()) + " §8» §f" + cm.count(p, c.id()));
             return true;
         }
         openMain(p);

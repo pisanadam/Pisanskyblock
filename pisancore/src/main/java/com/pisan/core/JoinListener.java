@@ -19,6 +19,7 @@ public final class JoinListener implements Listener {
         boolean isNew = !store.has(p.getUniqueId());
         store.create(p.getUniqueId(), p.getName());
         store.setName(p.getUniqueId(), p.getName());
+        plugin.crates().deliverPending(p);
         if (!isNew || !plugin.getConfig().getBoolean("starter-keys.enabled", true)) return;
 
         ConfigurationSection keys = plugin.getConfig().getConfigurationSection("starter-keys.keys");

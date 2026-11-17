@@ -29,6 +29,7 @@ public final class PisanCore extends JavaPlugin {
         getCommand("kasa").setExecutor(menu);
         getCommand("kasa").setTabCompleter(menu);
         Bukkit.getPluginManager().registerEvents(menu, this);
+        Bukkit.getPluginManager().registerEvents(new KeyProtectListener(this, menu), this);
 
         duel = new DuelManager(this);
         getCommand("duel").setExecutor(duel);

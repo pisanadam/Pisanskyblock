@@ -122,7 +122,9 @@ public final class GeneratorListener implements Listener {
         for (Key k : sorted) {
             kacc += k.chance();
             if (kroll < kacc) {
-                plugin.giveKey(p.getUniqueId(), k.id(), 1);
+                CrateManager.Crate crate = plugin.crates().crate(k.id());
+                if (crate == null) break;
+                b.getWorld().dropItemNaturally(drop, plugin.crates().keyItem(crate, 1));
                 p.sendMessage(PisanCore.color(plugin.getConfig().getString("messages.prefix", "")
                         + plugin.getConfig().getString("messages.key-drop", "").replace("%key%", k.name())));
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.4f);
