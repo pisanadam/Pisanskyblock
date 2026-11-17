@@ -1,0 +1,51 @@
+# 10 kademe kasa. Anahtar nadirliği generator.yml'de. (Tasarım spesifikasyonu)
+# Yeni oyuncu: 3 x caylak anahtarı.
+
+starter-keys:
+  caylak: 3
+
+crates:
+  - id: caylak
+    name: "Çaylak Sandığı"
+    tier: 1
+    rewards: ["Demir alet/zırh parçaları", "Tohum/ekin paketleri", "Küçük coin paketi", "Ucuz enchant kitapları (I-II)"]
+  - id: tasci
+    name: "Taşçı Sandığı"
+    tier: 2
+    rewards: ["Taş türleri paketleri", "Demir blok/altın külçe", "Verimlilik/Sağlamlık kitapları (II-III)", "Coin paketi"]
+  - id: madenci
+    name: "Madenci Sandığı"
+    tier: 3
+    rewards: ["Elmas (birkaç adet)", "Lapis/Redstone paketleri", "Fortune II-III", "Yiyecek paketleri"]
+  - id: demirci
+    name: "Demirci Sandığı"
+    tier: 4
+    rewards: ["Elmas alet/zırh parçası", "Sharpness/Protection III-IV kitapları", "Mending (şansa bağlı)", "Anvil/Smithing paketi"]
+  - id: kasif
+    name: "Kaşif Sandığı"
+    tier: 5
+    rewards: ["Ender pearl paketi", "Fireworks + Elytra parçası (sadece kasadan)", "Silk Touch/Looting III", "Orta coin paketi"]
+  - id: sovalye
+    name: "Şövalye Sandığı"
+    tier: 6
+    rewards: ["Elmas set parçaları (enchantlı)", "Protection IV, Sharpness V kitapları", "Golden Apple", "Büyük coin paketi"]
+  - id: usta
+    name: "Usta Sandığı"
+    tier: 7
+    rewards: ["Tam elmas set (enchantlı)", "Mending + Unbreaking III birlikte", "Totem of Undying", "Bonus anahtarlar (alt kademe)"]
+  - id: ejder
+    name: "Ejder Sandığı"
+    tier: 8
+    rewards: ["Büyük kitaplar: Sharpness VI, Efficiency VI, Fortune IV, Protection V (oyunda normalde yok)", "Beacon", "Elytra"]
+  - id: efsane
+    name: "Efsane Sandığı"
+    tier: 9
+    rewards: ["En yüksek seviye kitaplar", "Netherite template (çok düşük şans)", "Ender Dragon Head/Nadir koleksiyon", "Çok büyük coin paketi"]
+  - id: kozmik
+    name: "Kozmik Sandık"
+    tier: 10
+    rewards: ["Her şeyden en iyisi: tam set, özel isimli silah, çoklu üst kitap", "Sunucuya özel kozmetik/ünvan"]
+
+notes:
+  - Kasa içeriği örnektir, kesin ağırlıklar plugin kurulunca ayarlanacak.
+  - Marketten alınamayan her şey (netherite, elytra, totem, beacon) yalnızca üst kasalardan çıkabilir.

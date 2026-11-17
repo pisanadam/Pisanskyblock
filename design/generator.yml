@@ -1,0 +1,31 @@
+# Taş jeneratörü ödül tablosu (tasarım spesifikasyonu – plugin yazılınca buradan okunacak)
+# Jeneratörde oluşan taş/cobblestone kırıldığında 1 kez zar atılır.
+# Değerler: kırılan blok başına yüzde (%).
+
+ore-drops:
+  coal:           6.00
+  copper:         4.00
+  iron:           3.00
+  lapis:          1.50
+  redstone:       1.50
+  gold:           1.00
+  diamond:        0.50
+  emerald:        0.30
+  ancient_debris: 0.03   # netherite hammaddesi, çok nadir
+
+key-drops:         # crates.yml'deki kasa ID'leri
+  caylak:   0.500
+  tasci:    0.300
+  madenci:  0.180
+  demirci:  0.100
+  kasif:    0.060
+  sovalye:  0.035
+  usta:     0.020
+  ejder:    0.010
+  efsane:   0.004
+  kozmik:   0.001
+
+notes:
+  - Ödüller birbirinden bağımsız zar atar; istersen "tek zar, tek sonuç" modeline çevrilebilir.
+  - Ada seviyesi / jeneratör seviyesi ile şans çarpanı eklenebilir (ör. +%10 her seviye).
+  - Fortune/Luck gibi enchantlar etkilemesin ya da küçük bonus versin (karar bekliyor).
