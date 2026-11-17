@@ -25,6 +25,9 @@ commands:
   duel:
     aliases: [duello, 1v1]
     description: Esyali duel
+  takas:
+    aliases: [trade, ticaret]
+    description: Oyuncu takasi
   pisancore:
     description: Admin komutu (reload)
     permission: pisancore.admin

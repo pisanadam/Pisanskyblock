@@ -23,6 +23,7 @@ Ada koruma alanı: 500x500 (protection-range 250).
 | `/kasa` | Kasa menüsü (sol tık aç, sağ tık içerik) |
 | `/kasa anahtar` | Anahtarlarını listeler |
 | `/duel <oyuncu>` | Eşyalı duel isteği (`/duel kabul`, `/duel red`, `/duel pes`). Kazanan kaybedenin tüm eşyalarını alır |
+| `/takas <oyuncu>` | Takas isteği (`/takas kabul`, `/takas red`). Eşya + Coin, iki taraf onaylayınca 3 sn sonra tamamlanır |
 | `/bal`, `/pay <oyuncu> <miktar>`, `/baltop` | Coin |
 
 ## Admin komutları
