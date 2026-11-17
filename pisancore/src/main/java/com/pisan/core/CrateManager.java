@@ -127,8 +127,8 @@ public final class CrateManager {
         m.setLore(List.of(
                 PisanCore.color("&7Bu anahtar " + c.name() + " &7kasasını açar."),
                 "",
-                PisanCore.color("&eSağ tık &7» Kasayı aç"),
-                PisanCore.color("&eSol tık &7» İçeriğe bak"),
+                PisanCore.color("&eKullanmak için &f/kasa &eyaz,"),
+                PisanCore.color("&ekasaya tıklayarak aç."),
                 PisanCore.color("&8Yere koyulamaz • İsmi değiştirilemez")));
         m.setEnchantmentGlintOverride(true);
         m.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);

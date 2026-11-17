@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-/** Kasa anahtarlari: yere koyulamaz, ismi degistirilemez, craftta kullanilamaz. Sag tik = kasayi ac. */
+/** Kasa anahtarlari: yere koyulamaz, ismi degistirilemez, craftta kullanilamaz. Sadece /kasa menusunden acilir. */
 public final class KeyProtectListener implements Listener {
     private final PisanCore plugin;
     private final CrateMenu menu;
@@ -33,13 +33,11 @@ public final class KeyProtectListener implements Listener {
         ItemStack it = e.getItem();
         String id = cm().keyId(it);
         if (id == null) return;
-        e.setCancelled(true);
-        CrateManager.Crate c = cm().crate(id);
-        if (c == null) return;
-        Player p = e.getPlayer();
         Action a = e.getAction();
-        if (a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK) cm().open(p, c);
-        else if (a == Action.LEFT_CLICK_AIR || a == Action.LEFT_CLICK_BLOCK) menu.openPreview(p, c);
+        if (a != Action.RIGHT_CLICK_AIR && a != Action.RIGHT_CLICK_BLOCK) return;
+        e.setCancelled(true);
+        Player p = e.getPlayer();
+        p.sendActionBar(PisanCore.color("&eKasayı açmak için &f/kasa &eyaz ve kasaya tıkla."));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
