@@ -14,6 +14,8 @@ public final class PisanCore extends JavaPlugin {
     private DuelManager duel;
     private TradeManager trade;
     private MinionManager minions;
+    private SkillManager skills;
+    private ScoreboardManager scoreboard;
 
     @Override
     public void onEnable() {
@@ -54,6 +56,18 @@ public final class PisanCore extends JavaPlugin {
         // BentoBox dunyalari yuklendikten sonra baslat
         Bukkit.getScheduler().runTaskLater(this, () -> { minions.load(); minions.start(); }, 40L);
 
+        skills = new SkillManager(this);
+        skills.load();
+        Bukkit.getPluginManager().registerEvents(skills, this);
+        getCommand("skill").setExecutor(skills);
+        getCommand("skill").setTabCompleter(skills);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> skills.save(false), 6000L, 6000L);
+
+        scoreboard = new ScoreboardManager(this);
+        Bukkit.getPluginManager().registerEvents(scoreboard, this);
+        for (String c : new String[]{"scoreboard", "siralama"}) { getCommand(c).setExecutor(scoreboard); getCommand(c).setTabCompleter(scoreboard); }
+        Bukkit.getScheduler().runTaskLater(this, scoreboard::start, 60L);
+
         EcoCommands eco = new EcoCommands(this, store);
         for (String c : new String[]{"bal", "pay", "baltop", "eco", "pisancore"}) {
             getCommand(c).setExecutor(eco);
@@ -74,6 +88,7 @@ public final class PisanCore extends JavaPlugin {
         if (trade != null) trade.shutdown();
         if (minions != null) minions.shutdown();
         if (duel != null) duel.shutdown();
+        if (skills != null) skills.save(true);
         if (store != null) store.saveSync();
         if (crates != null) crates.saveKeys(true);
     }
@@ -95,6 +110,7 @@ public final class PisanCore extends JavaPlugin {
 
     public EconomyStore store() { return store; }
     public CrateManager crates() { return crates; }
+    public SkillManager skills() { return skills; }
 
     public void giveKey(java.util.UUID player, String key, int amount) {
         crates.addKeys(player, key, amount);

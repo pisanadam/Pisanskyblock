@@ -31,6 +31,15 @@ commands:
   minyon:
     aliases: [minyonlar, minion, minions]
     description: Minyon marketi
+  skill:
+    aliases: [skiller, skills, yetenek]
+    description: Skill menusu
+  scoreboard:
+    aliases: [sb]
+    description: Scoreboard ac/kapat
+  siralama:
+    aliases: [sıralama, top, sira]
+    description: Para / ada / skill siralamasi
   pisancore:
     description: Admin komutu (reload)
     permission: pisancore.admin

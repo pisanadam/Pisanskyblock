@@ -111,6 +111,7 @@ public final class GeneratorListener implements Listener {
                 String m = plugin.getConfig().getString("messages.ore-drop", "")
                         .replace("%amount%", String.valueOf(amt)).replace("%item%", pretty(o.item()));
                 p.sendActionBar(PisanCore.color(m));
+                plugin.skills().addXp(p, SkillManager.Skill.MADENCILIK, oreXp(o.item()));
                 break;
             }
         }
@@ -134,6 +135,13 @@ public final class GeneratorListener implements Listener {
                 break;
             }
         }
+    }
+
+    private static double oreXp(Material m) {
+        return switch (m.name()) {
+            case "COAL" -> 5; case "RAW_COPPER" -> 4; case "RAW_IRON" -> 7; case "LAPIS_LAZULI" -> 9; case "REDSTONE" -> 8;
+            case "RAW_GOLD" -> 10; case "DIAMOND" -> 20; case "EMERALD" -> 25; case "ANCIENT_DEBRIS" -> 40; default -> 3;
+        };
     }
 
     private static String pretty(Material m) {

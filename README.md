@@ -25,6 +25,10 @@ Ada koruma alanı: 500x500 (protection-range 250).
 | `/duel <oyuncu>` | Eşyalı duel isteği (`/duel kabul`, `/duel red`, `/duel pes`). Kazanan kaybedenin tüm eşyalarını alır |
 | `/takas <oyuncu>` | Takas isteği (`/takas kabul`, `/takas red`). Eşya + Coin, iki taraf onaylayınca 3 sn sonra tamamlanır |
 | `/minyon` | Minyon marketi. Minyonu adanda bir bloğa sağ tıklayarak koy, sağ tıkla menüsünü aç (topla / yükselt / al) |
+| `/skill [oyuncu]` | Skill menüsü (Madencilik, Çiftçilik, Odunculuk, Savaş, Balıkçılık) |
+| `/siralama [para\|ada\|skill]` | Sıralamalar |
+| `/is level`, `/is top` | Ada puanını hesapla / ada sıralaması (BentoBox Level) |
+| `/sb` | Scoreboard aç/kapat |
 | `/bal`, `/pay <oyuncu> <miktar>`, `/baltop` | Coin |
 
 ## Admin komutları
