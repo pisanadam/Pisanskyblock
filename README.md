@@ -24,10 +24,11 @@ Ada koruma alanı: 500x500 (protection-range 250).
 | `/kasa anahtar` | Anahtarlarını listeler |
 | `/duel <oyuncu>` | Eşyalı duel isteği (`/duel kabul`, `/duel red`, `/duel pes`). Kazanan kaybedenin tüm eşyalarını alır |
 | `/takas <oyuncu>` | Takas isteği (`/takas kabul`, `/takas red`). Eşya + Coin, iki taraf onaylayınca 3 sn sonra tamamlanır |
+| `/minyon` | Minyon marketi. Minyonu adanda bir bloğa sağ tıklayarak koy, sağ tıkla menüsünü aç (topla / yükselt / al) |
 | `/bal`, `/pay <oyuncu> <miktar>`, `/baltop` | Coin |
 
 ## Admin komutları
-`/kasa ver <oyuncu> <kasa> [adet]`, `/eco give|take|set <oyuncu> <miktar>`, `/pisancore reload`
+`/kasa ver <oyuncu> <kasa> [adet]`, `/minyon ver <oyuncu> <tür> [seviye] [adet]`, `/eco give|take|set <oyuncu> <miktar>`, `/pisancore reload`
 
 ## PisanCore derleme
 ```

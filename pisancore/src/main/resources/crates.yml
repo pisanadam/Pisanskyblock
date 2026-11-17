@@ -60,7 +60,7 @@ crates:
       dpick:    { weight: 6,  item: DIAMOND_PICKAXE, enchants: { efficiency: 3 } }
       food:     { weight: 10, item: COOKED_BEEF, amount: 32 }
       key:      { weight: 3,  commands: ["kasa ver %player% tasci 1"], display: "&71x Taşçı Anahtarı" }
-
+      minion:   { weight: 3,  commands: ["minyon ver %player% tas 1"], display: "&7Taş Minyonu [I]" }
   # ---------------- 4. DEMIRCI ----------------
   demirci:
     name: "&f&lDemirci Sandığı"
@@ -79,7 +79,7 @@ crates:
       diamonds: { weight: 10, item: DIAMOND, amount: 6 }
       xp:       { weight: 8,  item: EXPERIENCE_BOTTLE, amount: 32 }
       key:      { weight: 3,  commands: ["kasa ver %player% madenci 1"], display: "&e1x Madenci Anahtarı" }
-
+      minion:   { weight: 3,  commands: ["minyon ver %player% bugday 1"], display: "&eBuğday Minyonu [I]" }
   # ---------------- 5. KASIF ----------------
   kasif:
     name: "&b&lKaşif Sandığı"
@@ -98,7 +98,7 @@ crates:
       boots:    { weight: 6,  item: DIAMOND_BOOTS, enchants: { feather_falling: 4, protection: 3 } }
       spawn:    { weight: 6,  item: COW_SPAWN_EGG, amount: 2 }
       key:      { weight: 3,  commands: ["kasa ver %player% demirci 1"], display: "&f1x Demirci Anahtarı" }
-
+      minion:   { weight: 3,  commands: ["minyon ver %player% odun 1"], display: "&6Odun Minyonu [I]" }
   # ---------------- 6. SOVALYE ----------------
   sovalye:
     name: "&9&lŞövalye Sandığı"
@@ -117,7 +117,7 @@ crates:
       gapple:   { weight: 8,  item: GOLDEN_APPLE, amount: 8 }
       mending:  { weight: 6,  item: ENCHANTED_BOOK, enchants: { mending: 1 } }
       key:      { weight: 3,  commands: ["kasa ver %player% kasif 1"], display: "&b1x Kaşif Anahtarı" }
-
+      minion:   { weight: 3,  commands: ["minyon ver %player% komur 1"], display: "&8Kömür Minyonu [I]" }
   # ---------------- 7. USTA ----------------
   usta:
     name: "&5&lUsta Sandığı"
@@ -136,7 +136,7 @@ crates:
       shulker:  { weight: 4,  item: SHULKER_BOX }
       key1:     { weight: 5,  commands: ["kasa ver %player% sovalye 1"], display: "&91x Şövalye Anahtarı" }
       key2:     { weight: 6,  commands: ["kasa ver %player% kasif 2"], display: "&b2x Kaşif Anahtarı" }
-
+      minion:   { weight: 4,  commands: ["minyon ver %player% demir 1"], display: "&fDemir Minyonu [I]", broadcast: true }
   # ---------------- 8. EJDER ----------------
   ejder:
     name: "&4&lEjder Sandığı"
@@ -156,7 +156,7 @@ crates:
       egapple:  { weight: 5,  item: ENCHANTED_GOLDEN_APPLE, amount: 2 }
       template: { weight: 2,  item: NETHERITE_UPGRADE_SMITHING_TEMPLATE, broadcast: true }
       key:      { weight: 6,  commands: ["kasa ver %player% usta 1"], display: "&51x Usta Anahtarı" }
-
+      minion:   { weight: 4,  commands: ["minyon ver %player% altin 1"], display: "&6Altın Minyonu [I]", broadcast: true }
   # ---------------- 9. EFSANE ----------------
   efsane:
     name: "&6&lEfsane Sandığı"
@@ -174,7 +174,7 @@ crates:
       ningot:   { weight: 4,  item: NETHERITE_INGOT, broadcast: true }
       star:     { weight: 5,  item: NETHER_STAR }
       key:      { weight: 8,  commands: ["kasa ver %player% ejder 1"], display: "&41x Ejder Anahtarı" }
-
+      minion:   { weight: 5,  commands: ["minyon ver %player% elmas 1"], display: "&bElmas Minyonu [I]", broadcast: true }
   # ---------------- 10. KOZMIK ----------------
   kozmik:
     name: "&d&lKozmik Sandık"
@@ -191,3 +191,4 @@ crates:
       nblock:   { weight: 4,  item: NETHERITE_BLOCK, broadcast: true }
       beacon:   { weight: 8,  item: BEACON, amount: 2 }
       keys:     { weight: 10, commands: ["kasa ver %player% efsane 2"], display: "&62x Efsane Anahtarı" }
+      minion:   { weight: 8,  commands: ["minyon ver %player% elmas 3"], display: "&bElmas Minyonu [III]", broadcast: true }

@@ -28,6 +28,9 @@ commands:
   takas:
     aliases: [trade, ticaret]
     description: Oyuncu takasi
+  minyon:
+    aliases: [minyonlar, minion, minions]
+    description: Minyon marketi
   pisancore:
     description: Admin komutu (reload)
     permission: pisancore.admin

@@ -13,10 +13,13 @@ public final class PisanCore extends JavaPlugin {
     private CrateManager crates;
     private DuelManager duel;
     private TradeManager trade;
+    private MinionManager minions;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
         store = new EconomyStore(this);
         store.load();
 
@@ -42,6 +45,15 @@ public final class PisanCore extends JavaPlugin {
         getCommand("takas").setTabCompleter(trade);
         Bukkit.getPluginManager().registerEvents(trade, this);
 
+        minions = new MinionManager(this);
+        minions.load();
+        Bukkit.getPluginManager().registerEvents(minions, this);
+        MinionCommand mc = new MinionCommand(this, minions);
+        getCommand("minyon").setExecutor(mc);
+        getCommand("minyon").setTabCompleter(mc);
+        // BentoBox dunyalari yuklendikten sonra baslat
+        Bukkit.getScheduler().runTaskLater(this, () -> { minions.load(); minions.start(); }, 40L);
+
         EcoCommands eco = new EcoCommands(this, store);
         for (String c : new String[]{"bal", "pay", "baltop", "eco", "pisancore"}) {
             getCommand(c).setExecutor(eco);
@@ -60,6 +72,7 @@ public final class PisanCore extends JavaPlugin {
     @Override
     public void onDisable() {
         if (trade != null) trade.shutdown();
+        if (minions != null) minions.shutdown();
         if (duel != null) duel.shutdown();
         if (store != null) store.saveSync();
         if (crates != null) crates.saveKeys(true);
@@ -69,6 +82,7 @@ public final class PisanCore extends JavaPlugin {
         reloadConfig();
         generator.reload();
         crates.reloadCrates();
+        minions.loadConfig();
     }
 
     public String msg(String path) {

@@ -45,6 +45,26 @@ generator:
     efsane:  { chance: 0.004, name: "&6Efsane Anahtarı",    broadcast: true }
     kozmik:  { chance: 0.001, name: "&d&lKozmik Anahtar",   broadcast: true }
 
+# Minyonlar: adaya konur, chunk yukluyken urun uretir. /minyon = market
+minions:
+  max-per-player: 8
+  # Seviye 1..5: uretim suresi carpani ve depo kapasitesi
+  tier-speed:   [1.0, 0.85, 0.72, 0.6, 0.5]
+  tier-storage: [128, 256, 448, 640, 960]
+  # Yukseltme fiyati = minyon fiyati x carpan (1->2, 2->3, 3->4, 4->5)
+  tier-upgrade-cost: [1.0, 2.0, 4.0, 8.0]
+  types:
+    tas:      { name: "&7Taş Minyonu",       head: COBBLESTONE,    output: COBBLESTONE,  amount: 1, interval: 12, price: 750,   color: "8a8a8a", tool: WOODEN_PICKAXE }
+    odun:     { name: "&6Odun Minyonu",      head: OAK_LOG,        output: OAK_LOG,      amount: 1, interval: 20, price: 1500,  color: "8b5a2b", tool: STONE_AXE }
+    bugday:   { name: "&eBuğday Minyonu",    head: HAY_BLOCK,      output: WHEAT,        amount: 1, interval: 16, price: 1500,  color: "e6c84a", tool: WOODEN_HOE }
+    seker:    { name: "&aŞeker Kamışı Minyonu", head: SUGAR_CANE,  output: SUGAR_CANE,   amount: 1, interval: 18, price: 2000,  color: "6fcf4a", tool: WOODEN_HOE }
+    komur:    { name: "&8Kömür Minyonu",     head: COAL_BLOCK,     output: COAL,         amount: 1, interval: 30, price: 5000,  color: "2b2b2b", tool: STONE_PICKAXE }
+    demir:    { name: "&fDemir Minyonu",     head: IRON_BLOCK,     output: IRON_INGOT,   amount: 1, interval: 36, price: 8000,  color: "d8d8d8", tool: STONE_PICKAXE }
+    lapis:    { name: "&9Lapis Minyonu",     head: LAPIS_BLOCK,    output: LAPIS_LAZULI, amount: 3, interval: 40, price: 8000,  color: "2546b3", tool: IRON_PICKAXE }
+    redstone: { name: "&cRedstone Minyonu",  head: REDSTONE_BLOCK, output: REDSTONE,     amount: 3, interval: 40, price: 8000,  color: "b52020", tool: IRON_PICKAXE }
+    altin:    { name: "&6Altın Minyonu",     head: GOLD_BLOCK,     output: GOLD_INGOT,   amount: 1, interval: 48, price: 12000, color: "f2c230", tool: IRON_PICKAXE }
+    elmas:    { name: "&bElmas Minyonu",     head: DIAMOND_BLOCK,  output: DIAMOND,      amount: 1, interval: 90, price: 50000, color: "4ee6e0", tool: DIAMOND_PICKAXE }
+
 messages:
   prefix: "&6&lPISAN &8» &7"
   ore-drop: "&a+ %amount%x %item%"
