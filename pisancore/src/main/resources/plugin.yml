@@ -40,6 +40,9 @@ commands:
   siralama:
     aliases: [sıralama, top, sira]
     description: Para / ada / skill siralamasi
+  arkadas:
+    aliases: [arkadaş, arkadaslar, friend, friends, f]
+    description: Arkadas sistemi
   pisancore:
     description: Admin komutu (reload)
     permission: pisancore.admin

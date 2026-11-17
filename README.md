@@ -29,6 +29,7 @@ Ada koruma alanı: 500x500 (protection-range 250).
 | `/siralama [para\|ada\|skill]` | Sıralamalar |
 | `/is level`, `/is top` | Ada puanını hesapla / ada sıralaması (BentoBox Level) |
 | `/sb` | Scoreboard aç/kapat |
+| `/arkadas` | Arkadaş menüsü (`ekle`, `kabul`, `red`, `git`, `sil`, `liste`, `izinler`). Sol tık: adasına git, sağ tık: senin adandaki yetkisi |
 | `/bal`, `/pay <oyuncu> <miktar>`, `/baltop` | Coin |
 
 ## Admin komutları

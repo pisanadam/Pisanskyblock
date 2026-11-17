@@ -16,6 +16,7 @@ public final class PisanCore extends JavaPlugin {
     private MinionManager minions;
     private SkillManager skills;
     private ScoreboardManager scoreboard;
+    private FriendManager friends;
 
     @Override
     public void onEnable() {
@@ -68,6 +69,13 @@ public final class PisanCore extends JavaPlugin {
         for (String c : new String[]{"scoreboard", "siralama"}) { getCommand(c).setExecutor(scoreboard); getCommand(c).setTabCompleter(scoreboard); }
         Bukkit.getScheduler().runTaskLater(this, scoreboard::start, 60L);
 
+        friends = new FriendManager(this);
+        friends.load();
+        Bukkit.getPluginManager().registerEvents(friends, this);
+        getCommand("arkadas").setExecutor(friends);
+        getCommand("arkadas").setTabCompleter(friends);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> friends.save(false), 6000L, 6000L);
+
         EcoCommands eco = new EcoCommands(this, store);
         for (String c : new String[]{"bal", "pay", "baltop", "eco", "pisancore"}) {
             getCommand(c).setExecutor(eco);
@@ -89,6 +97,7 @@ public final class PisanCore extends JavaPlugin {
         if (minions != null) minions.shutdown();
         if (duel != null) duel.shutdown();
         if (skills != null) skills.save(true);
+        if (friends != null) friends.save(true);
         if (store != null) store.saveSync();
         if (crates != null) crates.saveKeys(true);
     }
