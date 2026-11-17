@@ -9,6 +9,14 @@ pages:
         material: BARREL
         buy: 8.17
         sell: 2.05
+      hopper:
+        material: HOPPER
+        buy: 38.67
+        sell: 9.67
+      hopper_minecart:
+        material: HOPPER_MINECART
+        buy: 70.99
+        sell: 17.75
       copper_chest:
         material: COPPER_CHEST
         buy: 19.2

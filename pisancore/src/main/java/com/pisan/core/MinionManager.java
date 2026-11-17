@@ -239,6 +239,7 @@ public final class MinionManager implements Listener {
             if (m.stand == null || !m.stand.isValid()) { m.stand = null; spawn(m); }
             Type t = types.get(m.type);
             long cap = capacity(m.tier);
+            if (m.stored > 0) pushToContainer(m, t);
             if (m.stored >= cap) continue;
             m.progress += 1.0 / interval(t, m.tier);
             if (m.progress >= 1) {
@@ -254,6 +255,35 @@ public final class MinionManager implements Listener {
                 }
             }
         }
+    }
+
+    // ======================= huni / sandik =======================
+    private static final org.bukkit.block.BlockFace[] FACES = {
+            org.bukkit.block.BlockFace.DOWN, org.bukkit.block.BlockFace.NORTH, org.bukkit.block.BlockFace.SOUTH,
+            org.bukkit.block.BlockFace.EAST, org.bukkit.block.BlockFace.WEST};
+
+    /** Minyonun altinda (once) veya yaninda huni/sandik/varil varsa onu dondurur. */
+    private Inventory container(Minion m) {
+        Block base = m.loc.getBlock();
+        for (org.bukkit.block.BlockFace f : FACES) {
+            Block b = base.getRelative(f);
+            Material t = b.getType();
+            if (t == Material.HOPPER || t == Material.CHEST || t == Material.TRAPPED_CHEST || t == Material.BARREL) {
+                if (b.getState(false) instanceof org.bukkit.block.Container c) return c.getInventory();
+            }
+        }
+        return null;
+    }
+
+    private void pushToContainer(Minion m, Type t) {
+        Inventory inv = container(m);
+        if (inv == null) return;
+        int max = t.output().getMaxStackSize();
+        int n = (int) Math.min(max, m.stored);
+        Map<Integer, ItemStack> left = inv.addItem(new ItemStack(t.output(), n));
+        int notFit = left.values().stream().mapToInt(ItemStack::getAmount).sum();
+        int moved = n - notFit;
+        if (moved > 0) { m.stored -= moved; dirty = true; updateName(m); }
     }
 
     // ======================= esya =======================
@@ -402,9 +432,15 @@ public final class MinionManager implements Listener {
         ItemStack pane = icon(Material.GRAY_STAINED_GLASS_PANE, " ", List.of());
         for (int i = 0; i < 27; i++) inv.setItem(i, pane);
         long cap = capacity(m.tier);
+        boolean linked = container(m) != null;
         inv.setItem(11, icon(t.output(), "&aDepoyu topla", List.of(
                 "&7Depoda: &f" + m.stored + "&7/" + cap + " " + CrateManager.pretty(t.output().name()),
                 "", "&eTıkla &7» Envanterine al")));
+        inv.setItem(20, icon(Material.HOPPER, linked ? "&aHuni/Sandık bağlı" : "&7Huni/Sandık bağlı değil", List.of(
+                "&7Minyonun &faltına &7ya da &fyanına &7bir",
+                "&7huni, sandık veya varil koyarsan",
+                "&7ürettiklerini otomatik oraya aktarır.",
+                "", linked ? "&aDurum: Aktarılıyor ✔" : "&cDurum: Bağlı değil")));
         double perHour = 3600.0 / interval(t, m.tier) * t.amount();
         inv.setItem(13, icon(t.head(), t.name() + " &8[&e" + ROMAN[Math.min(m.tier, 10)] + "&8]", List.of(
                 "&7Sahibi: &f" + m.ownerName,

@@ -1,6 +1,15 @@
 pages:
   page1:
     items:
+      redstone:
+        material: REDSTONE
+        buy: 31.5
+        sell: 7.92
+        stack-size: 9
+      redstone_block:
+        material: REDSTONE_BLOCK
+        buy: 33.08
+        sell: 8.27
       redstone_torch:
         material: REDSTONE_TORCH
         buy: 4.29

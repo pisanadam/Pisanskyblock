@@ -17,8 +17,3 @@ pages:
         displayname: <#5B8CFF><bold>Armor
         section: armor
         slot: 15
-      redstone:
-        material: REDSTONE
-        displayname: '&c&lRedstone'
-        section: redstone
-        slot: 17
