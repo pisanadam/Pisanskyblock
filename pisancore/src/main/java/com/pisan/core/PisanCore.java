@@ -11,6 +11,7 @@ public final class PisanCore extends JavaPlugin {
     private EconomyStore store;
     private GeneratorListener generator;
     private CrateManager crates;
+    private DuelManager duel;
 
     @Override
     public void onEnable() {
@@ -27,6 +28,12 @@ public final class PisanCore extends JavaPlugin {
         getCommand("kasa").setExecutor(menu);
         getCommand("kasa").setTabCompleter(menu);
         Bukkit.getPluginManager().registerEvents(menu, this);
+
+        duel = new DuelManager(this);
+        getCommand("duel").setExecutor(duel);
+        getCommand("duel").setTabCompleter(duel);
+        Bukkit.getPluginManager().registerEvents(duel, this);
+        Bukkit.getScheduler().runTask(this, duel::init);
 
         EcoCommands eco = new EcoCommands(this, store);
         for (String c : new String[]{"bal", "pay", "baltop", "eco", "pisancore"}) {
@@ -45,6 +52,7 @@ public final class PisanCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (duel != null) duel.shutdown();
         if (store != null) store.saveSync();
         if (crates != null) crates.saveKeys(true);
     }

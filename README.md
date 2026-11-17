@@ -10,7 +10,9 @@ Hypixel Skyblock'tan ilham alan Java skyblock sunucusu (Exaroton, Paper 26.3, 1.
 
 ## Sunucudaki pluginler
 ViaVersion + ViaBackwards, BentoBox + BSkyBlock, LuckPerms, VaultUnlocked, PlaceholderAPI,
-EconomyShopGUI (market), AuctionHouse (oyuncu pazarı), PisanCore.
+EconomyShopGUI (market), AuctionHouse (oyuncu pazarı), GrimAC (anti-hile), PisanCore.
+
+Ada koruma alanı: 500x500 (protection-range 250).
 
 ## Oyuncu komutları
 | Komut | İş |
@@ -20,6 +22,7 @@ EconomyShopGUI (market), AuctionHouse (oyuncu pazarı), PisanCore.
 | `/ah` | Oyuncu pazarı (`/ah sell <fiyat>` elindekini satışa koyar) |
 | `/kasa` | Kasa menüsü (sol tık aç, sağ tık içerik) |
 | `/kasa anahtar` | Anahtarlarını listeler |
+| `/duel <oyuncu>` | Eşyalı duel isteği (`/duel kabul`, `/duel red`, `/duel pes`). Kazanan kaybedenin tüm eşyalarını alır |
 | `/bal`, `/pay <oyuncu> <miktar>`, `/baltop` | Coin |
 
 ## Admin komutları

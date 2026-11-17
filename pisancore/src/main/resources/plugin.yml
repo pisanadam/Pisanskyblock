@@ -22,6 +22,9 @@ commands:
   kasa:
     aliases: [kasalar, crate, crates, anahtarlar]
     description: Kasa menusu
+  duel:
+    aliases: [duello, 1v1]
+    description: Esyali duel
   pisancore:
     description: Admin komutu (reload)
     permission: pisancore.admin
