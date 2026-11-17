@@ -1,0 +1,193 @@
+# =====================================================================
+#  Pisanskyblock Kasalari
+#  weight = agirlik (sans). Bir kasadaki sans = weight / toplam weight.
+#  Odul tipleri: item (+amount, name, lore, enchants, unbreakable), coins, commands
+#  enchants: normalde alinamayan seviyeler de verilebilir (ornek: sharpness: 7)
+#  Komut ile anahtar ver: /kasa ver <oyuncu> <kasa> [adet]
+# =====================================================================
+crates:
+
+  # ---------------- 1. CAYLAK ----------------
+  caylak:
+    name: "&a&lÇaylak Sandığı"
+    icon: CHEST
+    lore: ["&7Yeni başlayanlar için.", "&7Her yeni oyuncuya &a3 anahtar&7!"]
+    rewards:
+      coins1:   { weight: 20, coins: 100 }
+      coins2:   { weight: 10, coins: 250 }
+      seeds:    { weight: 12, item: WHEAT_SEEDS, amount: 16 }
+      sapling:  { weight: 12, item: OAK_SAPLING, amount: 4 }
+      bread:    { weight: 10, item: BREAD, amount: 16 }
+      iron:     { weight: 10, item: IRON_INGOT, amount: 8 }
+      ipick:    { weight: 8,  item: IRON_PICKAXE, enchants: { efficiency: 2 } }
+      bucket:   { weight: 6,  item: WATER_BUCKET }
+      lava:     { weight: 6,  item: LAVA_BUCKET }
+      bone:     { weight: 6,  item: BONE_MEAL, amount: 32 }
+      book1:    { weight: 4,  item: ENCHANTED_BOOK, enchants: { efficiency: 2 } }
+
+  # ---------------- 2. TASCI ----------------
+  tasci:
+    name: "&7&lTaşçı Sandığı"
+    icon: COBBLESTONE
+    lore: ["&7Taş ustalarının sandığı."]
+    rewards:
+      coins1:   { weight: 18, coins: 300 }
+      coins2:   { weight: 8,  coins: 750 }
+      stone:    { weight: 12, item: STONE_BRICKS, amount: 64 }
+      deep:     { weight: 10, item: DEEPSLATE, amount: 64 }
+      ironblk:  { weight: 8,  item: IRON_BLOCK, amount: 2 }
+      gold:     { weight: 10, item: GOLD_INGOT, amount: 12 }
+      ipick:    { weight: 8,  item: IRON_PICKAXE, enchants: { efficiency: 3, unbreaking: 2 } }
+      book_eff: { weight: 8,  item: ENCHANTED_BOOK, enchants: { efficiency: 3 } }
+      book_unb: { weight: 8,  item: ENCHANTED_BOOK, enchants: { unbreaking: 3 } }
+      dpick:    { weight: 3,  item: DIAMOND_PICKAXE }
+      key:      { weight: 2,  commands: ["kasa ver %player% caylak 2"], display: "&a2x Çaylak Anahtarı" }
+
+  # ---------------- 3. MADENCI ----------------
+  madenci:
+    name: "&e&lMadenci Sandığı"
+    icon: IRON_ORE
+    lore: ["&7Madencilere özel ganimetler."]
+    rewards:
+      coins1:   { weight: 16, coins: 750 }
+      coins2:   { weight: 6,  coins: 2000 }
+      diamond:  { weight: 12, item: DIAMOND, amount: 3 }
+      lapis:    { weight: 10, item: LAPIS_BLOCK, amount: 4 }
+      redstone: { weight: 10, item: REDSTONE_BLOCK, amount: 4 }
+      gold:     { weight: 8,  item: GOLD_BLOCK, amount: 2 }
+      fortune:  { weight: 8,  item: ENCHANTED_BOOK, enchants: { fortune: 2 } }
+      silk:     { weight: 6,  item: ENCHANTED_BOOK, enchants: { silk_touch: 1 } }
+      dpick:    { weight: 6,  item: DIAMOND_PICKAXE, enchants: { efficiency: 3 } }
+      food:     { weight: 10, item: COOKED_BEEF, amount: 32 }
+      key:      { weight: 3,  commands: ["kasa ver %player% tasci 1"], display: "&71x Taşçı Anahtarı" }
+
+  # ---------------- 4. DEMIRCI ----------------
+  demirci:
+    name: "&f&lDemirci Sandığı"
+    icon: ANVIL
+    lore: ["&7Silah ve zırh ustası."]
+    rewards:
+      coins1:   { weight: 14, coins: 1500 }
+      coins2:   { weight: 6,  coins: 4000 }
+      dsword:   { weight: 8,  item: DIAMOND_SWORD, enchants: { sharpness: 3 } }
+      dchest:   { weight: 6,  item: DIAMOND_CHESTPLATE, enchants: { protection: 2 } }
+      dhelm:    { weight: 6,  item: DIAMOND_HELMET, enchants: { protection: 2 } }
+      anvil:    { weight: 8,  item: ANVIL }
+      sharp:    { weight: 10, item: ENCHANTED_BOOK, enchants: { sharpness: 4 } }
+      prot:     { weight: 10, item: ENCHANTED_BOOK, enchants: { protection: 3 } }
+      mending:  { weight: 4,  item: ENCHANTED_BOOK, enchants: { mending: 1 } }
+      diamonds: { weight: 10, item: DIAMOND, amount: 6 }
+      xp:       { weight: 8,  item: EXPERIENCE_BOTTLE, amount: 32 }
+      key:      { weight: 3,  commands: ["kasa ver %player% madenci 1"], display: "&e1x Madenci Anahtarı" }
+
+  # ---------------- 5. KASIF ----------------
+  kasif:
+    name: "&b&lKaşif Sandığı"
+    icon: COMPASS
+    lore: ["&7Uzak diyarların hazineleri."]
+    rewards:
+      coins1:   { weight: 14, coins: 3000 }
+      coins2:   { weight: 6,  coins: 7500 }
+      pearls:   { weight: 10, item: ENDER_PEARL, amount: 16 }
+      rockets:  { weight: 8,  item: FIREWORK_ROCKET, amount: 32 }
+      elytra:   { weight: 2,  item: ELYTRA, broadcast: true }
+      silk:     { weight: 8,  item: ENCHANTED_BOOK, enchants: { silk_touch: 1 } }
+      looting:  { weight: 8,  item: ENCHANTED_BOOK, enchants: { looting: 3 } }
+      ff:       { weight: 8,  item: ENCHANTED_BOOK, enchants: { feather_falling: 4 } }
+      gapple:   { weight: 8,  item: GOLDEN_APPLE, amount: 4 }
+      boots:    { weight: 6,  item: DIAMOND_BOOTS, enchants: { feather_falling: 4, protection: 3 } }
+      spawn:    { weight: 6,  item: COW_SPAWN_EGG, amount: 2 }
+      key:      { weight: 3,  commands: ["kasa ver %player% demirci 1"], display: "&f1x Demirci Anahtarı" }
+
+  # ---------------- 6. SOVALYE ----------------
+  sovalye:
+    name: "&9&lŞövalye Sandığı"
+    icon: DIAMOND_SWORD
+    lore: ["&7Savaşçılar için güçlü ekipman."]
+    rewards:
+      coins1:   { weight: 12, coins: 6000 }
+      coins2:   { weight: 5,  coins: 15000 }
+      sword:    { weight: 10, item: DIAMOND_SWORD, enchants: { sharpness: 5, unbreaking: 3, looting: 2 } }
+      chest:    { weight: 8,  item: DIAMOND_CHESTPLATE, enchants: { protection: 4, unbreaking: 3 } }
+      legs:     { weight: 8,  item: DIAMOND_LEGGINGS, enchants: { protection: 4, unbreaking: 3 } }
+      helm:     { weight: 8,  item: DIAMOND_HELMET, enchants: { protection: 4, unbreaking: 3 } }
+      boots:    { weight: 8,  item: DIAMOND_BOOTS, enchants: { protection: 4, feather_falling: 4 } }
+      sharp5:   { weight: 8,  item: ENCHANTED_BOOK, enchants: { sharpness: 5 } }
+      prot4:    { weight: 8,  item: ENCHANTED_BOOK, enchants: { protection: 4 } }
+      gapple:   { weight: 8,  item: GOLDEN_APPLE, amount: 8 }
+      mending:  { weight: 6,  item: ENCHANTED_BOOK, enchants: { mending: 1 } }
+      key:      { weight: 3,  commands: ["kasa ver %player% kasif 1"], display: "&b1x Kaşif Anahtarı" }
+
+  # ---------------- 7. USTA ----------------
+  usta:
+    name: "&5&lUsta Sandığı"
+    icon: ENCHANTING_TABLE
+    lore: ["&7Ustalık ister.", "&7Nadir ve değerli ödüller."]
+    rewards:
+      coins1:   { weight: 12, coins: 12000 }
+      coins2:   { weight: 5,  coins: 30000 }
+      pick:     { weight: 8,  item: DIAMOND_PICKAXE, name: "&5Usta Kazması", enchants: { efficiency: 5, fortune: 3, unbreaking: 3, mending: 1 } }
+      sword:    { weight: 8,  item: DIAMOND_SWORD, name: "&5Usta Kılıcı", enchants: { sharpness: 5, looting: 3, unbreaking: 3, mending: 1 } }
+      totem:    { weight: 6,  item: TOTEM_OF_UNDYING, broadcast: true }
+      elytra:   { weight: 4,  item: ELYTRA }
+      mendbook: { weight: 10, item: ENCHANTED_BOOK, enchants: { mending: 1, unbreaking: 3 } }
+      dblock:   { weight: 8,  item: DIAMOND_BLOCK, amount: 3 }
+      debris:   { weight: 4,  item: ANCIENT_DEBRIS, amount: 2 }
+      shulker:  { weight: 4,  item: SHULKER_BOX }
+      key1:     { weight: 5,  commands: ["kasa ver %player% sovalye 1"], display: "&91x Şövalye Anahtarı" }
+      key2:     { weight: 6,  commands: ["kasa ver %player% kasif 2"], display: "&b2x Kaşif Anahtarı" }
+
+  # ---------------- 8. EJDER ----------------
+  ejder:
+    name: "&4&lEjder Sandığı"
+    icon: DRAGON_HEAD
+    lore: ["&7Oyunda bulunmayan &cBÜYÜK KİTAPLAR&7!"]
+    rewards:
+      coins:    { weight: 10, coins: 50000 }
+      sharp6:   { weight: 10, item: ENCHANTED_BOOK, name: "&4Büyük Kitap", enchants: { sharpness: 6 } }
+      eff6:     { weight: 10, item: ENCHANTED_BOOK, name: "&4Büyük Kitap", enchants: { efficiency: 6 } }
+      fort4:    { weight: 8,  item: ENCHANTED_BOOK, name: "&4Büyük Kitap", enchants: { fortune: 4 } }
+      prot5:    { weight: 8,  item: ENCHANTED_BOOK, name: "&4Büyük Kitap", enchants: { protection: 5 } }
+      unb4:     { weight: 8,  item: ENCHANTED_BOOK, name: "&4Büyük Kitap", enchants: { unbreaking: 4 } }
+      loot4:    { weight: 6,  item: ENCHANTED_BOOK, name: "&4Büyük Kitap", enchants: { looting: 4 } }
+      power6:   { weight: 6,  item: ENCHANTED_BOOK, name: "&4Büyük Kitap", enchants: { power: 6 } }
+      beacon:   { weight: 5,  item: BEACON, broadcast: true }
+      elytra:   { weight: 6,  item: ELYTRA }
+      egapple:  { weight: 5,  item: ENCHANTED_GOLDEN_APPLE, amount: 2 }
+      template: { weight: 2,  item: NETHERITE_UPGRADE_SMITHING_TEMPLATE, broadcast: true }
+      key:      { weight: 6,  commands: ["kasa ver %player% usta 1"], display: "&51x Usta Anahtarı" }
+
+  # ---------------- 9. EFSANE ----------------
+  efsane:
+    name: "&6&lEfsane Sandığı"
+    icon: NETHER_STAR
+    lore: ["&7Efsaneler buradan doğar."]
+    rewards:
+      coins:    { weight: 10, coins: 150000 }
+      sharp7:   { weight: 8,  item: ENCHANTED_BOOK, name: "&6Efsanevi Kitap", enchants: { sharpness: 7 } }
+      eff7:     { weight: 8,  item: ENCHANTED_BOOK, name: "&6Efsanevi Kitap", enchants: { efficiency: 7 } }
+      fort5:    { weight: 6,  item: ENCHANTED_BOOK, name: "&6Efsanevi Kitap", enchants: { fortune: 5 } }
+      prot6:    { weight: 6,  item: ENCHANTED_BOOK, name: "&6Efsanevi Kitap", enchants: { protection: 6 } }
+      sword:    { weight: 6,  item: DIAMOND_SWORD, name: "&6&lEfsane Kılıcı", enchants: { sharpness: 7, looting: 4, unbreaking: 5, mending: 1, fire_aspect: 2 }, broadcast: true }
+      pick:     { weight: 6,  item: DIAMOND_PICKAXE, name: "&6&lEfsane Kazması", enchants: { efficiency: 7, fortune: 5, unbreaking: 5, mending: 1 }, broadcast: true }
+      template: { weight: 6,  item: NETHERITE_UPGRADE_SMITHING_TEMPLATE }
+      ningot:   { weight: 4,  item: NETHERITE_INGOT, broadcast: true }
+      star:     { weight: 5,  item: NETHER_STAR }
+      key:      { weight: 8,  commands: ["kasa ver %player% ejder 1"], display: "&41x Ejder Anahtarı" }
+
+  # ---------------- 10. KOZMIK ----------------
+  kozmik:
+    name: "&d&lKozmik Sandık"
+    icon: END_CRYSTAL
+    lore: ["&7Sunucudaki en nadir sandık.", "&dSadece en şanslılar görebilir."]
+    rewards:
+      coins:    { weight: 10, coins: 500000, broadcast: true }
+      nsword:   { weight: 8,  item: NETHERITE_SWORD, name: "&d&lKozmik Kılıç", enchants: { sharpness: 8, looting: 5, unbreaking: 6, mending: 1, fire_aspect: 3, sweeping_edge: 4 }, broadcast: true }
+      npick:    { weight: 8,  item: NETHERITE_PICKAXE, name: "&d&lKozmik Kazma", enchants: { efficiency: 8, fortune: 6, unbreaking: 6, mending: 1 }, broadcast: true }
+      nchest:   { weight: 6,  item: NETHERITE_CHESTPLATE, name: "&d&lKozmik Göğüslük", enchants: { protection: 7, unbreaking: 6, mending: 1 }, broadcast: true }
+      nhelm:    { weight: 6,  item: NETHERITE_HELMET, name: "&d&lKozmik Kask", enchants: { protection: 7, unbreaking: 6, mending: 1 }, broadcast: true }
+      nlegs:    { weight: 6,  item: NETHERITE_LEGGINGS, name: "&d&lKozmik Pantolon", enchants: { protection: 7, unbreaking: 6, mending: 1 }, broadcast: true }
+      nboots:   { weight: 6,  item: NETHERITE_BOOTS, name: "&d&lKozmik Botlar", enchants: { protection: 7, feather_falling: 6, unbreaking: 6, mending: 1 }, broadcast: true }
+      nblock:   { weight: 4,  item: NETHERITE_BLOCK, broadcast: true }
+      beacon:   { weight: 8,  item: BEACON, amount: 2 }
+      keys:     { weight: 10, commands: ["kasa ver %player% efsane 2"], display: "&62x Efsane Anahtarı" }

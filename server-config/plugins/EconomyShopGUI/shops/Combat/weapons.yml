@@ -1,0 +1,54 @@
+pages:
+  page1:
+    items:
+      wooden_sword:
+        material: WOODEN_SWORD
+        buy: 3.54
+        sell: 0.89
+      stone_sword:
+        material: STONE_SWORD
+        buy: 2.04
+        sell: 0.51
+      copper_sword:
+        material: COPPER_SWORD
+        buy: 3.24
+        sell: 0.77
+      iron_sword:
+        material: IRON_SWORD
+        buy: 12.19
+        sell: 3.05
+      golden_sword:
+        material: GOLDEN_SWORD
+        buy: 17.98
+        sell: 4.5
+      diamond_sword:
+        material: DIAMOND_SWORD
+        buy: 110.86
+        sell: 27.72
+      arrow:
+        material: ARROW
+        buy: 36.16
+        sell: 9.12
+        stack-size: 16
+        slot: 38
+      spectral_arrow:
+        material: SPECTRAL_ARROW
+        buy: 127.12
+        sell: 31.84
+        stack-size: 8
+        slot: 39
+      bow:
+        material: BOW
+        buy: 23.88
+        sell: 5.97
+        slot: 40
+      crossbow:
+        material: CROSSBOW
+        buy: 26.28
+        sell: 6.57
+        slot: 41
+      shield:
+        material: SHIELD
+        buy: 12.74
+        sell: 3.19
+        slot: 44

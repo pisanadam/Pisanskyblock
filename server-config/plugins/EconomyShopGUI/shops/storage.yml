@@ -1,0 +1,101 @@
+pages:
+  page1:
+    items:
+      chest:
+        material: CHEST
+        buy: 9.27
+        sell: 2.32
+      barrel:
+        material: BARREL
+        buy: 8.17
+        sell: 2.05
+      copper_chest:
+        material: COPPER_CHEST
+        buy: 19.2
+        sell: 5.82
+      ender_chest:
+        material: ENDER_CHEST
+        buy: 273.12
+        sell: 68.28
+      decorated_pot:
+        material: DECORATED_POT
+        buy: 92.61
+        sell: 23.16
+      chiseled_bookshelf:
+        material: CHISELED_BOOKSHELF
+        buy: 8.77
+        sell: 2.2
+      cauldron:
+        material: CAULDRON
+        buy: 28.95
+        sell: 7.24
+      bundle:
+        material: BUNDLE
+        buy: 252.0
+        sell: 5.2
+      white_bundle:
+        material: WHITE_BUNDLE
+        buy: 253.5
+        sell: 5.35
+      light_gray_bundle:
+        material: LIGHT_GRAY_BUNDLE
+        buy: 253.0
+        sell: 5.3
+      gray_bundle:
+        material: GRAY_BUNDLE
+        buy: 255.25
+        sell: 5.26
+      black_bundle:
+        material: BLACK_BUNDLE
+        buy: 257.0
+        sell: 5.7
+      brown_bundle:
+        material: BROWN_BUNDLE
+        buy: 254.0
+        sell: 5.4
+      red_bundle:
+        material: RED_BUNDLE
+        buy: 253.0
+        sell: 5.3
+      orange_bundle:
+        material: ORANGE_BUNDLE
+        buy: 253.0
+        sell: 5.3
+      yellow_bundle:
+        material: YELLOW_BUNDLE
+        buy: 252.67
+        sell: 5.27
+      lime_bundle:
+        material: LIME_BUNDLE
+        buy: 252.8
+        sell: 5.28
+      green_bundle:
+        material: GREEN_BUNDLE
+        buy: 252.1
+        sell: 5.21
+      cyan_bundle:
+        material: CYAN_BUNDLE
+        buy: 252.55
+        sell: 5.26
+      light_blue_bundle:
+        material: LIGHT_BLUE_BUNDLE
+        buy: 253.0
+        sell: 5.3
+      blue_bundle:
+        material: BLUE_BUNDLE
+        buy: 253.0
+        sell: 5.3
+      purple_bundle:
+        material: PURPLE_BUNDLE
+        buy: 253.0
+        sell: 5.3
+      magenta_bundle:
+        material: MAGENTA_BUNDLE
+        buy: 253.0
+        sell: 5.3
+      pink_bundle:
+        material: PINK_BUNDLE
+        buy: 253.0
+        sell: 5.3
+  page2:
+    items: {}

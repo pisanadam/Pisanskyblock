@@ -1,0 +1,52 @@
+# ==============================
+#  PisanCore - Pisanskyblock
+# ==============================
+
+economy:
+  currency-singular: "Coin"
+  currency-plural: "Coin"
+  starting-balance: 500.0
+
+# Yeni oyuncuya verilecek baslangic anahtarlari
+starter-keys:
+  enabled: true
+  keys:
+    caylak: 3
+
+# Tas jeneratoru: lav + su ile olusan tas/kirik tas kirilinca calisir.
+# Oyuncunun koydugu tas sayilmaz (istismar onlemi).
+generator:
+  enabled: true
+  # Sadece bu dunyalarda calisir (bos = her yerde)
+  worlds: []
+  blocks: [COBBLESTONE, STONE, BASALT]
+  # TEK zar: en fazla bir cevher duser. Sans yuzde (%) olarak.
+  ores:
+    coal:           { chance: 6.00, item: COAL,            min: 1, max: 2 }
+    copper:         { chance: 4.00, item: RAW_COPPER,      min: 1, max: 3 }
+    iron:           { chance: 3.00, item: RAW_IRON,        min: 1, max: 1 }
+    lapis:          { chance: 1.50, item: LAPIS_LAZULI,    min: 2, max: 5 }
+    redstone:       { chance: 1.50, item: REDSTONE,        min: 2, max: 4 }
+    gold:           { chance: 1.00, item: RAW_GOLD,        min: 1, max: 1 }
+    diamond:        { chance: 0.50, item: DIAMOND,         min: 1, max: 1 }
+    emerald:        { chance: 0.30, item: EMERALD,         min: 1, max: 1 }
+    ancient_debris: { chance: 0.03, item: ANCIENT_DEBRIS,  min: 1, max: 1 }
+  # Anahtarlar AYRI zar atar. Sans yuzde (%).
+  # broadcast: true ise tum sunucuya duyurulur.
+  keys:
+    caylak:  { chance: 0.500, name: "&aÇaylak Anahtarı",    broadcast: false }
+    tasci:   { chance: 0.300, name: "&7Taşçı Anahtarı",     broadcast: false }
+    madenci: { chance: 0.180, name: "&eMadenci Anahtarı",   broadcast: false }
+    demirci: { chance: 0.100, name: "&fDemirci Anahtarı",   broadcast: false }
+    kasif:   { chance: 0.060, name: "&bKaşif Anahtarı",     broadcast: true }
+    sovalye: { chance: 0.035, name: "&9Şövalye Anahtarı",   broadcast: true }
+    usta:    { chance: 0.020, name: "&5Usta Anahtarı",      broadcast: true }
+    ejder:   { chance: 0.010, name: "&4Ejder Anahtarı",     broadcast: true }
+    efsane:  { chance: 0.004, name: "&6Efsane Anahtarı",    broadcast: true }
+    kozmik:  { chance: 0.001, name: "&d&lKozmik Anahtar",   broadcast: true }
+
+messages:
+  prefix: "&6&lPISAN &8» &7"
+  ore-drop: "&a+ %amount%x %item%"
+  key-drop: "&eŞanslı gün! &f%key% &edüştü!"
+  key-broadcast: "&6%player% &etaş kırarken &f%key% &ebuldu!"

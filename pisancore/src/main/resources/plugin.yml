@@ -1,0 +1,30 @@
+name: PisanCore
+version: ${project.version}
+main: com.pisan.core.PisanCore
+api-version: '1.21'
+author: Pisan
+description: Pisanskyblock - coin ekonomisi, tas jeneratoru odulleri, kasa anahtarlari
+depend: [Vault]
+loadbefore: [AuctionHouse, EconomyShopGUI, BentoBox]
+commands:
+  bal:
+    aliases: [balance, para, coin, money]
+    description: Coin bakiyeni gosterir
+  pay:
+    aliases: [ode, gonder]
+    description: Baska oyuncuya coin gonderir
+  baltop:
+    aliases: [zenginler]
+    description: En zengin oyuncular
+  eco:
+    description: Admin ekonomi komutu
+    permission: pisancore.admin
+  kasa:
+    aliases: [kasalar, crate, crates, anahtarlar]
+    description: Kasa menusu
+  pisancore:
+    description: Admin komutu (reload)
+    permission: pisancore.admin
+permissions:
+  pisancore.admin:
+    default: op
