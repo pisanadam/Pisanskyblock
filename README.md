@@ -19,6 +19,7 @@ Ada koruma alanı: 500x500 (protection-range 250).
 |---|---|
 | `/is` | Ada menüsü (ilk girişte ada otomatik açılır) |
 | `/shop` | Sistem market |
+| `/market <eşya>` | O eşyanın satın alma ekranını direkt açar (ör. `/market elmas`, `/market hopper`) |
 | `/ah` | Oyuncu pazarı (`/ah sell <fiyat>` elindekini satışa koyar) |
 | `/kasa` | Kasa menüsü (sol tık aç, sağ tık içerik) |
 | `/kasa anahtar` | Anahtarlarını listeler |

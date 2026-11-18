@@ -46,6 +46,9 @@ commands:
   lobi:
     aliases: [lobby, spawn, hub]
     description: Lobiye isinlan
+  market:
+    aliases: [satinal, al, buy]
+    description: Esyanin satin alma ekranini ac
   pisancore:
     description: Admin komutu (reload)
     permission: pisancore.admin
