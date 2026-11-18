@@ -50,3 +50,9 @@ Oyuncu lobiye girer → pusula (`/oyun`) veya lobideki 3 plakadan birini seçer 
 Komutlar: `/oyun [pvp|skyblock|sfleague]`, `/pvp`, `/skyblock`, `/sfleague`, `/lobi`. Admin: `/pisangames reload|setspawn|rebuild`.
 
 Kurulum: `cd pisangames && mvn package`, jar'ı `plugins/` içine at. `plugins/PisanGames/config.yml` içinde `exaroton-token` ayarla (git'e koyma). Hedef sunucularda transfer açık olmalı: Paper'da `accepts-transfers=true`, Velocity'de `accepts-transfers = true`.
+
+## `/analobi` (diğer sunuculardan Pisan Games lobisine dönüş)
+- `pisanhub/paper/` – Paper plugini (PisanHub). Pisanskyblock (26.3) ve Pisan SF League (1.20.1) üzerinde. 26.3'te Paper'ın transfer metodunu, 1.20.1'de transfer paketini ViaVersion üzerinden gönderir. Ayar: `plugins/PisanHub/config.yml`.
+- `pisanhub/velocity/` – Velocity 4.3 plugini (pisanpvp proxy'si, legacy + modern dahil). Ayar: `plugins/pisanhub/config.properties`. Derleme JDK 25 ister: `JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64 mvn package`.
+
+Lobi kapalıysa komut Exaroton API ile başlatır, açılınca oyuncuyu gönderir. 1.20.5 altı istemcilere adres verilir. Komut takma adları: `/anamenu`, `/pisangames`.

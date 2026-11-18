@@ -1,0 +1,11 @@
+name: PisanHub
+version: ${project.version}
+main: com.pisan.hub.PisanHub
+api-version: '1.20'
+author: Pisan
+description: /analobi - Pisan Games ana lobisine donus
+softdepend: [ViaVersion]
+commands:
+  analobi:
+    aliases: [anamenu, pisangames]
+    description: Pisan Games ana lobisine don

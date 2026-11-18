@@ -1,0 +1,5 @@
+# Exaroton API anahtari (lobi kapaliysa baslatmak icin). GIT'E KOYMA.
+exaroton-token: "BURAYA_TOKEN"
+# Pisan Games lobi sunucusu
+lobby-id: kYqtelwqpRHsIbWp
+start-timeout-seconds: 180

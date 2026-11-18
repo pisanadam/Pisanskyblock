@@ -1,3 +1,5 @@
 pisancore/target/
 *.class
 pisangames/target/
+pisanhub/paper/target/
+pisanhub/velocity/target/

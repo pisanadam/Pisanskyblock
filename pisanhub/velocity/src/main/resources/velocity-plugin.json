@@ -1,0 +1,1 @@
+{"id":"pisanhub","name":"PisanHub","version":"1.0.0","description":"/analobi - Pisan Games ana lobisine donus","authors":["Pisan"],"dependencies":[{"id":"viaversion","optional":true}],"main":"com.pisan.hub.velocity.PisanHubVelocity"}
