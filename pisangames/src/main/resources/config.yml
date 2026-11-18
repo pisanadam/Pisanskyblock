@@ -1,0 +1,41 @@
+# Exaroton API anahtari (https://exaroton.com/account/ -> API). GIT'E KOYMA.
+exaroton-token: "BURAYA_TOKEN"
+
+# Hedef sunucu en fazla kac saniye icinde acilmazsa vazgecilsin
+start-timeout-seconds: 240
+
+# Lobi spawn (bos birakilirsa ilk acilista platform otomatik kurulur)
+spawn:
+  world: world
+  x: 0.5
+  y: 151.0
+  z: 0.5
+  yaw: 0.0
+  pitch: 0.0
+built: false
+
+servers:
+  pvp:
+    id: TAZFy4OoHMvlc9Uz
+    name: "&c&lPisan PvP"
+    icon: DIAMOND_SWORD
+    slot: 11
+    lore:
+      - "&7Duello, FFA ve turnuva"
+      - "&71.8 + guncel surumler"
+  skyblock:
+    id: xSQJtk6ig0N4wEgt
+    name: "&a&lPisan Skyblock"
+    icon: GRASS_BLOCK
+    slot: 13
+    lore:
+      - "&7Minyonlar, kasalar, pazar"
+      - "&7Ada kur, zengin ol!"
+  sfleague:
+    id: 1KthvwLvVD1EMKRZ
+    name: "&b&lPisan SF League"
+    icon: SLIME_BALL
+    slot: 15
+    lore:
+      - "&7Futbol & Basketbol"
+      - "&7Duello, sira, turnuva"

@@ -1,0 +1,25 @@
+name: PisanGames
+version: ${project.version}
+main: com.pisan.games.PisanGames
+api-version: '1.21'
+author: Pisan
+description: Pisan Games lobisi - PisanPvP, Pisanskyblock ve Pisan SF League'e gecis
+softdepend: [ViaVersion]
+commands:
+  oyun:
+    aliases: [oyunlar, games, menu]
+    description: Oyun secme menusu (/oyun [pvp|skyblock|sfleague])
+  pvp:
+    description: PisanPvP'ye gec
+  skyblock:
+    aliases: [sb, adalar]
+    description: Pisanskyblock'a gec
+  sfleague:
+    aliases: [sf, lig, futbol]
+    description: Pisan SF League'e gec
+  lobi:
+    aliases: [spawn, hub]
+    description: Lobi spawnina isinlan
+  pisangames:
+    description: Admin (reload, setspawn, rebuild)
+    permission: pisangames.admin

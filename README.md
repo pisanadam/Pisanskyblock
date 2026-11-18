@@ -6,6 +6,7 @@ Hypixel Skyblock'tan ilham alan Java skyblock sunucusu (Exaroton, Paper 26.3, 1.
 - `pisancore/` – Sunucuya özel plugin (Maven): coin ekonomisi (Vault), taş jeneratörü ödülleri, 10 kademe kasa sistemi.
 - `server-config/` – Sunucuya yüklenen düzenlenmiş config dosyaları (market, pazar, BentoBox).
 - `design/` – Tasarım dokümanı.
+- `pisangames/` – **Pisan Games lobisi** plugini (Exaroton `Pisangames` sunucusu, Paper 26.3). Pusula menüsü veya plakalarla PisanPvP / Pisanskyblock / Pisan SF League'e transfer eder; hedef sunucu kapalıysa Exaroton API ile başlatıp açılınca otomatik gönderir.
 - `tools/` – Yardımcı scriptler (`exa.sh`: Exaroton API, `EXAROTON_TOKEN` ortam değişkeni ister).
 
 ## Sunucudaki pluginler
@@ -42,3 +43,10 @@ Ada koruma alanı: 500x500 (protection-range 250).
 cd pisancore && mvn package   # target/PisanCore-1.0.0.jar
 ```
 Ayarlar: `plugins/PisanCore/config.yml` (jeneratör şansları), `plugins/PisanCore/crates.yml` (kasa içerikleri).
+
+## Pisan Games lobisi (`Pisangames.exaroton.me`)
+Oyuncu lobiye girer → pusula (`/oyun`) veya lobideki 3 plakadan birini seçer → sunucu uyuyorsa başlatılır (bossbar ile ilerleme), açılınca 1.20.5+ istemciler transfer paketiyle otomatik geçer. Daha eski istemcilere adres tıkla-kopyala olarak verilir.
+
+Komutlar: `/oyun [pvp|skyblock|sfleague]`, `/pvp`, `/skyblock`, `/sfleague`, `/lobi`. Admin: `/pisangames reload|setspawn|rebuild`.
+
+Kurulum: `cd pisangames && mvn package`, jar'ı `plugins/` içine at. `plugins/PisanGames/config.yml` içinde `exaroton-token` ayarla (git'e koyma). Hedef sunucularda transfer açık olmalı: Paper'da `accepts-transfers=true`, Velocity'de `accepts-transfers = true`.
