@@ -87,6 +87,7 @@ public final class PisanCore extends JavaPlugin {
         MarketCommand market = new MarketCommand(this);
         getCommand("market").setExecutor(market);
         getCommand("market").setTabCompleter(market);
+        Bukkit.getScheduler().runTaskLater(this, market::warmup, 100L);
 
         EcoCommands eco = new EcoCommands(this, store);
         for (String c : new String[]{"bal", "pay", "baltop", "eco", "pisancore"}) {

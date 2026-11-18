@@ -36,7 +36,29 @@ public final class MarketCommand implements CommandExecutor, TabCompleter {
     }
 
     private final PisanCore plugin;
-    private Method getShopItem, isBuyAble, openScreen;
+    private Method getShopItem, isBuyAble, openScreen, getSections, getShopItems, getItemToGive;
+    private final Map<String, TreeMap<Integer, Object>> books = new HashMap<>(); // buyu anahtari -> seviye -> ShopItem
+    private long booksTime;
+
+    private static final Map<String, String> ENCH = new HashMap<>();
+    static {
+        String[][] a = {
+            // eski Bukkit adlari
+            {"dig_speed", "efficiency"}, {"damage_all", "sharpness"}, {"damage_undead", "smite"}, {"damage_arthropods", "bane_of_arthropods"},
+            {"protection_environmental", "protection"}, {"protection_fire", "fire_protection"}, {"protection_explosions", "blast_protection"},
+            {"protection_projectile", "projectile_protection"}, {"protection_fall", "feather_falling"}, {"loot_bonus_blocks", "fortune"},
+            {"loot_bonus_mobs", "looting"}, {"luck", "luck_of_the_sea"}, {"durability", "unbreaking"}, {"oxygen", "respiration"},
+            {"water_worker", "aqua_affinity"}, {"arrow_damage", "power"}, {"arrow_knockback", "punch"}, {"arrow_fire", "flame"},
+            {"arrow_infinite", "infinity"},
+            // turkce
+            {"verimlilik", "efficiency"}, {"keskinlik", "sharpness"}, {"koruma", "protection"}, {"servet", "fortune"},
+            {"yagma", "looting"}, {"yağma", "looting"}, {"kirilmazlik", "unbreaking"}, {"kırılmazlık", "unbreaking"},
+            {"ipeksi", "silk_touch"}, {"ipeksidokunus", "silk_touch"}, {"tuydusus", "feather_falling"}, {"tüydüşüş", "feather_falling"},
+            {"dikenler", "thorns"}, {"guc", "power"}, {"güç", "power"}, {"sonsuzluk", "infinity"}, {"alev", "flame"},
+            {"atesbuyusu", "fire_aspect"}, {"geriitme", "knockback"}, {"solunum", "respiration"}, {"cekim", "lure"},
+        };
+        for (String[] x : a) ENCH.put(x[0], x[1]);
+    }
     private Object buyMode;
     private List<String> cache;
     private long cacheTime;
@@ -58,12 +80,44 @@ public final class MarketCommand implements CommandExecutor, TabCompleter {
             isBuyAble = hook.getMethod("isBuyAble", shopItem);
             openScreen = hook.getMethod("openTransactionScreen", Player.class, shopItem, mode);
             buyMode = mode.getField("BUY").get(null);
+            getSections = hook.getMethod("getSections");
+            getShopItems = Class.forName("me.gypopo.economyshopgui.objects.shops.ShopSection", true, cl).getMethod("getShopItems");
+            getItemToGive = shopItem.getMethod("getItemToGive");
             return true;
         } catch (Throwable t) {
             plugin.getLogger().warning("EconomyShopGUI API baglanamadi: " + t);
             getShopItem = null;
             return false;
         }
+    }
+
+    /** Marketteki tum buyulu kitaplari tarar: buyu -> seviye -> ShopItem */
+    @SuppressWarnings("unchecked")
+    private void indexBooks() {
+        if (System.currentTimeMillis() - booksTime < 300_000 && !books.isEmpty()) return;
+        books.clear();
+        try {
+            Map<String, Object> secs = (Map<String, Object>) getSections.invoke(null);
+            for (Object sec : secs.values()) {
+                for (Object si : (Collection<Object>) getShopItems.invoke(sec)) {
+                    ItemStack it = (ItemStack) getItemToGive.invoke(si);
+                    if (it == null || it.getType() != Material.ENCHANTED_BOOK
+                            || !(it.getItemMeta() instanceof org.bukkit.inventory.meta.EnchantmentStorageMeta esm)) continue;
+                    for (var en : esm.getStoredEnchants().entrySet())
+                        books.computeIfAbsent(en.getKey().getKey().getKey(), k -> new TreeMap<>()).put(en.getValue(), si);
+                }
+            }
+        } catch (Throwable t) { plugin.getLogger().warning("Market kitap taramasi: " + t); }
+        booksTime = System.currentTimeMillis();
+        plugin.getLogger().info("Market: " + books.size() + " buyu kitabi bulundu " + new TreeSet<>(books.keySet()));
+    }
+
+    /** Acilista bir kez tara (log icin). */
+    public void warmup() { if (hook()) indexBooks(); }
+
+    private static String enchantKey(String in) {
+        String k = in.toLowerCase(Locale.ROOT).replace("minecraft:", "").replace(' ', '_');
+        return ENCH.getOrDefault(k, k);
     }
 
     private static Material resolve(String in) {
@@ -84,6 +138,25 @@ public final class MarketCommand implements CommandExecutor, TabCompleter {
         if (!(s instanceof Player p)) { s.sendMessage("Sadece oyuncular."); return true; }
         if (a.length == 0) { p.performCommand("shop"); return true; }
         if (!hook()) { p.sendMessage(pre() + "§cMarket şu an kullanılamıyor."); return true; }
+        // buyu kitabi mi? (/market efficiency [seviye])
+        indexBooks();
+        Integer wantLevel = null;
+        String[] parts = a;
+        if (a.length >= 2) try { wantLevel = Integer.parseInt(a[a.length - 1]); parts = Arrays.copyOf(a, a.length - 1); } catch (NumberFormatException ignored) { }
+        String ek = enchantKey(String.join("_", parts));
+        TreeMap<Integer, Object> lv = books.get(ek);
+        if (lv != null && !lv.isEmpty()) {
+            Object si = wantLevel != null && lv.containsKey(wantLevel) ? lv.get(wantLevel) : lv.lastEntry().getValue();
+            if (wantLevel != null && !lv.containsKey(wantLevel))
+                p.sendMessage(pre() + "§eMarkette o seviye yok, §f" + CrateManager.pretty(ek) + " " + lv.lastKey() + " §eaçılıyor.");
+            try { openScreen.invoke(null, p, si, buyMode); }
+            catch (Throwable t) { p.sendMessage(pre() + "§cSatın alma ekranı açılamadı."); plugin.getLogger().warning("/market kitap: " + t); }
+            return true;
+        }
+        if (org.bukkit.Registry.ENCHANTMENT.get(org.bukkit.NamespacedKey.minecraft(ek)) != null) {
+            p.sendMessage(pre() + "§c" + CrateManager.pretty(ek) + " kitabı markette satılmıyor.");
+            return true;
+        }
         String q = String.join("_", a);
         Material m = resolve(q);
         if (m == null) { p.sendMessage(pre() + "§cBöyle bir eşya yok: §f" + q + " §7(ör: /market elmas, /market hopper)"); return true; }
@@ -110,6 +183,9 @@ public final class MarketCommand implements CommandExecutor, TabCompleter {
             } catch (Throwable ignored) { }
         }
         for (var e : TR.entrySet()) if (l.contains(e.getValue().toLowerCase(Locale.ROOT))) l.add(e.getKey());
+        indexBooks();
+        l.addAll(books.keySet());
+        for (var e : ENCH.entrySet()) if (books.containsKey(e.getValue()) && !e.getKey().contains("_")) l.add(e.getKey());
         Collections.sort(l);
         cache = l; cacheTime = System.currentTimeMillis();
         return l;
