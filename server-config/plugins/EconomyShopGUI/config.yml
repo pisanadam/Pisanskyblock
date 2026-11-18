@@ -1328,15 +1328,19 @@ commands:
 # Do not use a slash('/') before the command name or it will not work
 shop-commands:
 - 'shop'
-- 'market'
+- 'magaza'
 
 # Set different aliases for the sellall command, defaults to /sellall if empty
 sellall-commands:
 - 'sellall'
+- 'satall'
+- 'hepsinisat'
 
 # Set different aliases for the sellgui command, defaults to /sellgui if empty
 sellgui-commands:
 - 'sellgui'
+- 'sell'
+- 'sat'
 
 
 #-------------------------------------------DisableBackButton-------------------------------------------
