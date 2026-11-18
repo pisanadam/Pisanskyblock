@@ -118,26 +118,36 @@ public final class GeneratorListener implements Listener {
 
         Location drop = b.getLocation().add(0.5, 0.5, 0.5);
 
-        // Anahtar: ayri zar, en nadirden baslayarak en fazla bir anahtar
+        ItemStack key = rollKey(p, 1.0);
+        if (key != null) {
+            e.setDropItems(false); // kirik tas yok olur, yerine anahtar duser
+            b.getWorld().dropItemNaturally(drop, key);
+        }
+    }
+
+    /**
+     * Anahtar zari. mult = sans carpani (jenerator 1.0). En nadirden baslayarak en fazla bir anahtar.
+     * Cikarsa anahtar esyasini dondurur ve mesaj/duyuru yapar; cikmazsa null.
+     */
+    public ItemStack rollKey(Player p, double mult) {
+        if (mult <= 0) return null;
         double kroll = ThreadLocalRandom.current().nextDouble() * 100.0, kacc = 0;
         List<Key> sorted = new ArrayList<>(keys);
         sorted.sort(Comparator.comparingDouble(Key::chance));
         for (Key k : sorted) {
-            kacc += k.chance();
+            kacc += k.chance() * mult;
             if (kroll < kacc) {
                 CrateManager.Crate crate = plugin.crates().crate(k.id());
-                if (crate == null) break;
-                e.setDropItems(false); // kirik tas yok olur, yerine anahtar duser
-                b.getWorld().dropItemNaturally(drop, plugin.crates().keyItem(crate, 1));
-                p.sendMessage(PisanCore.color(plugin.getConfig().getString("messages.prefix", "")
-                        + plugin.getConfig().getString("messages.key-drop", "").replace("%key%", k.name())));
+                if (crate == null) return null;
+                String pre = plugin.getConfig().getString("messages.prefix", "");
+                p.sendMessage(PisanCore.color(pre + plugin.getConfig().getString("messages.key-drop", "").replace("%key%", k.name())));
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.4f);
-                if (k.broadcast()) Bukkit.broadcastMessage(PisanCore.color(plugin.getConfig().getString("messages.prefix", "")
-                        + plugin.getConfig().getString("messages.key-broadcast", "")
+                if (k.broadcast()) Bukkit.broadcastMessage(PisanCore.color(pre + plugin.getConfig().getString("messages.key-broadcast", "")
                         .replace("%player%", p.getName()).replace("%key%", k.name())));
-                break;
+                return plugin.crates().keyItem(crate, 1);
             }
         }
+        return null;
     }
 
     private static String pretty(Material m) {

@@ -83,6 +83,7 @@ public final class PisanCore extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> friends.save(false), 6000L, 6000L);
 
         Bukkit.getPluginManager().registerEvents(new SpawnerListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new KeySourceListener(this), this);
 
         MarketCommand market = new MarketCommand(this);
         getCommand("market").setExecutor(market);
@@ -133,6 +134,8 @@ public final class PisanCore extends JavaPlugin {
     public EconomyStore store() { return store; }
     public CrateManager crates() { return crates; }
     public SkillManager skills() { return skills; }
+    public GeneratorListener generator() { return generator; }
+    public boolean lobbyWorld(org.bukkit.World w) { return lobby != null && lobby.world() != null && lobby.world().equals(w); }
 
     public void giveKey(java.util.UUID player, String key, int amount) {
         crates.addKeys(player, key, amount);

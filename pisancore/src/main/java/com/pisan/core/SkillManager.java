@@ -191,6 +191,9 @@ public final class SkillManager implements Listener, CommandExecutor, TabComplet
     // ======================= bloklar =======================
     private static String key(Block b) { return b.getWorld().getName() + ";" + b.getX() + ";" + b.getY() + ";" + b.getZ(); }
 
+    /** Oyuncu tarafindan konmus blok mu (MONITOR'dan once cagrilmali). */
+    public boolean isPlaced(Block b) { synchronized (placed) { return placed.contains(key(b)); } }
+
     private boolean tracked(Material m) {
         return MINING.containsKey(m) && m != Material.COBBLESTONE && m != Material.STONE && m != Material.BASALT
                 || isLog(m) || m == Material.MELON || m == Material.PUMPKIN || m == Material.SUGAR_CANE || m == Material.CACTUS || m == Material.BAMBOO

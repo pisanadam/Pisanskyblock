@@ -45,6 +45,12 @@ generator:
     efsane:  { chance: 0.004, name: "&6Efsane Anahtarı",    broadcast: true }
     kozmik:  { chance: 0.001, name: "&d&lKozmik Anahtar",   broadcast: true }
 
+# Jenerator disi anahtar kaynaklari. Sans = jenerator anahtar sansi x carpan.
+key-sources:
+  mobs: 1.5          # dusman yaratik oldurme
+  spawner-mobs: 0.25 # spawner'dan cikan yaratiklar icin ek carpan (1.5 x 0.25)
+  crops: 0.4         # olgun ekin / kavun / balkabagi hasadi
+
 # Minyonlar: adaya konur, chunk yukluyken urun uretir. /minyon = market
 minions:
   max-per-player: 8
