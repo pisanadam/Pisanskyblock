@@ -30,10 +30,11 @@ Ada koruma alanı: 500x500 (protection-range 250).
 | `/is level`, `/is top` | Ada puanını hesapla / ada sıralaması (BentoBox Level) |
 | `/sb` | Scoreboard aç/kapat |
 | `/arkadas` | Arkadaş menüsü (`ekle`, `kabul`, `red`, `git`, `sil`, `liste`, `izinler`). Sol tık: adasına git, sağ tık: senin adandaki yetkisi |
+| `/lobi` (`/spawn`) | Lobiye ışınlan. Lobideki kasalara sol tık: anahtarla aç, sağ tık: içerik ve şanslar |
 | `/bal`, `/pay <oyuncu> <miktar>`, `/baltop` | Coin |
 
 ## Admin komutları
-`/kasa ver <oyuncu> <kasa> [adet]`, `/minyon ver <oyuncu> <tür> [seviye] [adet]`, `/eco give|take|set <oyuncu> <miktar>`, `/pisancore reload`
+`/kasa ver <oyuncu> <kasa> [adet]`, `/minyon ver <oyuncu> <tür> [seviye] [adet]`, `/lobi spawnayarla|yenidenkur|kasaayarla <kasa>`, `/eco give|take|set <oyuncu> <miktar>`, `/pisancore reload`
 
 ## PisanCore derleme
 ```

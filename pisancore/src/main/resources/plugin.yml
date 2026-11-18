@@ -43,6 +43,9 @@ commands:
   arkadas:
     aliases: [arkadaş, arkadaslar, friend, friends, f]
     description: Arkadas sistemi
+  lobi:
+    aliases: [lobby, spawn, hub]
+    description: Lobiye isinlan
   pisancore:
     description: Admin komutu (reload)
     permission: pisancore.admin

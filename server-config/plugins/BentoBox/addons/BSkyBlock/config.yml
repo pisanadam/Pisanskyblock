@@ -411,7 +411,7 @@ island:
     #     the potential issues, especially if you expect a lot of players to connect to your server
     #     in a limited period of time.
     # Added since 1.9.0.
-    enable: true
+    enable: false
     # Time in seconds after the player logged in, before his island gets created.
     # If set to 0 or less, the island will be created directly upon the player's login.
     # It is recommended to keep this value under a minute's time.

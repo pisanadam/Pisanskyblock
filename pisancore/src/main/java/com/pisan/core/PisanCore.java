@@ -17,6 +17,7 @@ public final class PisanCore extends JavaPlugin {
     private SkillManager skills;
     private ScoreboardManager scoreboard;
     private FriendManager friends;
+    private LobbyManager lobby;
 
     @Override
     public void onEnable() {
@@ -36,6 +37,11 @@ public final class PisanCore extends JavaPlugin {
         getCommand("kasa").setTabCompleter(menu);
         Bukkit.getPluginManager().registerEvents(menu, this);
         Bukkit.getPluginManager().registerEvents(new KeyProtectListener(this, menu), this);
+        lobby = new LobbyManager(this, menu);
+        Bukkit.getPluginManager().registerEvents(lobby, this);
+        getCommand("lobi").setExecutor(lobby);
+        getCommand("lobi").setTabCompleter(lobby);
+        Bukkit.getScheduler().runTask(this, lobby::init);
 
         duel = new DuelManager(this);
         getCommand("duel").setExecutor(duel);
@@ -75,6 +81,8 @@ public final class PisanCore extends JavaPlugin {
         getCommand("arkadas").setExecutor(friends);
         getCommand("arkadas").setTabCompleter(friends);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> friends.save(false), 6000L, 6000L);
+
+        Bukkit.getPluginManager().registerEvents(new SpawnerListener(this), this);
 
         EcoCommands eco = new EcoCommands(this, store);
         for (String c : new String[]{"bal", "pay", "baltop", "eco", "pisancore"}) {
