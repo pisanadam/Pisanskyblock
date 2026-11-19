@@ -69,6 +69,8 @@ minions:
     lapis:    { name: "&9Lapis Minyonu",     head: LAPIS_BLOCK,    output: LAPIS_LAZULI, amount: 3, interval: 40, price: 8000,  color: "2546b3", tool: IRON_PICKAXE }
     redstone: { name: "&cRedstone Minyonu",  head: REDSTONE_BLOCK, output: REDSTONE,     amount: 3, interval: 40, price: 8000,  color: "b52020", tool: IRON_PICKAXE }
     altin:    { name: "&6Altın Minyonu",     head: GOLD_BLOCK,     output: GOLD_INGOT,   amount: 1, interval: 48, price: 12000, color: "f2c230", tool: IRON_PICKAXE }
+    # mode: break -> yanindaki jenerator blogunu (tas/cevher) kazar
+    kazici:   { name: "&3Kazıcı Minyon",     head: OBSERVER,       output: COBBLESTONE,  amount: 1, interval: 5,  price: 15000, color: "2f6f8f", tool: DIAMOND_PICKAXE, mode: break }
     elmas:    { name: "&bElmas Minyonu",     head: DIAMOND_BLOCK,  output: DIAMOND,      amount: 1, interval: 90, price: 50000, color: "4ee6e0", tool: DIAMOND_PICKAXE }
 
 messages:

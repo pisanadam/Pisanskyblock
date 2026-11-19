@@ -55,7 +55,7 @@ public final class PisanCore extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(trade, this);
 
         minions = new MinionManager(this);
-        minions.load();
+        minions.loadConfig(); // veriler dunyalar yuklendikten sonra (asagida) okunur
         Bukkit.getPluginManager().registerEvents(minions, this);
         MinionCommand mc = new MinionCommand(this, minions);
         getCommand("minyon").setExecutor(mc);

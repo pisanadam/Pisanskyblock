@@ -103,6 +103,7 @@ public final class MarketCommand implements CommandExecutor, TabCompleter {
                     ItemStack it = (ItemStack) getItemToGive.invoke(si);
                     if (it == null || it.getType() != Material.ENCHANTED_BOOK
                             || !(it.getItemMeta() instanceof org.bukkit.inventory.meta.EnchantmentStorageMeta esm)) continue;
+                    if (!(boolean) isBuyAble.invoke(null, si)) continue; // sadece satilabilen (gizli) kitaplar
                     for (var en : esm.getStoredEnchants().entrySet())
                         books.computeIfAbsent(en.getKey().getKey().getKey(), k -> new TreeMap<>()).put(en.getValue(), si);
                 }
