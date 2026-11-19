@@ -315,22 +315,17 @@ public final class MinionManager implements Listener {
     private boolean mine(Minion m, Type t, long cap) {
         Block base = m.loc.getBlock();
         org.bukkit.block.BlockFace front = yawFace(m.loc.getYaw());
-        List<org.bukkit.block.BlockFace> order = new ArrayList<>(List.of(front,
-                org.bukkit.block.BlockFace.NORTH, org.bukkit.block.BlockFace.EAST, org.bukkit.block.BlockFace.SOUTH, org.bukkit.block.BlockFace.WEST));
-        for (org.bukkit.block.BlockFace f : order) {
+        { // sadece baktigi yondeki blok
+            org.bukkit.block.BlockFace f = front;
             Block b = base.getRelative(f);
-            if (!MINEABLE.contains(b.getType())) continue;
+            if (!MINEABLE.contains(b.getType())) return false;
             ItemStack tool = new ItemStack(t.tool());
             for (ItemStack d : b.getDrops(tool)) m.add(d.getType(), Math.min(d.getAmount(), Math.max(0, cap - m.total())));
             b.getWorld().spawnParticle(Particle.BLOCK, b.getLocation().add(0.5, 0.5, 0.5), 12, 0.3, 0.3, 0.3, b.getBlockData());
             b.getWorld().playSound(b.getLocation(), b.getBlockData().getSoundGroup().getBreakSound(), 0.6f, 1f);
             b.setType(Material.AIR, true); // sivilar akar, jenerator yeniden uretir
-            if (m.stand != null && f != front) {
-                Location l = m.stand.getLocation(); l.setYaw(faceYaw(f)); m.stand.teleport(l);
-            }
             return true;
         }
-        return false;
     }
 
     private static org.bukkit.block.BlockFace yawFace(float yaw) {
@@ -341,9 +336,7 @@ public final class MinionManager implements Listener {
         return org.bukkit.block.BlockFace.EAST;
     }
 
-    private static float faceYaw(org.bukkit.block.BlockFace f) {
-        return switch (f) { case SOUTH -> 0f; case WEST -> 90f; case NORTH -> 180f; default -> 270f; };
-    }
+
 
 
     // ======================= esya =======================
@@ -353,7 +346,7 @@ public final class MinionManager implements Listener {
         m.setDisplayName(PisanCore.color(t.name() + " &8[&e" + ROMAN[Math.min(tier, 10)] + "&8]"));
         double perHour = 3600.0 / interval(t, tier) * t.amount();
         m.setLore(List.of(
-                PisanCore.color(t.breaker() ? "&7Yanındaki taş/cevher bloğunu kazar" : "&7Üretir: &f" + CrateManager.pretty(t.output().name())),
+                PisanCore.color(t.breaker() ? "&7Baktığı yöndeki taş/cevher bloğunu kazar" : "&7Üretir: &f" + CrateManager.pretty(t.output().name())),
                 PisanCore.color("&7Hız: &e" + fmt1(interval(t, tier)) + " sn &8(saatte ~" + (long) perHour + ")"),
                 PisanCore.color("&7Depo: &e" + capacity(tier)),
                 "",
@@ -403,7 +396,8 @@ public final class MinionManager implements Listener {
         Block target = e.getClickedBlock().getRelative(e.getBlockFace());
         if (!target.getType().isAir() && !target.isPassable()) { p.sendMessage(pre() + "§cBurada yer yok."); return; }
         Location loc = target.getLocation().add(0.5, 0, 0.5);
-        loc.setYaw(Math.round((p.getLocation().getYaw() + 180) / 90f) * 90f);
+        // Kazici oyuncunun baktigi yone bakar (arkasinda durup jeneratore bakarak koy); digerleri oyuncuya doner
+        loc.setYaw(Math.round((p.getLocation().getYaw() + (t.breaker() ? 0 : 180)) / 90f) * 90f);
 
         Boolean member = IslandHook.isMember(loc, p.getUniqueId());
         if (member == null) { p.sendMessage(pre() + "§cMinyonlar sadece adanda çalışır. §7(/is)"); return; }
