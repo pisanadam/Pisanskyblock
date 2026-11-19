@@ -49,6 +49,9 @@ commands:
   market:
     aliases: [satinal, al, buy]
     description: Esyanin satin alma ekranini ac
+  event:
+    aliases: [etkinlik, events]
+    description: Sunucu etkinlikleri
   pisancore:
     description: Admin komutu (reload)
     permission: pisancore.admin

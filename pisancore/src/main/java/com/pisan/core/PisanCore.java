@@ -18,6 +18,7 @@ public final class PisanCore extends JavaPlugin {
     private ScoreboardManager scoreboard;
     private FriendManager friends;
     private LobbyManager lobby;
+    private EventManager events;
 
     @Override
     public void onEnable() {
@@ -90,6 +91,12 @@ public final class PisanCore extends JavaPlugin {
         getCommand("market").setTabCompleter(market);
         Bukkit.getScheduler().runTaskLater(this, market::warmup, 100L);
 
+        events = new EventManager(this);
+        Bukkit.getPluginManager().registerEvents(events, this);
+        getCommand("event").setExecutor(events);
+        getCommand("event").setTabCompleter(events);
+        Bukkit.getScheduler().runTaskLater(this, events::start, 40L);
+
         EcoCommands eco = new EcoCommands(this, store);
         for (String c : new String[]{"bal", "pay", "baltop", "eco", "pisancore"}) {
             getCommand(c).setExecutor(eco);
@@ -107,6 +114,7 @@ public final class PisanCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (events != null) events.shutdown();
         if (trade != null) trade.shutdown();
         if (minions != null) minions.shutdown();
         if (duel != null) duel.shutdown();
@@ -135,6 +143,7 @@ public final class PisanCore extends JavaPlugin {
     public CrateManager crates() { return crates; }
     public SkillManager skills() { return skills; }
     public GeneratorListener generator() { return generator; }
+    public EventManager events() { return events; }
     public boolean lobbyWorld(org.bukkit.World w) { return lobby != null && lobby.world() != null && lobby.world().equals(w); }
 
     public void giveKey(java.util.UUID player, String key, int amount) {

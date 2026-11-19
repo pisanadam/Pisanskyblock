@@ -130,6 +130,7 @@ public final class GeneratorListener implements Listener {
      * Cikarsa anahtar esyasini dondurur ve mesaj/duyuru yapar; cikmazsa null.
      */
     public ItemStack rollKey(Player p, double mult) {
+        if (plugin.events() != null) mult *= plugin.events().keyMultiplier();
         if (mult <= 0) return null;
         double kroll = ThreadLocalRandom.current().nextDouble() * 100.0, kacc = 0;
         List<Key> sorted = new ArrayList<>(keys);
