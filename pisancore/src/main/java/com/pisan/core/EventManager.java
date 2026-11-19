@@ -40,13 +40,13 @@ public final class EventManager implements Listener, CommandExecutor, TabComplet
 
     enum Kind {
         SATIS("&6Satış Bonusu", BarColor.YELLOW), KAZMA("&bHızlı Kazma", BarColor.BLUE),
-        ANAHTAR("&dAnahtar Şansı", BarColor.PINK), GOREV("&aGörev", BarColor.GREEN);
+        ANAHTAR("&dAnahtar Şansı", BarColor.PINK), GOREV("&aGörev", BarColor.GREEN), HUNI("&eHızlı Huni", BarColor.YELLOW);
         final String title; final BarColor color;
         Kind(String t, BarColor c) { title = t; color = c; }
         static Kind of(String s) {
             return switch (s.toLowerCase(Locale.ROOT)) {
                 case "satis", "satış", "sell" -> SATIS; case "kazma", "hiz", "haste" -> KAZMA;
-                case "anahtar", "key" -> ANAHTAR; case "gorev", "görev", "quest" -> GOREV; default -> null;
+                case "anahtar", "key" -> ANAHTAR; case "gorev", "görev", "quest" -> GOREV; case "huni", "hopper" -> HUNI; default -> null;
             };
         }
     }
@@ -89,6 +89,8 @@ public final class EventManager implements Listener, CommandExecutor, TabComplet
     // ======================= yasam dongusu =======================
     public void start() {
         load();
+        Ev h = active.get(Kind.HUNI);
+        if (h != null) { int[] c = hopperFor(h.value); writeHopper(c[0], c[1]); }
         hookShop();
         Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, 20L);
     }
@@ -138,6 +140,7 @@ public final class EventManager implements Listener, CommandExecutor, TabComplet
             case KAZMA -> "Herkese &fHaste " + CrateManager.roman((int) e.value) + " &7(hızlı kazma)";
             case ANAHTAR -> "Anahtar düşme şansı &f" + num(e.value) + " kat";
             case GOREV -> taskText(e) + " &7» Ödül: &f" + rewardName(e.reward);
+            case HUNI -> "Huniler &f" + num(e.value) + "x &7hızlı eşya taşıyor";
         };
     }
 
@@ -155,6 +158,8 @@ public final class EventManager implements Listener, CommandExecutor, TabComplet
 
     private static String left(long ms) {
         long s = Math.max(0, ms / 1000);
+        if (s >= 86400) return (s / 86400) + " gün " + ((s % 86400) / 3600) + " sa";
+        if (s >= 3600) return (s / 3600) + " sa " + ((s % 3600) / 60) + " dk";
         return s >= 60 ? (s / 60) + " dk " + (s % 60) + " sn" : s + " sn";
     }
 
@@ -168,11 +173,13 @@ public final class EventManager implements Listener, CommandExecutor, TabComplet
             Ev e = it.next();
             if (now >= e.end) {
                 if (e.bar != null) e.bar.removeAll();
+                if (e.kind == Kind.HUNI) writeHopper(8, 1);
                 broadcast("&7" + PisanCore.color(e.kind.title) + " &7etkinliği sona erdi."
                         + (e.kind == Kind.GOREV ? " &8(" + e.done.size() + " kişi tamamladı)" : ""));
                 it.remove(); changed = true;
                 continue;
             }
+            if (e.kind == Kind.HUNI) continue; // uzun sureli: bossbar/duyuru yok, giriste bilgi verilir
             if (e.bar == null) e.bar = Bukkit.createBossBar("", e.kind.color, BarStyle.SEGMENTED_10);
             double frac = (double) (e.end - now) / Math.max(1, e.end - e.start);
             e.bar.setProgress(Math.max(0, Math.min(1, frac)));
@@ -189,6 +196,41 @@ public final class EventManager implements Listener, CommandExecutor, TabComplet
             }
         }
         if (changed) save();
+    }
+
+    // ======================= huni (spigot.yml) =======================
+    /** kat -> {hopper-transfer, hopper-amount}. 16x = her tick 2 esya (normal: 8 tickte 1). */
+    private static int[] hopperFor(double mult) {
+        if (mult >= 16) return new int[]{1, 2};
+        if (mult >= 8) return new int[]{1, 1};
+        if (mult >= 4) return new int[]{2, 1};
+        return new int[]{4, 1};
+    }
+
+    private boolean writeHopper(int transfer, int amount) {
+        try {
+            File f = new File(Bukkit.getWorldContainer(), "spigot.yml");
+            String t = java.nio.file.Files.readString(f.toPath());
+            String n = t.replaceFirst("(?m)^(\\s+hopper-transfer:)\\s*\\d+", "$1 " + transfer)
+                        .replaceFirst("(?m)^(\\s+hopper-amount:)\\s*\\d+", "$1 " + amount);
+            if (!n.equals(t)) java.nio.file.Files.writeString(f.toPath(), n);
+            plugin.getLogger().info("Huni ayari: hopper-transfer=" + transfer + " hopper-amount=" + amount + " (yeniden baslatinca gecerli)");
+            return true;
+        } catch (Exception ex) {
+            plugin.getLogger().warning("spigot.yml yazilamadi: " + ex.getMessage());
+            return false;
+        }
+    }
+
+    @EventHandler
+    public void onJoin(org.bukkit.event.player.PlayerJoinEvent e) {
+        if (active.isEmpty()) return;
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!e.getPlayer().isOnline()) return;
+            long now = System.currentTimeMillis();
+            for (Ev ev : active.values())
+                e.getPlayer().sendMessage(pre() + PisanCore.color(ev.kind.title + " &7etkinliği aktif! " + describe(ev) + " &8| &e" + left(ev.end - now)));
+        }, 60L);
     }
 
     // ======================= etkiler =======================
@@ -273,7 +315,8 @@ public final class EventManager implements Listener, CommandExecutor, TabComplet
             String which = a.length > 1 ? a[1] : "hepsi";
             List<Kind> ks = which.equalsIgnoreCase("hepsi") ? new ArrayList<>(active.keySet()) : Optional.ofNullable(Kind.of(which)).map(List::of).orElse(List.of());
             if (ks.isEmpty()) { s.sendMessage(pre() + "§cDurdurulacak etkinlik yok."); return true; }
-            for (Kind k : ks) { Ev e = active.remove(k); if (e != null && e.bar != null) e.bar.removeAll(); if (e != null) broadcast("&7" + PisanCore.color(k.title) + " &7etkinliği durduruldu."); }
+            for (Kind k : ks) { Ev e = active.remove(k); if (e != null && e.bar != null) e.bar.removeAll();
+                if (k == Kind.HUNI && e != null) { writeHopper(8, 1); s.sendMessage(pre() + "§7Huni hızı sonraki yeniden başlatmada normale döner."); } if (e != null) broadcast("&7" + PisanCore.color(k.title) + " &7etkinliği durduruldu."); }
             save();
             return true;
         }
@@ -282,7 +325,17 @@ public final class EventManager implements Listener, CommandExecutor, TabComplet
         try {
             Ev e;
             long now = System.currentTimeMillis();
-            if (k == Kind.GOREV) {
+            if (k == Kind.HUNI) {
+                if (a.length < 3) { help(s); return true; }
+                double v = Double.parseDouble(a[1]), days = Double.parseDouble(a[2].replace(",", "."));
+                if (v <= 1 || days <= 0) { help(s); return true; }
+                int[] c = hopperFor(v);
+                v = (8.0 / c[0]) * c[1];
+                e = new Ev(k, v, now, now + (long) (days * 86400000L));
+                boolean ok = writeHopper(c[0], c[1]);
+                s.sendMessage(pre() + (ok ? "§aspigot.yml güncellendi: hopper-transfer=" + c[0] + ", hopper-amount=" + c[1]
+                        + ". §eSunucu yeniden başlayınca aktif olur." : "§cspigot.yml yazılamadı!"));
+            } else if (k == Kind.GOREV) {
                 if (a.length < 4) { help(s); return true; }
                 String task = switch (a[1].toLowerCase(Locale.ROOT)) { case "kaz", "maden" -> "kaz"; case "oldur", "öldür", "kill" -> "oldur"; case "hasat", "tarim" -> "hasat"; default -> null; };
                 int target = Integer.parseInt(a[2]); double min = Double.parseDouble(a[3]);
@@ -332,6 +385,7 @@ public final class EventManager implements Listener, CommandExecutor, TabComplet
         s.sendMessage(" §e/event kazma <seviye 1-5> <dakika> §7- herkese Haste");
         s.sendMessage(" §e/event anahtar <çarpan> <dakika> §7- ör: /event anahtar 3 15");
         s.sendMessage(" §e/event gorev <kaz|oldur|hasat> <adet> <dakika> §7- ödül: elindeki eşya");
+        s.sendMessage(" §e/event huni <kat 2-16> <gün> §7- ör: /event huni 16 30 (yeniden başlatınca aktif)");
         s.sendMessage(" §e/event durdur <tür|hepsi> §7- etkinliği bitir");
         s.sendMessage(" §e/event §7- aktif etkinlikler");
     }
@@ -340,9 +394,10 @@ public final class EventManager implements Listener, CommandExecutor, TabComplet
     public List<String> onTabComplete(CommandSender s, Command cmd, String label, String[] a) {
         if (!s.hasPermission("pisancore.admin")) return List.of();
         List<String> out = new ArrayList<>();
-        if (a.length == 1) out.addAll(List.of("satis", "kazma", "anahtar", "gorev", "durdur"));
+        if (a.length == 1) out.addAll(List.of("satis", "kazma", "anahtar", "gorev", "huni", "durdur"));
         else if (a.length == 2 && a[0].equalsIgnoreCase("gorev")) out.addAll(List.of("kaz", "oldur", "hasat"));
-        else if (a.length == 2 && a[0].equalsIgnoreCase("durdur")) out.addAll(List.of("hepsi", "satis", "kazma", "anahtar", "gorev"));
+        else if (a.length == 2 && a[0].equalsIgnoreCase("durdur")) out.addAll(List.of("hepsi", "satis", "kazma", "anahtar", "gorev", "huni"));
+        else if (a.length == 2 && a[0].equalsIgnoreCase("huni")) out.addAll(List.of("2", "4", "8", "16"));
         else if (a.length == 2) out.addAll(List.of("2", "3"));
         else if (a.length == 3 && a[0].equalsIgnoreCase("gorev")) out.addAll(List.of("100", "500", "1000"));
         else if (a.length == 3 || a.length == 4) out.addAll(List.of("15", "30", "60"));

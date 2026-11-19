@@ -37,7 +37,7 @@ Ada koruma alanı: 500x500 (protection-range 250).
 | `/bal`, `/pay <oyuncu> <miktar>`, `/baltop` | Coin |
 
 ## Admin komutları
-`/kasa ver <oyuncu> <kasa> [adet]`, `/minyon ver <oyuncu> <tür> [seviye] [adet]`, `/event satis|kazma|anahtar <değer> <dk>`, `/event gorev <kaz|oldur|hasat> <adet> <dk>` (ödül: eldeki eşya), `/event durdur`, `/lobi spawnayarla|yenidenkur|kasaayarla <kasa>`, `/eco give|take|set <oyuncu> <miktar>`, `/pisancore reload`
+`/kasa ver <oyuncu> <kasa> [adet]`, `/minyon ver <oyuncu> <tür> [seviye] [adet]`, `/event satis|kazma|anahtar <değer> <dk>`, `/event gorev <kaz|oldur|hasat> <adet> <dk>` (ödül: eldeki eşya), `/event huni <kat> <gün>` (spigot.yml, yeniden başlatınca), `/event durdur`, `/lobi spawnayarla|yenidenkur|kasaayarla <kasa>`, `/eco give|take|set <oyuncu> <miktar>`, `/pisancore reload`
 
 ## PisanCore derleme
 ```
