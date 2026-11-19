@@ -139,6 +139,7 @@ pages:
         sell: 40
         enchantments:
         - MENDING:1
+        hidden: true
       multishot:
         material: ENCHANTED_BOOK
         buy: 160

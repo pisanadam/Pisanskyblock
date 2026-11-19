@@ -29,6 +29,7 @@ pages:
         material: NETHERITE_PICKAXE
         buy: -1
         sell: 665.23
+        hidden: true
       wooden_axe:
         material: WOODEN_AXE
         buy: 4.69
@@ -57,6 +58,7 @@ pages:
         material: NETHERITE_AXE
         buy: -1
         sell: 665.23
+        hidden: true
       wooden_shovel:
         material: WOODEN_SHOVEL
         buy: 2.38
@@ -85,6 +87,7 @@ pages:
         material: NETHERITE_SHOVEL
         buy: -1
         sell: 636.29
+        hidden: true
       wooden_hoe:
         material: WOODEN_HOE
         buy: 3.54
@@ -113,3 +116,4 @@ pages:
         material: NETHERITE_HOE
         buy: -1
         sell: 650.76
+        hidden: true

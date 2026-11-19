@@ -56,6 +56,7 @@ pages:
         buy: -1
         sell: 7
         stack-size: 4
+        hidden: true
       blaze_rod:
         material: BLAZE_ROD
         buy: 20
@@ -114,6 +115,7 @@ pages:
         material: WITHER_SKELETON_SKULL
         buy: -1
         sell: 250
+        hidden: true
       skeleton_skull:
         material: SKELETON_SKULL
         buy: -1
@@ -130,3 +132,4 @@ pages:
         material: TOTEM_OF_UNDYING
         buy: -1
         sell: 300
+        hidden: true

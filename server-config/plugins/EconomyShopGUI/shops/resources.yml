@@ -30,6 +30,7 @@ pages:
         material: NETHERITE_BLOCK
         buy: -1
         sell: 5593.5
+        hidden: true
       copper_ingot:
         material: COPPER_INGOT
         buy: 8.28
@@ -65,6 +66,7 @@ pages:
         buy: -1
         sell: 5327.19
         stack-size: 9
+        hidden: true
       copper_ore:
         material: COPPER_ORE
         buy: 15
@@ -93,6 +95,7 @@ pages:
         material: ANCIENT_DEBRIS
         buy: -1
         sell: 132.25
+        hidden: true
   page2:
     gui-rows: 5
     items:

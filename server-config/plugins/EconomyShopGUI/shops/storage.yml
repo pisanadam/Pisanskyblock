@@ -109,65 +109,81 @@ pages:
         material: WHITE_SHULKER_BOX
         buy: -1
         sell: 6.84
+        hidden: true
       light_gray_shulker_box:
         material: LIGHT_GRAY_SHULKER_BOX
         buy: -1
         sell: 6.69
+        hidden: true
   page2:
     items:
       gray_shulker_box:
         material: GRAY_SHULKER_BOX
         buy: -1
         sell: 7.36
+        hidden: true
       black_shulker_box:
         material: BLACK_SHULKER_BOX
         buy: -1
         sell: 7.79
+        hidden: true
       brown_shulker_box:
         material: BROWN_SHULKER_BOX
         buy: -1
         sell: 8.07
+        hidden: true
       red_shulker_box:
         material: RED_SHULKER_BOX
         buy: -1
         sell: 6.69
+        hidden: true
       orange_shulker_box:
         material: ORANGE_SHULKER_BOX
         buy: -1
         sell: 6.69
+        hidden: true
       yellow_shulker_box:
         material: YELLOW_SHULKER_BOX
         buy: -1
         sell: 6.6
+        hidden: true
       lime_shulker_box:
         material: LIME_SHULKER_BOX
         buy: -1
         sell: 8.07
+        hidden: true
       green_shulker_box:
         material: GREEN_SHULKER_BOX
         buy: -1
         sell: 6.44
+        hidden: true
       cyan_shulker_box:
         material: CYAN_SHULKER_BOX
         buy: -1
         sell: 6.58
+        hidden: true
       light_blue_shulker_box:
         material: LIGHT_BLUE_SHULKER_BOX
         buy: -1
         sell: 6.69
+        hidden: true
       blue_shulker_box:
         material: BLUE_SHULKER_BOX
         buy: -1
         sell: 6.69
+        hidden: true
       purple_shulker_box:
         material: PURPLE_SHULKER_BOX
         buy: -1
         sell: 6.71
+        hidden: true
       magenta_shulker_box:
         material: MAGENTA_SHULKER_BOX
         buy: -1
         sell: 6.69
+        hidden: true
       pink_shulker_box:
         material: PINK_SHULKER_BOX
         buy: -1
         sell: 6.69
+        hidden: true

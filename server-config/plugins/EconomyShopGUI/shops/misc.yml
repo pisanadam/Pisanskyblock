@@ -95,6 +95,7 @@ pages:
         material: DRAGON_EGG
         buy: -1
         sell: 1250
+        hidden: true
       end_rod:
         material: END_ROD
         buy: 2.14
@@ -107,10 +108,12 @@ pages:
         material: NETHER_STAR
         buy: -1
         sell: 350
+        hidden: true
       beacon:
         material: BEACON
         buy: -1
         sell: 400.38
+        hidden: true
       dragon_breath:
         material: DRAGON_BREATH
         buy: 109.93
@@ -260,3 +263,4 @@ pages:
         material: END_CRYSTAL
         buy: -1
         sell: 24.73
+        hidden: true

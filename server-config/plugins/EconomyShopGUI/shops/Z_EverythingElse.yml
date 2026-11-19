@@ -595,10 +595,12 @@ pages:
         material: DRAGON_HEAD
         buy: -1
         sell: 1250
+        hidden: true
       enchanted_golden_apple:
         material: ENCHANTED_GOLDEN_APPLE
         buy: -1
         sell: 2500
+        hidden: true
       enchanting_table:
         material: ENCHANTING_TABLE
         buy: 278.9
@@ -845,6 +847,7 @@ pages:
         material: NETHERITE_SCRAP
         buy: -1
         sell: 138.87
+        hidden: true
       oak_door:
         material: OAK_DOOR
         buy: 2.32
@@ -1051,6 +1054,7 @@ pages:
         material: SHULKER_BOX
         buy: -1
         sell: 6.11
+        hidden: true
       small_amethyst_bud:
         material: SMALL_AMETHYST_BUD
         buy: 2
@@ -1173,6 +1177,7 @@ pages:
         material: VAULT
         buy: -1
         sell: 30000
+        hidden: true
       warped_button:
         material: WARPED_BUTTON
         buy: 0.83

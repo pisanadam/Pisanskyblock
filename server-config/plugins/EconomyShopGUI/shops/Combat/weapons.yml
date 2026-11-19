@@ -29,34 +29,42 @@ pages:
         material: NETHERITE_SWORD
         buy: -1
         sell: 650.61
+        hidden: true
       wooden_spear:
         material: WOODEN_SPEAR
         buy: -1
         sell: 0.6
+        hidden: true
       stone_spear:
         material: STONE_SPEAR
         buy: -1
         sell: 0.49
+        hidden: true
       copper_spear:
         material: COPPER_SPEAR
         buy: -1
         sell: 0.54
+        hidden: true
       iron_spear:
         material: IRON_SPEAR
         buy: -1
         sell: 1.76
+        hidden: true
       golden_spear:
         material: GOLDEN_SPEAR
         buy: -1
         sell: 2.48
+        hidden: true
       diamond_spear:
         material: DIAMOND_SPEAR
         buy: -1
         sell: 14.09
+        hidden: true
       netherite_spear:
         material: NETHERITE_SPEAR
         buy: -1
         sell: 636.29
+        hidden: true
       arrow:
         material: ARROW
         buy: 36.16
@@ -84,11 +92,13 @@ pages:
         buy: -1
         sell: 5255.25
         slot: 42
+        hidden: true
       trident:
         material: TRIDENT
         buy: -1
         sell: 45
         slot: 43
+        hidden: true
       shield:
         material: SHIELD
         buy: 12.74
