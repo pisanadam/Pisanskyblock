@@ -130,6 +130,31 @@ public final class GeneratorListener implements Listener {
      * Cikarsa anahtar esyasini dondurur ve mesaj/duyuru yapar; cikmazsa null.
      */
     public ItemStack rollKey(Player p, double mult) {
+        Key k = rollKeyDef(mult);
+        if (k == null) return null;
+        CrateManager.Crate crate = plugin.crates().crate(k.id());
+        if (crate == null) return null;
+        String pre = plugin.getConfig().getString("messages.prefix", "");
+        p.sendMessage(PisanCore.color(pre + plugin.getConfig().getString("messages.key-drop", "").replace("%key%", k.name())));
+        p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.4f);
+        if (k.broadcast()) Bukkit.broadcastMessage(PisanCore.color(pre + plugin.getConfig().getString("messages.key-broadcast", "")
+                .replace("%player%", p.getName()).replace("%key%", k.name())));
+        return plugin.crates().keyItem(crate, 1);
+    }
+
+    /** Minyon icin anahtar zari: cikarsa kasa id'si (sahibine bildirim + nadirse duyuru). */
+    public String rollKeyForMinion(java.util.UUID owner, String ownerName, String minionName, double mult) {
+        Key k = rollKeyDef(mult);
+        if (k == null || plugin.crates().crate(k.id()) == null) return null;
+        String pre = plugin.getConfig().getString("messages.prefix", "");
+        Player o = Bukkit.getPlayer(owner);
+        if (o != null) o.sendMessage(PisanCore.color(pre + minionName + " &eminyonun &f" + k.name() + " &ebuldu! &7(minyon deposunda)"));
+        if (k.broadcast()) Bukkit.broadcastMessage(PisanCore.color(pre + "&6" + ownerName + " &eadlı oyuncunun minyonu &f" + k.name() + " &ebuldu!"));
+        return k.id();
+    }
+
+    /** Ortak zar: etkinlik carpani dahil. En nadirden baslayarak en fazla bir anahtar. */
+    private Key rollKeyDef(double mult) {
         if (plugin.events() != null) mult *= plugin.events().keyMultiplier();
         if (mult <= 0) return null;
         double kroll = ThreadLocalRandom.current().nextDouble() * 100.0, kacc = 0;
@@ -137,16 +162,7 @@ public final class GeneratorListener implements Listener {
         sorted.sort(Comparator.comparingDouble(Key::chance));
         for (Key k : sorted) {
             kacc += k.chance() * mult;
-            if (kroll < kacc) {
-                CrateManager.Crate crate = plugin.crates().crate(k.id());
-                if (crate == null) return null;
-                String pre = plugin.getConfig().getString("messages.prefix", "");
-                p.sendMessage(PisanCore.color(pre + plugin.getConfig().getString("messages.key-drop", "").replace("%key%", k.name())));
-                p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.4f);
-                if (k.broadcast()) Bukkit.broadcastMessage(PisanCore.color(pre + plugin.getConfig().getString("messages.key-broadcast", "")
-                        .replace("%player%", p.getName()).replace("%key%", k.name())));
-                return plugin.crates().keyItem(crate, 1);
-            }
+            if (kroll < kacc) return k;
         }
         return null;
     }

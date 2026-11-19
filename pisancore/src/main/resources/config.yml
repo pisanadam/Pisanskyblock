@@ -50,6 +50,7 @@ key-sources:
   mobs: 1.5          # dusman yaratik oldurme
   spawner-mobs: 0.25 # spawner'dan cikan yaratiklar icin ek carpan (1.5 x 0.25)
   crops: 0.4         # olgun ekin / kavun / balkabagi hasadi
+  minions: 0.5       # minyonlar: uretim basina (kazici: kirdigi her tas icin)
 
 # Minyonlar: adaya konur, chunk yukluyken urun uretir. /minyon = market
 minions:

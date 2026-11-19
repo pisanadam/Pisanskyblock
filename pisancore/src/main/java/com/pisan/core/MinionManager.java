@@ -55,6 +55,8 @@ public final class MinionManager implements Listener {
         final UUID id; UUID owner; String ownerName; final Location loc; final String type;
         int tier; double progress;
         final LinkedHashMap<Material, Long> items = new LinkedHashMap<>();
+        final LinkedHashMap<String, Integer> keys = new LinkedHashMap<>(); // kasa id -> adet (anahtarlar ayri bolmede)
+        int keyCount() { int n = 0; for (int v : keys.values()) n += v; return n; }
         long total() { long t = 0; for (long v : items.values()) t += v; return t; }
         void add(Material m, long n) { if (n > 0) items.merge(m, n, Long::sum); }
         void take(Material m, long n) { long v = items.getOrDefault(m, 0L) - n; if (v <= 0) items.remove(m); else items.put(m, v); }
@@ -143,6 +145,8 @@ public final class MinionManager implements Listener {
             ConfigurationSection is = s.getConfigurationSection("items");
             if (is != null) for (String mk : is.getKeys(false)) { Material mm = Material.matchMaterial(mk); if (mm != null) m.add(mm, is.getLong(mk)); }
             else if (s.getLong("stored") > 0 && types.containsKey(m.type)) m.add(types.get(m.type).output(), s.getLong("stored"));
+            ConfigurationSection ks = s.getConfigurationSection("keys");
+            if (ks != null) for (String kid : ks.getKeys(false)) if (ks.getInt(kid) > 0) m.keys.put(kid, ks.getInt(kid));
             m.progress = s.getDouble("progress");
             if (!types.containsKey(m.type)) { plugin.getLogger().warning("Bilinmeyen minyon turu: " + m.type); continue; }
             minions.put(m.id, m);
@@ -167,6 +171,7 @@ public final class MinionManager implements Listener {
             y.set(k + ".type", m.type);
             y.set(k + ".tier", m.tier);
             for (var it : m.items.entrySet()) y.set(k + ".items." + it.getKey().name(), it.getValue());
+            for (var it : m.keys.entrySet()) y.set(k + ".keys." + it.getKey(), it.getValue());
             y.set(k + ".progress", m.progress);
         }
         try { plugin.getDataFolder().mkdirs(); y.save(file); dirty = false; }
@@ -228,7 +233,8 @@ public final class MinionManager implements Listener {
         long cap = capacity(m.tier);
         long tot = m.total();
         String fill = tot >= cap ? "&c" : "&a";
-        m.stand.setCustomName(PisanCore.color(t.name() + " &8[&e" + ROMAN[Math.min(m.tier, 10)] + "&8] " + fill + tot + "&7/" + cap));
+        m.stand.setCustomName(PisanCore.color(t.name() + " &8[&e" + ROMAN[Math.min(m.tier, 10)] + "&8] " + fill + tot + "&7/" + cap
+                + (m.keys.isEmpty() ? "" : " &6🗝" + m.keyCount())));
     }
 
     private void onChunk(Chunk ch) {
@@ -271,7 +277,10 @@ public final class MinionManager implements Listener {
                 m.progress -= n;
                 if (t.breaker()) {
                     if (!mine(m, t, cap)) { m.progress = Math.min(m.progress + n, 1.0); continue; } // kazacak blok yok, bekle
-                } else m.add(t.output(), Math.min(cap - m.total(), (long) n * t.amount()));
+                } else {
+                    m.add(t.output(), Math.min(cap - m.total(), (long) n * t.amount()));
+                    for (int i = 0; i < n; i++) minionKeyRoll(m, t);
+                }
                 dirty = true;
                 updateName(m);
                 if (m.stand != null) {
@@ -303,12 +312,33 @@ public final class MinionManager implements Listener {
 
     private void pushToContainer(Minion m, Type t) {
         Inventory inv = container(m);
-        if (inv == null || m.items.isEmpty()) return;
+        if (inv == null) return;
+        if (!m.keys.isEmpty()) { // anahtarlar once
+            var ke = m.keys.entrySet().iterator().next();
+            CrateManager.Crate c = plugin.crates().crate(ke.getKey());
+            if (c == null) { m.keys.remove(ke.getKey()); return; }
+            int n = Math.min(64, ke.getValue());
+            int notFit = inv.addItem(plugin.crates().keyItem(c, n)).values().stream().mapToInt(ItemStack::getAmount).sum();
+            int moved = n - notFit;
+            if (moved > 0) { if (ke.getValue() - moved <= 0) m.keys.remove(ke.getKey()); else ke.setValue(ke.getValue() - moved); dirty = true; updateName(m); }
+            return;
+        }
+        if (m.items.isEmpty()) return;
         Map.Entry<Material, Long> e = m.items.entrySet().iterator().next();
         int n = (int) Math.min(e.getKey().getMaxStackSize(), e.getValue());
         Map<Integer, ItemStack> left = inv.addItem(new ItemStack(e.getKey(), n));
         int moved = n - left.values().stream().mapToInt(ItemStack::getAmount).sum();
         if (moved > 0) { m.take(e.getKey(), moved); dirty = true; updateName(m); }
+    }
+
+    /** Minyon anahtar zari (config: key-sources.minions). Cikarsa minyonun anahtar bolmesine eklenir. */
+    private boolean minionKeyRoll(Minion m, Type t) {
+        double mult = plugin.getConfig().getDouble("key-sources.minions", 0.5);
+        String id = plugin.generator().rollKeyForMinion(m.owner, m.ownerName, PisanCore.color(t.name()), mult);
+        if (id == null) return false;
+        m.keys.merge(id, 1, Integer::sum);
+        dirty = true;
+        return true;
     }
 
     /** Kazici: yanindaki (once baktigi yon) jenerator blogunu kirar, dusenleri depoya koyar. */
@@ -320,7 +350,10 @@ public final class MinionManager implements Listener {
             Block b = base.getRelative(f);
             if (!MINEABLE.contains(b.getType())) return false;
             ItemStack tool = new ItemStack(t.tool());
-            for (ItemStack d : b.getDrops(tool)) m.add(d.getType(), Math.min(d.getAmount(), Math.max(0, cap - m.total())));
+            Material bt = b.getType();
+            boolean cobble = bt == Material.COBBLESTONE || bt == Material.STONE || bt == Material.BASALT;
+            boolean gotKey = cobble && minionKeyRoll(m, t); // oyuncudaki gibi: anahtar cikarsa tas dusmez
+            if (!gotKey) for (ItemStack d : b.getDrops(tool)) m.add(d.getType(), Math.min(d.getAmount(), Math.max(0, cap - m.total())));
             b.getWorld().spawnParticle(Particle.BLOCK, b.getLocation().add(0.5, 0.5, 0.5), 12, 0.3, 0.3, 0.3, b.getBlockData());
             b.getWorld().playSound(b.getLocation(), b.getBlockData().getSoundGroup().getBreakSound(), 0.6f, 1f);
             b.setType(Material.AIR, true); // sivilar akar, jenerator yeniden uretir
@@ -489,6 +522,10 @@ public final class MinionManager implements Listener {
         boolean linked = container(m) != null;
         List<String> depo = new ArrayList<>();
         depo.add("&7Depoda: &f" + m.total() + "&7/" + cap);
+        for (var ke : m.keys.entrySet()) {
+            CrateManager.Crate c = plugin.crates().crate(ke.getKey());
+            if (c != null) depo.add(" &6🗝 &f" + ke.getValue() + "x " + plugin.crates().keyName(c));
+        }
         int shown = 0;
         for (var it : m.items.entrySet()) { if (shown++ >= 8) { depo.add("&8..."); break; } depo.add(" &8- &f" + it.getValue() + "x " + CrateManager.pretty(it.getKey().name())); }
         depo.add(""); depo.add("&eTıkla &7» Envanterine al");
@@ -517,7 +554,21 @@ public final class MinionManager implements Listener {
         Type t = types.get(m.type);
         long given = 0;
         boolean full = false;
+        for (String kid : new ArrayList<>(m.keys.keySet())) {
+            CrateManager.Crate c = plugin.crates().crate(kid);
+            if (c == null) { m.keys.remove(kid); continue; }
+            while (m.keys.getOrDefault(kid, 0) > 0) {
+                int n = Math.min(64, m.keys.get(kid));
+                int notFit = p.getInventory().addItem(plugin.crates().keyItem(c, n)).values().stream().mapToInt(ItemStack::getAmount).sum();
+                int left = m.keys.get(kid) - (n - notFit);
+                if (left <= 0) m.keys.remove(kid); else m.keys.put(kid, left);
+                given += (n - notFit);
+                if (notFit > 0) { full = true; break; }
+            }
+            if (full) break;
+        }
         for (Material mat : new ArrayList<>(m.items.keySet())) {
+            if (full) break;
             while (m.items.getOrDefault(mat, 0L) > 0) {
                 int n = (int) Math.min(mat.getMaxStackSize(), m.items.get(mat));
                 Map<Integer, ItemStack> left = p.getInventory().addItem(new ItemStack(mat, n));
@@ -531,7 +582,7 @@ public final class MinionManager implements Listener {
         dirty = true;
         updateName(m);
         if (given > 0) p.playSound(p.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 1.2f);
-        if (m.total() > 0) p.sendMessage(pre() + "§eEnvanterin doldu, §f" + m.total() + " §eeşya depoda kaldı.");
+        if (m.total() > 0 || !m.keys.isEmpty()) p.sendMessage(pre() + "§eEnvanterin doldu, §f" + (m.total() + m.keyCount()) + " §eeşya depoda kaldı.");
     }
 
     @EventHandler
@@ -559,7 +610,7 @@ public final class MinionManager implements Listener {
             }
             case 22 -> {
                 collect(p, m);
-                if (m.total() > 0) { p.sendMessage(pre() + "§cÖnce envanterinde yer aç."); return; }
+                if (m.total() > 0 || !m.keys.isEmpty()) { p.sendMessage(pre() + "§cÖnce envanterinde yer aç."); return; }
                 minions.remove(m.id);
                 dirty = true;
                 if (m.stand != null) m.stand.remove();
