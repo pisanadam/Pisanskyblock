@@ -26,6 +26,10 @@ pages:
         material: EMERALD_BLOCK
         buy: 372.1
         sell: 93.03
+      netherite_block:
+        material: NETHERITE_BLOCK
+        buy: -1
+        sell: 5593.5
       copper_ingot:
         material: COPPER_INGOT
         buy: 8.28
@@ -56,6 +60,11 @@ pages:
         buy: 354.42
         sell: 88.65
         stack-size: 9
+      netherite_ingot:
+        material: NETHERITE_INGOT
+        buy: -1
+        sell: 5327.19
+        stack-size: 9
       copper_ore:
         material: COPPER_ORE
         buy: 15
@@ -80,6 +89,10 @@ pages:
         material: EMERALD_ORE
         buy: 150
         sell: -1
+      ancient_debris:
+        material: ANCIENT_DEBRIS
+        buy: -1
+        sell: 132.25
   page2:
     gui-rows: 5
     items:

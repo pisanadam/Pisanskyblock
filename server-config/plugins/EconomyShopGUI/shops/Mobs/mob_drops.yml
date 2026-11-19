@@ -51,6 +51,11 @@ pages:
         buy: 500.6
         sell: 125.16
         stack-size: 4
+      shulker_shell:
+        material: SHULKER_SHELL
+        buy: -1
+        sell: 7
+        stack-size: 4
       blaze_rod:
         material: BLAZE_ROD
         buy: 20
@@ -105,6 +110,10 @@ pages:
         material: GHAST_TEAR
         buy: 40
         sell: 10
+      wither_skeleton_skull:
+        material: WITHER_SKELETON_SKULL
+        buy: -1
+        sell: 250
       skeleton_skull:
         material: SKELETON_SKULL
         buy: -1
@@ -117,3 +126,7 @@ pages:
         material: ZOMBIE_HEAD
         buy: -1
         sell: 150
+      totem_of_undying:
+        material: TOTEM_OF_UNDYING
+        buy: -1
+        sell: 300

@@ -133,6 +133,12 @@ pages:
         sell: 176.4
         enchantments:
         - LURE:3
+      mending:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 40
+        enchantments:
+        - MENDING:1
       multishot:
         material: ENCHANTED_BOOK
         buy: 160

@@ -91,6 +91,10 @@ pages:
         material: MINECART
         buy: 28.95
         sell: 7.24
+      dragon_egg:
+        material: DRAGON_EGG
+        buy: -1
+        sell: 1250
       end_rod:
         material: END_ROD
         buy: 2.14
@@ -99,6 +103,14 @@ pages:
         material: SADDLE
         buy: 60
         sell: 15
+      nether_star:
+        material: NETHER_STAR
+        buy: -1
+        sell: 350
+      beacon:
+        material: BEACON
+        buy: -1
+        sell: 400.38
       dragon_breath:
         material: DRAGON_BREATH
         buy: 109.93
@@ -244,3 +256,7 @@ pages:
         material: SNIFFER_EGG
         buy: 23
         sell: 5.75
+      end_crystal:
+        material: END_CRYSTAL
+        buy: -1
+        sell: 24.73

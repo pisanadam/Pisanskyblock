@@ -25,6 +25,10 @@ pages:
         material: DIAMOND_PICKAXE
         buy: 166.6
         sell: 41.65
+      netherite_pickaxe:
+        material: NETHERITE_PICKAXE
+        buy: -1
+        sell: 665.23
       wooden_axe:
         material: WOODEN_AXE
         buy: 4.69
@@ -49,6 +53,10 @@ pages:
         material: DIAMOND_AXE
         buy: 166.6
         sell: 41.65
+      netherite_axe:
+        material: NETHERITE_AXE
+        buy: -1
+        sell: 665.23
       wooden_shovel:
         material: WOODEN_SHOVEL
         buy: 2.38
@@ -73,6 +81,10 @@ pages:
         material: DIAMOND_SHOVEL
         buy: 56.35
         sell: 14.09
+      netherite_shovel:
+        material: NETHERITE_SHOVEL
+        buy: -1
+        sell: 636.29
       wooden_hoe:
         material: WOODEN_HOE
         buy: 3.54
@@ -97,3 +109,7 @@ pages:
         material: DIAMOND_HOE
         buy: 111.47
         sell: 27.87
+      netherite_hoe:
+        material: NETHERITE_HOE
+        buy: -1
+        sell: 650.76

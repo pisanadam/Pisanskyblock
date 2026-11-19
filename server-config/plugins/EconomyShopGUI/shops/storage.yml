@@ -105,5 +105,69 @@ pages:
         material: PINK_BUNDLE
         buy: 253.0
         sell: 5.3
+      white_shulker_box:
+        material: WHITE_SHULKER_BOX
+        buy: -1
+        sell: 6.84
+      light_gray_shulker_box:
+        material: LIGHT_GRAY_SHULKER_BOX
+        buy: -1
+        sell: 6.69
   page2:
-    items: {}
+    items:
+      gray_shulker_box:
+        material: GRAY_SHULKER_BOX
+        buy: -1
+        sell: 7.36
+      black_shulker_box:
+        material: BLACK_SHULKER_BOX
+        buy: -1
+        sell: 7.79
+      brown_shulker_box:
+        material: BROWN_SHULKER_BOX
+        buy: -1
+        sell: 8.07
+      red_shulker_box:
+        material: RED_SHULKER_BOX
+        buy: -1
+        sell: 6.69
+      orange_shulker_box:
+        material: ORANGE_SHULKER_BOX
+        buy: -1
+        sell: 6.69
+      yellow_shulker_box:
+        material: YELLOW_SHULKER_BOX
+        buy: -1
+        sell: 6.6
+      lime_shulker_box:
+        material: LIME_SHULKER_BOX
+        buy: -1
+        sell: 8.07
+      green_shulker_box:
+        material: GREEN_SHULKER_BOX
+        buy: -1
+        sell: 6.44
+      cyan_shulker_box:
+        material: CYAN_SHULKER_BOX
+        buy: -1
+        sell: 6.58
+      light_blue_shulker_box:
+        material: LIGHT_BLUE_SHULKER_BOX
+        buy: -1
+        sell: 6.69
+      blue_shulker_box:
+        material: BLUE_SHULKER_BOX
+        buy: -1
+        sell: 6.69
+      purple_shulker_box:
+        material: PURPLE_SHULKER_BOX
+        buy: -1
+        sell: 6.71
+      magenta_shulker_box:
+        material: MAGENTA_SHULKER_BOX
+        buy: -1
+        sell: 6.69
+      pink_shulker_box:
+        material: PINK_SHULKER_BOX
+        buy: -1
+        sell: 6.69

@@ -591,6 +591,14 @@ pages:
         material: DIORITE_WALL
         buy: 0.75
         sell: 0.19
+      dragon_head:
+        material: DRAGON_HEAD
+        buy: -1
+        sell: 1250
+      enchanted_golden_apple:
+        material: ENCHANTED_GOLDEN_APPLE
+        buy: -1
+        sell: 2500
       enchanting_table:
         material: ENCHANTING_TABLE
         buy: 278.9
@@ -833,6 +841,10 @@ pages:
         material: NETHER_WART_BLOCK
         buy: 28.35
         sell: 7.09
+      netherite_scrap:
+        material: NETHERITE_SCRAP
+        buy: -1
+        sell: 138.87
       oak_door:
         material: OAK_DOOR
         buy: 2.32
@@ -1035,6 +1047,10 @@ pages:
         material: SEAGRASS
         buy: 7
         sell: 1.75
+      shulker_box:
+        material: SHULKER_BOX
+        buy: -1
+        sell: 6.11
       small_amethyst_bud:
         material: SMALL_AMETHYST_BUD
         buy: 2
@@ -1153,6 +1169,10 @@ pages:
         material: TUFF_WALL
         buy: 2.1
         sell: 0.53
+      vault:
+        material: VAULT
+        buy: -1
+        sell: 30000
       warped_button:
         material: WARPED_BUTTON
         buy: 0.83

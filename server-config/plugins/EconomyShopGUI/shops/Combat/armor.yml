@@ -121,6 +121,26 @@ pages:
         buy: 220.5
         sell: 55.13
         slot: 43
+      netherite_helmet:
+        material: NETHERITE_HELMET
+        buy: -1
+        sell: 693.86
+        slot: 17
+      netherite_chestplate:
+        material: NETHERITE_CHESTPLATE
+        buy: -1
+        sell: 737.27
+        slot: 26
+      netherite_leggings:
+        material: NETHERITE_LEGGINGS
+        buy: -1
+        sell: 722.8
+        slot: 35
+      netherite_boots:
+        material: NETHERITE_BOOTS
+        buy: -1
+        sell: 679.39
+        slot: 44
   page2:
     items:
       leather_horse_armor:
@@ -143,6 +163,10 @@ pages:
         material: DIAMOND_HORSE_ARMOR
         buy: 2250
         sell: 562.5
+      netherite_horse_armor:
+        material: NETHERITE_HORSE_ARMOR
+        buy: -1
+        sell: 871
       wolf_armor:
         material: WOLF_ARMOR
         buy: 3339
@@ -167,6 +191,10 @@ pages:
         material: DIAMOND_NAUTILUS_ARMOR
         buy: 3400
         sell: 925
+      netherite_nautilus_armor:
+        material: NETHERITE_NAUTILUS_ARMOR
+        buy: -1
+        sell: 1250
       bolt_armor_trim_smithing_template:
         material: BOLT_ARMOR_TRIM_SMITHING_TEMPLATE
         buy: 389.93
@@ -191,6 +219,10 @@ pages:
         material: HOST_ARMOR_TRIM_SMITHING_TEMPLATE
         buy: 204.52
         sell: 51.13
+      netherite_upgrade_smithing_template:
+        material: NETHERITE_UPGRADE_SMITHING_TEMPLATE
+        buy: -1
+        sell: 48.27
       raiser_armor_trim_smithing_template:
         material: RAISER_ARMOR_TRIM_SMITHING_TEMPLATE
         buy: 204.52
