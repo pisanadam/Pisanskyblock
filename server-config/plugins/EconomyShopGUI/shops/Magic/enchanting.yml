@@ -262,3 +262,754 @@ pages:
         sell: 4450
         enchantments:
         - LUNGE:3
+  page3:
+    items:
+      damage_arthropods_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 97.24
+        enchantments:
+        - DAMAGE_ARTHROPODS:1
+        hidden: true
+      damage_arthropods_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 194.48
+        enchantments:
+        - DAMAGE_ARTHROPODS:2
+        hidden: true
+      damage_arthropods_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 291.73
+        enchantments:
+        - DAMAGE_ARTHROPODS:3
+        hidden: true
+      damage_arthropods_lvl4:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 388.97
+        enchantments:
+        - DAMAGE_ARTHROPODS:4
+        hidden: true
+      breach_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 115.76
+        enchantments:
+        - BREACH:1
+        hidden: true
+      breach_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 231.53
+        enchantments:
+        - BREACH:2
+        hidden: true
+      breach_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 347.29
+        enchantments:
+        - BREACH:3
+        hidden: true
+      protection_explosions_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 92.61
+        enchantments:
+        - PROTECTION_EXPLOSIONS:1
+        hidden: true
+      protection_explosions_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 185.22
+        enchantments:
+        - PROTECTION_EXPLOSIONS:2
+        hidden: true
+      protection_explosions_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 277.83
+        enchantments:
+        - PROTECTION_EXPLOSIONS:3
+        hidden: true
+      density_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 194.48
+        enchantments:
+        - DENSITY:1
+        hidden: true
+      density_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 388.96
+        enchantments:
+        - DENSITY:2
+        hidden: true
+      density_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 583.45
+        enchantments:
+        - DENSITY:3
+        hidden: true
+      density_lvl4:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 777.93
+        enchantments:
+        - DENSITY:4
+        hidden: true
+      depth_strider_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 58.8
+        enchantments:
+        - DEPTH_STRIDER:1
+        hidden: true
+      depth_strider_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 117.6
+        enchantments:
+        - DEPTH_STRIDER:2
+        hidden: true
+      dig_speed_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 48.62
+        enchantments:
+        - DIG_SPEED:1
+        hidden: true
+      dig_speed_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 97.24
+        enchantments:
+        - DIG_SPEED:2
+        hidden: true
+      dig_speed_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 145.87
+        enchantments:
+        - DIG_SPEED:3
+        hidden: true
+      dig_speed_lvl4:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 194.49
+        enchantments:
+        - DIG_SPEED:4
+        hidden: true
+      dig_speed_lvl6:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 437.6
+        enchantments:
+        - DIG_SPEED:6
+        hidden: true
+      dig_speed_lvl7:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 765.8
+        enchantments:
+        - DIG_SPEED:7
+        hidden: true
+      dig_speed_lvl8:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 1312.79
+        enchantments:
+        - DIG_SPEED:8
+        hidden: true
+      protection_fall_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 57.88
+        enchantments:
+        - PROTECTION_FALL:1
+        hidden: true
+      protection_fall_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 115.77
+        enchantments:
+        - PROTECTION_FALL:2
+        hidden: true
+      protection_fall_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 173.65
+        enchantments:
+        - PROTECTION_FALL:3
+        hidden: true
+      protection_fall_lvl5:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 434.12
+        enchantments:
+        - PROTECTION_FALL:5
+        hidden: true
+      protection_fall_lvl6:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 781.41
+        enchantments:
+        - PROTECTION_FALL:6
+        hidden: true
+      fire_aspect_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 42.0
+        enchantments:
+        - FIRE_ASPECT:1
+        hidden: true
+      fire_aspect_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 189.0
+        enchantments:
+        - FIRE_ASPECT:3
+        hidden: true
+      protection_fire_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 57.88
+        enchantments:
+        - PROTECTION_FIRE:1
+        hidden: true
+      protection_fire_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 115.77
+        enchantments:
+        - PROTECTION_FIRE:2
+        hidden: true
+      protection_fire_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 173.65
+        enchantments:
+        - PROTECTION_FIRE:3
+        hidden: true
+      loot_bonus_blocks_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 58.8
+        enchantments:
+        - LOOT_BONUS_BLOCKS:1
+        hidden: true
+      loot_bonus_blocks_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 117.6
+        enchantments:
+        - LOOT_BONUS_BLOCKS:2
+        hidden: true
+      loot_bonus_blocks_lvl4:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 352.8
+        enchantments:
+        - LOOT_BONUS_BLOCKS:4
+        hidden: true
+      loot_bonus_blocks_lvl5:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 661.5
+        enchantments:
+        - LOOT_BONUS_BLOCKS:5
+        hidden: true
+      loot_bonus_blocks_lvl6:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 1190.7
+        enchantments:
+        - LOOT_BONUS_BLOCKS:6
+        hidden: true
+      frost_walker_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 42.0
+        enchantments:
+        - FROST_WALKER:1
+        hidden: true
+      impaling_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 155.59
+        enchantments:
+        - IMPALING:1
+        hidden: true
+      impaling_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 311.17
+        enchantments:
+        - IMPALING:2
+        hidden: true
+      impaling_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 466.76
+        enchantments:
+        - IMPALING:3
+        hidden: true
+      impaling_lvl4:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 622.34
+        enchantments:
+        - IMPALING:4
+        hidden: true
+      knockback_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 26.25
+        enchantments:
+        - KNOCKBACK:1
+        hidden: true
+      loot_bonus_mobs_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 58.8
+        enchantments:
+        - LOOT_BONUS_MOBS:1
+        hidden: true
+      loot_bonus_mobs_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 117.6
+        enchantments:
+        - LOOT_BONUS_MOBS:2
+        hidden: true
+      loot_bonus_mobs_lvl4:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 352.8
+        enchantments:
+        - LOOT_BONUS_MOBS:4
+        hidden: true
+      loot_bonus_mobs_lvl5:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 661.5
+        enchantments:
+        - LOOT_BONUS_MOBS:5
+        hidden: true
+      loyalty_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 36.75
+        enchantments:
+        - LOYALTY:1
+        hidden: true
+      loyalty_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 73.5
+        enchantments:
+        - LOYALTY:2
+        hidden: true
+      luck_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 58.8
+        enchantments:
+        - LUCK:1
+        hidden: true
+      luck_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 117.6
+        enchantments:
+        - LUCK:2
+        hidden: true
+      lure_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 58.8
+        enchantments:
+        - LURE:1
+        hidden: true
+      lure_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 117.6
+        enchantments:
+        - LURE:2
+        hidden: true
+      piercing_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 28.94
+        enchantments:
+        - PIERCING:1
+        hidden: true
+      piercing_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 57.88
+        enchantments:
+        - PIERCING:2
+        hidden: true
+      piercing_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 86.83
+        enchantments:
+        - PIERCING:3
+        hidden: true
+      arrow_damage_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 48.62
+        enchantments:
+        - ARROW_DAMAGE:1
+        hidden: true
+      arrow_damage_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 97.24
+        enchantments:
+        - ARROW_DAMAGE:2
+        hidden: true
+      arrow_damage_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 145.87
+        enchantments:
+        - ARROW_DAMAGE:3
+        hidden: true
+      arrow_damage_lvl4:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 194.49
+        enchantments:
+        - ARROW_DAMAGE:4
+        hidden: true
+      arrow_damage_lvl6:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 437.6
+        enchantments:
+        - ARROW_DAMAGE:6
+        hidden: true
+      protection_projectile_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 57.88
+        enchantments:
+        - PROTECTION_PROJECTILE:1
+        hidden: true
+      protection_projectile_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 115.77
+        enchantments:
+        - PROTECTION_PROJECTILE:2
+        hidden: true
+      protection_projectile_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 173.65
+        enchantments:
+        - PROTECTION_PROJECTILE:3
+        hidden: true
+      protection_environmental_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 28.94
+        enchantments:
+        - PROTECTION_ENVIRONMENTAL:1
+        hidden: true
+      protection_environmental_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 57.88
+        enchantments:
+        - PROTECTION_ENVIRONMENTAL:2
+        hidden: true
+      protection_environmental_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 86.83
+        enchantments:
+        - PROTECTION_ENVIRONMENTAL:3
+        hidden: true
+      protection_environmental_lvl5:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 217.07
+        enchantments:
+        - PROTECTION_ENVIRONMENTAL:5
+        hidden: true
+      protection_environmental_lvl6:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 390.72
+        enchantments:
+        - PROTECTION_ENVIRONMENTAL:6
+        hidden: true
+      protection_environmental_lvl7:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 683.77
+        enchantments:
+        - PROTECTION_ENVIRONMENTAL:7
+        hidden: true
+      arrow_knockback_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 42.0
+        enchantments:
+        - ARROW_KNOCKBACK:1
+        hidden: true
+      quick_charge_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 36.75
+        enchantments:
+        - QUICK_CHARGE:1
+        hidden: true
+      quick_charge_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 73.5
+        enchantments:
+        - QUICK_CHARGE:2
+        hidden: true
+      oxygen_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 58.8
+        enchantments:
+        - OXYGEN:1
+        hidden: true
+      oxygen_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 117.6
+        enchantments:
+        - OXYGEN:2
+        hidden: true
+      riptide_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 58.8
+        enchantments:
+        - RIPTIDE:1
+        hidden: true
+      riptide_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 117.6
+        enchantments:
+        - RIPTIDE:2
+        hidden: true
+      damage_all_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 48.62
+        enchantments:
+        - DAMAGE_ALL:1
+        hidden: true
+      damage_all_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 97.24
+        enchantments:
+        - DAMAGE_ALL:2
+        hidden: true
+      damage_all_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 145.87
+        enchantments:
+        - DAMAGE_ALL:3
+        hidden: true
+      damage_all_lvl4:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 194.49
+        enchantments:
+        - DAMAGE_ALL:4
+        hidden: true
+      damage_all_lvl6:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 437.6
+        enchantments:
+        - DAMAGE_ALL:6
+        hidden: true
+      damage_all_lvl7:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 765.8
+        enchantments:
+        - DAMAGE_ALL:7
+        hidden: true
+      damage_all_lvl8:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 1312.79
+        enchantments:
+        - DAMAGE_ALL:8
+        hidden: true
+      damage_undead_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 97.24
+        enchantments:
+        - DAMAGE_UNDEAD:1
+        hidden: true
+      damage_undead_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 194.48
+        enchantments:
+        - DAMAGE_UNDEAD:2
+        hidden: true
+      damage_undead_lvl3:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 291.73
+        enchantments:
+        - DAMAGE_UNDEAD:3
+        hidden: true
+      damage_undead_lvl4:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 388.97
+        enchantments:
+        - DAMAGE_UNDEAD:4
+        hidden: true
+      soul_speed_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 91.88
+        enchantments:
+        - SOUL_SPEED:1
+        hidden: true
+      soul_speed_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 183.75
+        enchantments:
+        - SOUL_SPEED:2
+        hidden: true
+      sweeping_edge_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 58.8
+        enchantments:
+        - SWEEPING_EDGE:1
+        hidden: true
+      sweeping_edge_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 117.6
+        enchantments:
+        - SWEEPING_EDGE:2
+        hidden: true
+      sweeping_edge_lvl4:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 352.8
+        enchantments:
+        - SWEEPING_EDGE:4
+        hidden: true
+      swift_sneak_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 22.97
+        enchantments:
+        - SWIFT_SNEAK:1
+        hidden: true
+      swift_sneak_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 45.94
+        enchantments:
+        - SWIFT_SNEAK:2
+        hidden: true
+      thorns_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 73.5
+        enchantments:
+        - THORNS:1
+        hidden: true
+      thorns_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 147.0
+        enchantments:
+        - THORNS:2
+        hidden: true
+      durability_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 36.75
+        enchantments:
+        - DURABILITY:1
+        hidden: true
+      durability_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 73.5
+        enchantments:
+        - DURABILITY:2
+        hidden: true
+      durability_lvl4:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 220.5
+        enchantments:
+        - DURABILITY:4
+        hidden: true
+      durability_lvl5:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 413.44
+        enchantments:
+        - DURABILITY:5
+        hidden: true
+      durability_lvl6:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 744.19
+        enchantments:
+        - DURABILITY:6
+        hidden: true
+      wind_burst_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 2021.25
+        enchantments:
+        - WIND_BURST:1
+        hidden: true
+      wind_burst_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 4042.5
+        enchantments:
+        - WIND_BURST:2
+        hidden: true
+      lunge_lvl1:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 1483.33
+        enchantments:
+        - LUNGE:1
+        hidden: true
+      lunge_lvl2:
+        material: ENCHANTED_BOOK
+        buy: -1
+        sell: 2966.67
+        enchantments:
+        - LUNGE:2
+        hidden: true
