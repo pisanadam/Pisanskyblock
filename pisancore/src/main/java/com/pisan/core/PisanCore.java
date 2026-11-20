@@ -19,6 +19,7 @@ public final class PisanCore extends JavaPlugin {
     private FriendManager friends;
     private LobbyManager lobby;
     private EventManager events;
+    private SellManager sell;
 
     @Override
     public void onEnable() {
@@ -97,6 +98,12 @@ public final class PisanCore extends JavaPlugin {
         getCommand("event").setTabCompleter(events);
         Bukkit.getScheduler().runTaskLater(this, events::start, 40L);
 
+        sell = new SellManager(this);
+        Bukkit.getPluginManager().registerEvents(sell, this);
+        getCommand("sat").setExecutor(sell);
+        getCommand("sat").setTabCompleter(sell);
+        Bukkit.getScheduler().runTaskLater(this, sell::load, 60L);
+
         EcoCommands eco = new EcoCommands(this, store);
         for (String c : new String[]{"bal", "pay", "baltop", "eco", "pisancore"}) {
             getCommand(c).setExecutor(eco);
@@ -129,6 +136,7 @@ public final class PisanCore extends JavaPlugin {
         generator.reload();
         crates.reloadCrates();
         minions.loadConfig();
+        if (sell != null) sell.load();
     }
 
     public String msg(String path) {

@@ -19,7 +19,7 @@ Ada koruma alanı: 500x500 (protection-range 250).
 |---|---|
 | `/is` | Ada menüsü (ilk girişte ada otomatik açılır) |
 | `/shop` (`/magaza`) | Sistem market |
-| `/sell` (`/sat`) | Satış penceresi: eşyaları koy, kapatınca satılır |
+| `/sat` (`/sell`) | Satış penceresi (büyülü eşya/kitaplar dahil). `/sat el`: elindekini sat, `/sat fiyat`: değerine bak |
 | `/sellall <inventory\|hand\|eşya>` (`/hepsinisat`) | Toplu satış |
 | `/market <eşya>` | O eşyanın satın alma ekranını direkt açar (ör. `/market elmas`, `/market hopper`, `/market efficiency`) |
 | `/ah` | Oyuncu pazarı (`/ah sell <fiyat>` elindekini satışa koyar) |

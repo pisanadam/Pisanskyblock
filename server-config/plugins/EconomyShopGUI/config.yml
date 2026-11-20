@@ -1339,8 +1339,6 @@ sellall-commands:
 # Set different aliases for the sellgui command, defaults to /sellgui if empty
 sellgui-commands:
 - 'sellgui'
-- 'sell'
-- 'sat'
 
 
 #-------------------------------------------DisableBackButton-------------------------------------------

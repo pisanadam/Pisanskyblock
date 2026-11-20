@@ -52,6 +52,9 @@ commands:
   event:
     aliases: [etkinlik, events]
     description: Sunucu etkinlikleri
+  sat:
+    aliases: [sell, satis]
+    description: Satis penceresi (/sat el, /sat fiyat)
   pisancore:
     description: Admin komutu (reload)
     permission: pisancore.admin
