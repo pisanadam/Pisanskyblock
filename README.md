@@ -56,3 +56,10 @@ Kurulum: `cd pisangames && mvn package`, jar'ı `plugins/` içine at. `plugins/P
 - `pisanhub/velocity/` – Velocity 4.3 plugini (pisanpvp proxy'si, legacy + modern dahil). Ayar: `plugins/pisanhub/config.properties`. Derleme JDK 25 ister: `JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64 mvn package`.
 
 Lobi kapalıysa komut Exaroton API ile başlatır, açılınca oyuncuyu gönderir. 1.20.5 altı istemcilere adres verilir. Komut takma adları: `/anamenu`, `/pisangames`.
+
+## Pisan Strike (`pisanstrike/`, Exaroton `Pisanstrike`, Paper 1.20.1)
+CS2 tarzı oyun plugini. Kaynak, sunucudaki jar'dan geri çevrildi (Vineflower) ve buradan derleniyor: `cd pisanstrike && mvn package` → `target/PisanStrike.jar`.
+- 7 harita: Çöl, Liman, Köy, **Fabrika**, **Kar Üssü**, **Tapınak** (bomba) + Düello Arenası. Yeni haritalar `pisanstrike/tools/maps.py` ile tasarlanıp doğrulanır (bağlantı, CT/T mesafeleri) ve Java kodu üretilir; önizleme `pisanstrike/tools/maps-preview.png`.
+- Bıçak her vuruşta tek atar.
+- 3D silahlar: `strike-pack/` kaynak paketi (`python3 strike-pack/build_pack.py`), sunucuda `resource-pack` olarak tanımlı.
+- Sunucuda ViaVersion + ViaBackwards var (1.20.1 ve sonrası tam, eski sürümler ViaBackwards ile).
