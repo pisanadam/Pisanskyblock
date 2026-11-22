@@ -19,7 +19,7 @@ servers:
     id: TAZFy4OoHMvlc9Uz
     name: "&c&lPisan PvP"
     icon: DIAMOND_SWORD
-    slot: 11
+    slot: 10
     lore:
       - "&7Duello, FFA ve turnuva"
       - "&71.8 + guncel surumler"
@@ -27,7 +27,7 @@ servers:
     id: xSQJtk6ig0N4wEgt
     name: "&a&lPisan Skyblock"
     icon: GRASS_BLOCK
-    slot: 13
+    slot: 12
     lore:
       - "&7Minyonlar, kasalar, pazar"
       - "&7Ada kur, zengin ol!"
@@ -35,7 +35,15 @@ servers:
     id: 1KthvwLvVD1EMKRZ
     name: "&b&lPisan SF League"
     icon: SLIME_BALL
-    slot: 15
+    slot: 14
     lore:
       - "&7Futbol & Basketbol"
       - "&7Duello, sira, turnuva"
+  strike:
+    id: K1WJHdOKTONcaA7J
+    name: "&6&lPisan Strike"
+    icon: CROSSBOW
+    slot: 16
+    lore:
+      - "&7CS2 tarzi maclar"
+      - "&7Parti kur, harita sec, 1v1, olum maci"

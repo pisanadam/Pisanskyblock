@@ -44,14 +44,16 @@ public final class LobbyBuilder {
         }
 
         // Istasyonlar (kuzey tarafi, spawn kuzeye bakar)
-        Material[] pads = {Material.RED_CONCRETE, Material.LIME_CONCRETE, Material.LIGHT_BLUE_CONCRETE};
-        Material[] glass = {Material.RED_STAINED_GLASS, Material.LIME_STAINED_GLASS, Material.LIGHT_BLUE_STAINED_GLASS};
+        Material[] pads = {Material.RED_CONCRETE, Material.LIME_CONCRETE, Material.LIGHT_BLUE_CONCRETE, Material.ORANGE_CONCRETE};
+        Material[] glass = {Material.RED_STAINED_GLASS, Material.LIME_STAINED_GLASS, Material.LIGHT_BLUE_STAINED_GLASS, Material.ORANGE_STAINED_GLASS};
         List<GameServer> list = plugin.servers().stream().toList();
         int n = list.size();
         for (int i = 0; i < n; i++) {
             GameServer gs = list.get(i);
-            int sx = cx + (i - (n - 1) / 2) * 7 + ((n % 2 == 0) ? 3 : 0);
-            int sz = cz - 8;
+            // 3 istasyon: 7 blok aralik; 4+: 6 blok aralik ve platform kenarina tasmamasi icin biraz daha yakin
+            double spacing = n <= 3 ? 7 : 6;
+            int sx = cx + (int) Math.round((i - (n - 1) / 2.0) * spacing);
+            int sz = cz - (n <= 3 ? 8 : 5);
             Material pad = pads[i % pads.length], gl = glass[i % glass.length];
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) set(w, sx + dx, cy, sz + dz, pad);
             set(w, sx, cy, sz, Material.GLOWSTONE);

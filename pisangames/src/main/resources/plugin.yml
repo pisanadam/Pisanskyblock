@@ -3,7 +3,7 @@ version: ${project.version}
 main: com.pisan.games.PisanGames
 api-version: '1.21'
 author: Pisan
-description: Pisan Games lobisi - PisanPvP, Pisanskyblock ve Pisan SF League'e gecis
+description: Pisan Games lobisi - PisanPvP, Pisanskyblock, Pisan SF League ve Pisan Strike'a gecis
 softdepend: [ViaVersion]
 commands:
   oyun:
@@ -17,6 +17,9 @@ commands:
   sfleague:
     aliases: [sf, lig, futbol]
     description: Pisan SF League'e gec
+  strike:
+    aliases: [cs, pisanstrike]
+    description: Pisan Strike'a gec
   lobi:
     aliases: [spawn, hub]
     description: Lobi spawnina isinlan

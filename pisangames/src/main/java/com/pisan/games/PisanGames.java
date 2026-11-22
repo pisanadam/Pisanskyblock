@@ -97,7 +97,7 @@ public final class PisanGames extends JavaPlugin {
         if (!(sender instanceof Player p)) { sender.sendMessage("Sadece oyuncular."); return true; }
         switch (name) {
             case "lobi" -> p.teleport(spawn());
-            case "pvp", "skyblock", "sfleague" -> go(p, name);
+            case "pvp", "skyblock", "sfleague", "strike" -> go(p, name);
             case "oyun" -> {
                 if (args.length > 0) go(p, args[0].toLowerCase(Locale.ROOT));
                 else GameMenu.open(this, p);

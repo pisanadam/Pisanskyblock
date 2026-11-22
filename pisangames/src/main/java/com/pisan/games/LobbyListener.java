@@ -39,7 +39,7 @@ public final class LobbyListener implements Listener {
         ItemStack it = GameMenu.item(Material.COMPASS,
                 Component.text("Oyun Sec", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false)
                         .append(Component.text(" (Sag Tik)", NamedTextColor.GRAY).decoration(TextDecoration.BOLD, false)),
-                List.of(Component.text("PvP, Skyblock, SF League", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
+                List.of(Component.text("PvP, Skyblock, SF League, Strike", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
         it.editMeta(m -> m.getPersistentDataContainer().set(compassKey, org.bukkit.persistence.PersistentDataType.BYTE, (byte) 1));
         return it;
     }
