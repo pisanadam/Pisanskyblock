@@ -1,5 +1,5 @@
 name: PisanStrike
-version: 1.1.0
+version: 1.2.0
 main: tr.pisan.strike.StrikePlugin
 api-version: '1.20'
 description: CS2 tarzi oyun - silahlar, bomba, market, parti, harita secimi, 1v1 ve olum maci. Mod gerektirmez.
@@ -10,6 +10,10 @@ commands:
     usage: /parti [kur|davet <oyuncu>|kabul <lider>|ayril|baslat]
   market:
     description: Silah marketi
+  dereceli:
+    description: Dereceli 1v1-5v5 kuyrugu, ELO ve siralama
+    usage: /dereceli [1v1|2v2|3v3|4v4|5v5|ayril|sira]
+    aliases: [ranked, rank]
   ayril:
     description: Mactan cik, lobiye don
     aliases: [lobi, leave]

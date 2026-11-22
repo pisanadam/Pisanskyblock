@@ -50,6 +50,8 @@ final class Game {
    static final int CT = 1;
    final StrikePlugin plugin;
    final StrikePlugin.Party party;
+   /** parti liderinin sectigi (ya da dereceli eslestirmenin kurdugu) takimlar */
+   java.util.Map<java.util.UUID, Integer> preset;
    final Game.Mode mode;
    final StrikeMap map;
    final int slot;
@@ -113,7 +115,7 @@ final class Game {
       for (int var3 = 0; var3 < var2.size(); var3++) {
          Player var4 = (Player)var2.get(var3);
          Game.PS var5 = new Game.PS(var4);
-         var5.group = this.mode == Game.Mode.DM ? -1 : var3 % 2;
+         var5.group = this.mode == Game.Mode.DM ? -1 : (this.preset != null && this.preset.containsKey(var4.getUniqueId()) ? this.preset.get(var4.getUniqueId()) : var3 % 2);
          if (this.unlimited) {
             var5.money = 16000;
          }
@@ -135,6 +137,26 @@ final class Game {
       });
    }
 
+   /** Mac sonu kazanan grup: bir takim tamamen ayrildiysa digeri, yoksa skoru yuksek olan; esitse -1. */
+   int winnerGroup() {
+      int[] left = new int[2];
+      for (Game.PS ps : this.players.values()) {
+         if (ps.group >= 0 && org.bukkit.Bukkit.getPlayer(ps.id) != null) {
+            left[ps.group]++;
+         }
+      }
+
+      if (left[0] == 0 && left[1] > 0) {
+         return 1;
+      } else if (left[1] == 0 && left[0] > 0) {
+         return 0;
+      } else if (this.score[0] != this.score[1]) {
+         return this.score[0] > this.score[1] ? 0 : 1;
+      } else {
+         return -1;
+      }
+   }
+
    void end(String var1) {
       if (this.phase != Game.Phase.OVER) {
          this.phase = Game.Phase.OVER;
@@ -149,6 +171,10 @@ final class Game {
          if (this.bomb != null) {
             this.bomb.getBlock().setType(Material.AIR);
             this.bomb = null;
+         }
+
+         if (this.party.ranked > 0) {
+            this.plugin.ranked.finish(this, this.winnerGroup());
          }
 
          ArrayList<Game.PS> var6 = new ArrayList<>(this.players.values());

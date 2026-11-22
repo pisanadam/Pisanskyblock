@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,6 +84,8 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
    final Map<UUID, Game> gameOf = new HashMap<>();
    final List<Game> games = new ArrayList<>();
    final Set<Integer> slots = new HashSet<>();
+   Ranked ranked;
+   static final int MAX_PARTY = 10;
    final Set<UUID> webVerified = new HashSet<>();
    static final List<Material> ITEMS = new ArrayList<>();
 
@@ -114,7 +117,11 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
             var2x.tick();
          }
       }, 1L, 1L);
-      Bukkit.getScheduler().runTaskTimer(this, this::lobbyHud, 20L, 40L);
+      this.ranked = new Ranked(this);
+      Bukkit.getScheduler().runTaskTimer(this, () -> {
+         this.lobbyHud();
+         this.ranked.hud();
+      }, 20L, 40L);
       this.startWebChannel();
 
       for (Player var2 : Bukkit.getOnlinePlayers()) {
@@ -175,6 +182,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
             0,
             this.ui(Material.NETHER_STAR, "party", "§6§lParti Menüsü §7(sağ tık)", "§7Parti kur, arkadaşlarını davet et,", "§7harita ve mod seçip maçı başlat.")
          );
+      var1.getInventory().setItem(2, this.ui(Material.DIAMOND, "ranked", "§b§lDereceli §7(sağ tık)", "§71v1 · 2v2 · 3v3 · 4v4 · 5v5", "§7Kuyruğa gir, ELO kazan, rütbe atla."));
       var1.getInventory().setItem(4, this.ui(Material.BOOK, "help", "§e§lNasıl oynanır §7(sağ tık)"));
       var1.getInventory().setItem(8, this.ui(Material.DIAMOND_SWORD, "quick", "§b§lHızlı Düello §7(sağ tık)", "§7Partideki biriyle hemen 1v1."));
    }
@@ -286,6 +294,10 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       return var1 != null && var1.hasItemMeta() ? (String)var1.getItemMeta().getPersistentDataContainer().get(this.KEY_UI, PersistentDataType.STRING) : null;
    }
 
+   static boolean bothTeams(Map<UUID, Integer> m) {
+      return m.containsValue(0) && m.containsValue(1);
+   }
+
    void startGame(Player var1, StrikePlugin.Party var2) {
       if (var2.game != null) {
          var1.sendMessage("§cPartin zaten oyunda.");
@@ -304,6 +316,8 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
             var1.sendMessage("§cMaç için en az 2 kişi gerekli. §7Parti Menüsü → Davet et.");
          } else if (var10 == Game.Mode.DUEL && var3.size() != 2) {
             var1.sendMessage("§cDüello için partide tam 2 kişi olmalı (şu an " + var3.size() + ").");
+         } else if (var10 != Game.Mode.DM && !bothTeams(this.resolveTeams(var2, var3))) {
+            var1.sendMessage("§cHer takımda en az 1 kişi olmalı. §7Parti Menüsü → Takımlar.");
          } else {
             StrikeMap var11 = StrikeMap.ALL.get(var2.map);
             if (var11 == null) {
@@ -322,6 +336,15 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
 
             this.slots.add(var12);
             Game var7 = new Game(this, var2, var10, var11, var12);
+            var7.preset = var10 == Game.Mode.DM ? null : this.resolveTeams(var2, var3);
+            for (Player var9x : var3) {
+               this.ranked.remove(var9x.getUniqueId());
+            }
+
+            if (var2.ranked > 0) {
+               var2.team.clear();
+               var2.team.putAll(var7.preset);
+            }
             var2.game = var7;
             this.games.add(var7);
 
@@ -360,6 +383,8 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       StrikePlugin.Party var3 = this.create(var1);
       if (!var3.leader.equals(var1.getUniqueId())) {
          var1.sendMessage("§cSadece parti lideri davet edebilir.");
+      } else if (var3.members.size() >= MAX_PARTY) {
+         var1.sendMessage("§cParti dolu (en fazla " + MAX_PARTY + " kişi).");
       } else if (!var2.equals(var1) && !var3.members.contains(var2.getUniqueId())) {
          this.invites.computeIfAbsent(var2.getUniqueId(), var0 -> new LinkedHashSet<>()).add(var1.getUniqueId());
          var1.sendMessage("§a" + var2.getName() + " davet edildi.");
@@ -378,7 +403,10 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       Set var3 = this.invites.get(var1.getUniqueId());
       if (var3 != null && var3.contains(var2.getUniqueId())) {
          StrikePlugin.Party var4 = this.partyOf.get(var2.getUniqueId());
-         if (var4 != null && var4.leader.equals(var2.getUniqueId())) {
+         if (var4 != null && var4.leader.equals(var2.getUniqueId()) && var4.members.size() >= MAX_PARTY) {
+            var1.sendMessage("§cParti dolu (en fazla " + MAX_PARTY + " kişi).");
+         } else if (var4 != null && var4.leader.equals(var2.getUniqueId())) {
+            this.ranked.remove(var1.getUniqueId());
             this.leaveParty(var1, false);
             var3.remove(var2.getUniqueId());
             var4.members.add(var1.getUniqueId());
@@ -397,6 +425,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       StrikePlugin.Party var3 = this.partyOf.remove(var1.getUniqueId());
       if (var3 != null) {
          var3.members.remove(var1.getUniqueId());
+         var3.team.remove(var1.getUniqueId());
          if (var2) {
             var1.sendMessage("§7Partiden ayrıldın.");
          }
@@ -428,9 +457,140 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       return var5.inv;
    }
 
+   static String teamTag(StrikePlugin.Party p, UUID id) {
+      Integer t = p.team.get(id);
+      return t == null ? "§7[Oto] " : (t == 0 ? "§6[Takım 1] " : "§b[Takım 2] ");
+   }
+
+   /** Partideki cevrimici uyeleri takimlara dagitir. Secilmeyenler kalabaligi az olan takima gider. */
+   Map<UUID, Integer> resolveTeams(StrikePlugin.Party p, List<Player> players) {
+      Map<UUID, Integer> out = new HashMap<>();
+      int[] cnt = new int[2];
+      List<Player> auto = new ArrayList<>();
+      for (Player pl : players) {
+         Integer t = p.team.get(pl.getUniqueId());
+         if (t == null) {
+            auto.add(pl);
+         } else {
+            out.put(pl.getUniqueId(), t);
+            cnt[t]++;
+         }
+      }
+
+      Collections.shuffle(auto);
+      for (Player pl : auto) {
+         int t = cnt[0] <= cnt[1] ? 0 : 1;
+         out.put(pl.getUniqueId(), t);
+         cnt[t]++;
+      }
+
+      return out;
+   }
+
+   List<Player> onlineMembers(StrikePlugin.Party p) {
+      List<Player> l = new ArrayList<>();
+      for (UUID id : p.members) {
+         Player pl = Bukkit.getPlayer(id);
+         if (pl != null && !this.gameOf.containsKey(id)) {
+            l.add(pl);
+         }
+      }
+
+      return l;
+   }
+
+   String lineup(StrikePlugin.Party p) {
+      if (p.mode == Game.Mode.DM) {
+         return p.members.size() + " kişi herkes herkese";
+      }
+
+      Map<UUID, Integer> r = this.resolveTeams(p, this.onlineMembers(p));
+      int a = 0;
+      int b = 0;
+      for (int t : r.values()) {
+         if (t == 0) {
+            a++;
+         } else {
+            b++;
+         }
+      }
+
+      return a + "v" + b;
+   }
+
+   void openTeams(Player pl) {
+      StrikePlugin.Party p = this.partyOf.get(pl.getUniqueId());
+      if (p == null) {
+         this.openParty(pl);
+         return;
+      }
+
+      boolean lead = p.leader.equals(pl.getUniqueId());
+      Inventory inv = this.menu("teams", 0, 36, "§6Takımlar · " + this.lineup(p));
+      int i = 0;
+      for (UUID id : p.members) {
+         Player m = Bukkit.getPlayer(id);
+         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+         SkullMeta sm = (SkullMeta) head.getItemMeta();
+         sm.setOwningPlayer(Bukkit.getOfflinePlayer(id));
+         sm.setDisplayName(teamTag(p, id) + "§f" + (m != null ? m.getName() : "?"));
+         sm.setLore(lead ? List.of("§7Sol tık: Takım 1 ↔ Takım 2", "§7Sağ tık: otomatik") : List.of("§8Sadece lider değiştirebilir"));
+         sm.getPersistentDataContainer().set(this.KEY_UI, PersistentDataType.STRING, "t:cycle:" + id);
+         head.setItemMeta(sm);
+         inv.setItem(i++, head);
+      }
+
+      inv.setItem(27, this.ui(Material.ORANGE_BANNER, "t:legend", "§6Takım 1 §7ilk yarıda §6Terörist", "§bTakım 2 §7ilk yarıda §bAnti-Terörist", "§7Devre arasında taraflar değişir.", "§7[Oto] seçilmeyenler kalabalığı az olan takıma gider."));
+      inv.setItem(29, this.ui(Material.HOPPER, "t:auto", "§e§lHerkes otomatik", "§7Bütün seçimleri sıfırla."));
+      inv.setItem(30, this.ui(Material.COMPASS, "t:balance", "§e§lRastgele ve dengeli dağıt", "§7Herkesi iki takıma eşit böler."));
+      inv.setItem(31, this.ui(Material.ENDER_PEARL, "t:swap", "§e§lTakımları değiştir", "§7Takım 1 ile Takım 2'yi yer değiştir."));
+      inv.setItem(35, this.ui(Material.ARROW, "t:back", "§f§lGeri", "§7Parti menüsüne dön."));
+      pl.openInventory(inv);
+   }
+
+   void teamClick(Player pl, StrikePlugin.Party p, String key, boolean right) {
+      if (key.equals("t:back")) {
+         this.openParty(pl);
+         return;
+      }
+
+      if (!p.leader.equals(pl.getUniqueId())) {
+         this.openTeams(pl);
+         return;
+      }
+
+      switch (key) {
+         case "t:auto":
+            p.team.clear();
+            break;
+         case "t:balance":
+            p.team.clear();
+            p.team.putAll(this.resolveTeams(p, this.onlineMembers(p)));
+            break;
+         case "t:swap":
+            p.team.replaceAll((k, v) -> 1 - v);
+            break;
+         default:
+            if (key.startsWith("t:cycle:")) {
+               UUID id = UUID.fromString(key.substring(8));
+               if (p.members.contains(id)) {
+                  if (right) {
+                     p.team.remove(id);
+                  } else {
+                     Integer t = p.team.get(id);
+                     p.team.put(id, t == null ? 0 : 1 - t);
+                  }
+               }
+            }
+      }
+
+      this.partySay(p, "§eTakımlar: §f" + this.lineup(p));
+      this.openTeams(pl);
+   }
+
    void openParty(Player var1) {
       StrikePlugin.Party var2 = this.partyOf.get(var1.getUniqueId());
-      Inventory var3 = this.menu("party", 0, 36, "§6Parti");
+      Inventory var3 = this.menu("party", 0, 45, "§6Parti");
       if (var2 == null) {
          var3.setItem(11, this.ui(Material.LIME_CONCRETE, "p:create", "§a§lParti Kur", "§7Kendi partini kur, sonra arkadaşlarını davet et."));
          Set<UUID> var11 = this.invites.getOrDefault(var1.getUniqueId(), Set.of());
@@ -458,7 +618,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
          int var5 = 0;
 
          for (UUID var7 : var2.members) {
-            if (var5 >= 9) {
+            if (var5 >= MAX_PARTY) {
                break;
             }
 
@@ -466,7 +626,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
             ItemStack var9 = new ItemStack(Material.PLAYER_HEAD);
             SkullMeta var10 = (SkullMeta)var9.getItemMeta();
             var10.setOwningPlayer(Bukkit.getOfflinePlayer(var7));
-            var10.setDisplayName((var7.equals(var2.leader) ? "§6★ " : "§f") + (var8 != null ? var8.getName() : "?"));
+            var10.setDisplayName(teamTag(var2, var7) + (var7.equals(var2.leader) ? "§6★ " : "§f") + (var8 != null ? var8.getName() : "?"));
             if (var4 && !var7.equals(var2.leader)) {
                var10.setLore(List.of("§cTıkla: partiden çıkar"));
             }
@@ -478,7 +638,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
 
          String var13 = var4 ? "§eTıkla: değiştir" : "§8Sadece lider değiştirebilir";
          var3.setItem(
-            19,
+            27,
             this.ui(
                Material.IRON_SWORD,
                "p:mode",
@@ -491,13 +651,13 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
          );
          StrikeMap var15 = StrikeMap.ALL.get(var2.map);
          var3.setItem(
-            20,
+            28,
             this.ui(
                Material.FILLED_MAP, "p:map", "§f§lHarita: §e" + var15.name, "§7" + var15.desc, var4 ? "§eTıkla: harita seç" : "§8Sadece lider değiştirebilir"
             )
          );
          var3.setItem(
-            21,
+            29,
             this.ui(
                var2.unlimited ? Material.GOLD_BLOCK : Material.GOLD_NUGGET,
                "p:money",
@@ -507,7 +667,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
             )
          );
          var3.setItem(
-            22,
+            30,
             this.ui(
                var2.anyItem ? Material.ENDER_CHEST : Material.CHEST,
                "p:any",
@@ -517,16 +677,27 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
                var13
             )
          );
-         var3.setItem(23, this.ui(Material.CLOCK, "p:rounds", "§f§lKazanmak için tur: §e" + var2.toWin, "§75, 9 ya da 13 (CS2: 13).", var13));
-         var3.setItem(24, this.ui(Material.WRITABLE_BOOK, "p:invite", "§a§lDavet et", "§7Lobideki oyuncuları partiye çağır."));
+         var3.setItem(31, this.ui(Material.CLOCK, "p:rounds", "§f§lKazanmak için tur: §e" + var2.toWin, "§75, 9 ya da 13 (CS2: 13).", var13));
+         var3.setItem(
+            32,
+            this.ui(
+               Material.RED_BANNER,
+               "p:teams",
+               "§f§lTakımlar: §e" + this.lineup(var2),
+               "§7Kimin hangi takımda oynayacağını seç.",
+               "§7Örn. 1v5 için 1 kişiyi Takım 1'e, 5 kişiyi Takım 2'ye koy.",
+               var4 ? "§eTıkla: takımları düzenle" : "§8Sadece lider değiştirebilir"
+            )
+         );
+         var3.setItem(33, this.ui(Material.WRITABLE_BOOK, "p:invite", "§a§lDavet et", "§7Lobideki oyuncuları partiye çağır.", "§7En fazla " + MAX_PARTY + " kişi."));
          if (var4) {
             var3.setItem(
-               25,
-               this.ui(Material.LIME_CONCRETE, "p:start", "§a§lMAÇI BAŞLAT", "§7" + var2.members.size() + " kişi · " + modeName(var2.mode) + " · " + var15.name)
+               34,
+               this.ui(Material.LIME_CONCRETE, "p:start", "§a§lMAÇI BAŞLAT", "§7" + this.lineup(var2) + " · " + modeName(var2.mode) + " · " + var15.name)
             );
          }
 
-         var3.setItem(31, this.ui(Material.BARRIER, "p:leave", "§c§lPartiden ayrıl"));
+         var3.setItem(40, this.ui(Material.BARRIER, "p:leave", "§c§lPartiden ayrıl"));
          var1.openInventory(var3);
       }
    }
@@ -671,6 +842,24 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
                         var2.getInventory().addItem(new ItemStack[]{var17});
                         var2.playSound(var2.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.6F, 1.3F);
                      }
+                  } else if (var6 != null && var4.kind.equals("teams")) {
+                     if (var7 != null) {
+                        this.teamClick(var2, var7, var6, var1.isRightClick());
+                     } else {
+                        var2.closeInventory();
+                     }
+                  } else if (var6 != null && var4.kind.equals("ranked")) {
+                     if (var6.equals("r:leave")) {
+                        this.ranked.leave(var2, true);
+                        this.ranked.open(var2);
+                     } else if (var6.startsWith("r:") && var6.length() == 3 && Character.isDigit(var6.charAt(2))) {
+                        this.ranked.join(var2, var6.charAt(2) - '0');
+                        if (!this.gameOf.containsKey(var2.getUniqueId())) {
+                           this.ranked.open(var2);
+                        } else {
+                           var2.closeInventory();
+                        }
+                     }
                   } else if (var6 != null) {
                      if (var6.startsWith("buy:")) {
                         if (var15 != null) {
@@ -750,6 +939,9 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
 
                               this.openParty(var2);
                               break;
+                           case "p:teams":
+                              this.openTeams(var2);
+                              break;
                            case "p:invite":
                               if (var7 == null) {
                                  this.create(var2);
@@ -773,6 +965,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
                                  if (!var11.equals(var7.leader)) {
                                     Player var12 = Bukkit.getPlayer(var11);
                                     var7.members.remove(var11);
+                                    var7.team.remove(var11);
                                     this.partyOf.remove(var11);
                                     if (var12 != null) {
                                        var12.sendMessage("§cPartiden çıkarıldın.");
@@ -854,6 +1047,9 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
                switch (var4) {
                   case "party":
                      this.openParty(var2);
+                     break;
+                  case "ranked":
+                     this.ranked.open(var2);
                      break;
                   case "help":
                      this.help(var2);
@@ -1125,6 +1321,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       }
 
       this.leaveParty(var2, false);
+      this.ranked.remove(var2.getUniqueId());
       this.invites.remove(var2.getUniqueId());
       this.webVerified.remove(var2.getUniqueId());
    }
@@ -1136,7 +1333,9 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       var1.sendMessage("§e3. §fMaçta: §eSağ tık§f ateş (basılı tut: otomatik), §eSol tık§f dürbün, §eF§f ya da §eQ§f şarjör.");
       var1.sendMessage("§e4. §fMarket: zümrüt (9. slot) ya da §e/market§f — sadece doğduğun yerde ve tur başında.");
       var1.sendMessage("§e5. §fTeröristler bombayı A ya da B'ye kurar (sağ tık basılı), Anti-Teröristler bombaya sağ tıkı basılı tutarak imha eder.");
-      var1.sendMessage("§7Komutlar: /parti, /market, /ayril");
+      var1.sendMessage("§e6. §fParti Menüsü → Takımlar: kimin hangi takımda olacağını seç (1v1'den 5v5'e, 1v5 gibi).");
+      var1.sendMessage("§e7. §fDereceli (elmas): 1v1-5v5 kuyruğu, ELO ve rütbe.");
+      var1.sendMessage("§7Komutlar: /parti, /market, /dereceli, /ayril");
    }
 
    public boolean onCommand(CommandSender var1, Command var2, String var3, String[] var4) {
@@ -1145,6 +1344,24 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
          switch (var6) {
             case "market":
                this.openShop(var5);
+               break;
+            case "dereceli":
+               if (var4.length == 0) {
+                  this.ranked.open(var5);
+               } else if (var4[0].matches("[1-5](v[1-5])?")) {
+                  this.ranked.join(var5, var4[0].charAt(0) - '0');
+               } else if (var4[0].equalsIgnoreCase("ayril") || var4[0].equalsIgnoreCase("cik")) {
+                  this.ranked.leave(var5, true);
+               } else if (var4[0].equalsIgnoreCase("sira") || var4[0].equalsIgnoreCase("top")) {
+                  int i = 1;
+                  var5.sendMessage("§6§lDereceli sıralama");
+                  for (Ranked.Stats st : this.ranked.top(10)) {
+                     var5.sendMessage("§7" + i++ + ". §f" + st.name + " §7— §f" + st.elo + " " + Ranked.tier(st.elo) + " §7(" + st.wins + "G " + st.losses + "M)");
+                  }
+               } else {
+                  Ranked.Stats st = this.ranked.of(var5.getUniqueId(), var5.getName());
+                  var5.sendMessage("§7/dereceli [1v1..5v5|ayril|sira] · Senin ELO: §f" + st.elo + " " + Ranked.tier(st.elo));
+               }
                break;
             case "ayril":
                if (this.gameOf.containsKey(var5.getUniqueId())) {
@@ -1264,6 +1481,10 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       boolean anyItem = false;
       int toWin = 9;
       Game game;
+      /** lider tarafindan secilen takimlar: 0 = Takim 1 (T baslar), 1 = Takim 2 (CT baslar); olmayan = otomatik */
+      final Map<UUID, Integer> team = new HashMap<>();
+      /** 0 = normal parti mac, 1..5 = dereceli NvN */
+      int ranked = 0;
 
       Party(UUID var1) {
          this.leader = var1;

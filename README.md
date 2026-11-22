@@ -61,5 +61,7 @@ Lobi kapalıysa komut Exaroton API ile başlatır, açılınca oyuncuyu gönderi
 CS2 tarzı oyun plugini. Kaynak, sunucudaki jar'dan geri çevrildi (Vineflower) ve buradan derleniyor: `cd pisanstrike && mvn package` → `target/PisanStrike.jar`.
 - 7 harita: Çöl, Liman, Köy, **Fabrika**, **Kar Üssü**, **Tapınak** (bomba) + Düello Arenası. Yeni haritalar `pisanstrike/tools/maps.py` ile tasarlanıp doğrulanır (bağlantı, CT/T mesafeleri) ve Java kodu üretilir; önizleme `pisanstrike/tools/maps-preview.png`.
 - Bıçak her vuruşta tek atar.
+- Parti en fazla 10 kişi. Parti Menüsü → **Takımlar**: lider herkesi Takım 1 / Takım 2'ye koyar (1v1'den 5v5'e, 1v5 gibi dengesiz düzenler de olur), "rastgele ve dengeli dağıt", "takımları değiştir".
+- **Dereceli** (lobide elmas, `/dereceli [1v1..5v5|ayril|sira]`): tek kişilik kuyruk, dolunca ELO'ya göre dengeli takımlarla otomatik maç (1v1 düello arenası 5 tur, diğerleri rastgele bomba haritası 9 tur). ELO K=32, rütbeler Demir → Bronz → Gümüş → Altın → Platin → Elmas → Usta → Efsane. Kayıt: `plugins/PisanStrike/ranked.yml`.
 - 3D silahlar: `strike-pack/` kaynak paketi (`python3 strike-pack/build_pack.py`), sunucuda `resource-pack` olarak tanımlı.
 - Sunucuda ViaVersion + ViaBackwards var (1.20.1 ve sonrası tam, eski sürümler ViaBackwards ile).
