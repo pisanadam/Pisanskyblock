@@ -322,24 +322,37 @@ def dual():
 GUNS[1004] = ("dualies", dual())
 
 # ---------------------------------------------------------------- gosterim (display) ayarlari
+# Elde gorunum ayarlari; Minecraft 1.20.1 istemcisinde gozle ayarlandi (bkz. strike-pack/README).
+DISPLAY_OVERRIDE = json.loads(os.environ.get("PISAN_DISPLAY", "null"))
+
 def display(kind, span):
     s = min(1.0, 16 / max(span, 1))
+    if DISPLAY_OVERRIDE and kind in DISPLAY_OVERRIDE:
+        out = {}
+        for k, v in DISPLAY_OVERRIDE[kind].items():
+            v = dict(v); v["scale"] = [round(v.pop("k", 1.0) * s, 4)] * 3; out[k] = v
+        return out
     if kind == "gun":
+        # Minecraft 1.20.1 istemcisinde (Xvfb) ekran goruntusuyle dogrulandi: namlu ileri, sarjor asagi.
+        # kisa silahlar (tabanca, bicak, SMG) birinci sahista ekrani kaplamasin
+        small = 0.55 if span < 12 else (0.7 if span < 20 else 1.0)
+        fp = {"translation": [-0.5 + (1 - small) * 2, 4 + (1 - small) * 2, -0.5], "scale": [round(0.8 * s * small, 4)] * 3}
+        tp = {"translation": [0, 3, 1], "scale": [1.0 * s] * 3}
         return {
-            "firstperson_righthand": {"rotation": [0, -90, 0], "translation": [0, 2.5, 1.5], "scale": [0.9 * s * 1.3] * 3},
-            "firstperson_lefthand": {"rotation": [0, 90, 0], "translation": [0, 2.5, 1.5], "scale": [0.9 * s * 1.3] * 3},
-            "thirdperson_righthand": {"rotation": [0, -90, 90], "translation": [0, 3, 1], "scale": [0.85 * s * 1.2] * 3},
-            "thirdperson_lefthand": {"rotation": [0, 90, -90], "translation": [0, 3, 1], "scale": [0.85 * s * 1.2] * 3},
+            "firstperson_righthand": {"rotation": [0, 96, 0], **fp},
+            "firstperson_lefthand": {"rotation": [0, -96, 0], **fp},
+            "thirdperson_righthand": {"rotation": [180, 0, -90], **tp},
+            "thirdperson_lefthand": {"rotation": [180, 0, 90], **tp},
             "gui": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [s] * 3},
             "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5 * s] * 3},
             "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [s] * 3},
             "head": {"rotation": [0, 0, 0], "translation": [0, 10, 0], "scale": [s] * 3},
         }
     return {
-        "firstperson_righthand": {"rotation": [0, -90, 0], "translation": [0, 3, 1], "scale": [0.9 * s] * 3},
-        "firstperson_lefthand": {"rotation": [0, 90, 0], "translation": [0, 3, 1], "scale": [0.9 * s] * 3},
-        "thirdperson_righthand": {"rotation": [0, -90, 90], "translation": [0, 3, 1], "scale": [0.8 * s] * 3},
-        "thirdperson_lefthand": {"rotation": [0, 90, -90], "translation": [0, 3, 1], "scale": [0.8 * s] * 3},
+        "firstperson_righthand": {"rotation": [0, -90, 0], "translation": [1.5, 4.5, 0], "scale": [0.38 * s] * 3},
+        "firstperson_lefthand": {"rotation": [0, 90, 0], "translation": [1.5, 4.5, 0], "scale": [0.38 * s] * 3},
+        "thirdperson_righthand": {"rotation": [0, 0, 0], "translation": [0, 2, 1], "scale": [0.6 * s] * 3},
+        "thirdperson_lefthand": {"rotation": [0, 0, 0], "translation": [0, 2, 1], "scale": [0.6 * s] * 3},
         "gui": {"rotation": [20, -30, 0], "translation": [0, 0, 0], "scale": [s] * 3},
         "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5 * s] * 3},
         "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [s] * 3},
@@ -385,7 +398,7 @@ def build(out):
         cases = []
         for cmd in sorted(entries):
             name, m = entries[cmd]
-            kind = "gun" if item == "crossbow" else "thing"
+            kind = "gun" if item in ("crossbow", "iron_sword", "lightning_rod") else "thing"
             files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(model_json(m, kind), separators=(",", ":")).encode()
             base["overrides"].append({"predicate": {"custom_model_data": cmd}, "model": f"{NS}:item/{name}"})
             cases.append((cmd, f"{NS}:item/{name}"))
