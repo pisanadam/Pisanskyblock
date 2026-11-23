@@ -52,6 +52,10 @@ final class Game {
    final StrikePlugin.Party party;
    /** parti liderinin sectigi (ya da dereceli eslestirmenin kurdugu) takimlar */
    java.util.Map<java.util.UUID, Integer> preset;
+   /** bu macin botlari (bos = botsuz mac) */
+   final List<Bot> bots = new ArrayList<>();
+   /** T botlarinin bu tur saldiracagi bolge: 0 = A, 1 = B */
+   int botSite;
    final Game.Mode mode;
    final StrikeMap map;
    final int slot;
@@ -127,6 +131,10 @@ final class Game {
          this.plugin.resetPlayer(var4);
       }
 
+      if (this.party.bots) {
+         this.addBots();
+      }
+
       int var6 = 2000 + this.slot * 300;
       short var7 = 2000;
       World var8 = this.plugin.world;
@@ -135,6 +143,192 @@ final class Game {
          this.built = var1x;
          this.newRound(true);
       });
+   }
+
+   // ------------------------------------------------------------------ botlar
+   void addBots() {
+      int size = Math.max(1, Math.min(5, this.party.botSize));
+      int diff = this.party.botDiff;
+      int[] cnt = new int[2];
+      for (Game.PS ps : this.players.values()) {
+         if (ps.group >= 0) {
+            cnt[ps.group]++;
+         }
+      }
+
+      List<Integer> want = new ArrayList<>();
+      if (this.mode == Game.Mode.DM) {
+         for (int i = this.players.size(); i < size * 2; i++) {
+            want.add(-1);
+         }
+      } else {
+         int per = this.mode == Game.Mode.DUEL ? 1 : size;
+         for (int grp = 0; grp < 2; grp++) {
+            for (int i = cnt[grp]; i < per; i++) {
+               want.add(grp);
+            }
+         }
+      }
+
+      List<String> names = Bot.names(want.size(), this.rnd);
+      for (int i = 0; i < want.size(); i++) {
+         Bot b = new Bot(this, names.get(i), want.get(i), diff);
+         if (this.unlimited) {
+            b.ps.money = 16000;
+         }
+
+         this.bots.add(b);
+         this.players.put(b.ps.id, b.ps);
+      }
+   }
+
+   Bot botOf(org.bukkit.entity.Entity e) {
+      for (Bot b : this.bots) {
+         if (b.ent != null && b.ent.equals(e)) {
+            return b;
+         }
+      }
+
+      return null;
+   }
+
+   /** Zirh hesabi (damage() ile ayni kurallar). */
+   double afterArmor(Game.PS v, double dmg, boolean head, double pen) {
+      double out = dmg;
+      boolean armored = head ? v.helmet && v.armor > 0.0 : v.armor > 0.0;
+      if (armored && pen < 1.0) {
+         out = dmg * pen;
+         double absorbed = (dmg - out) * 0.5;
+         if (absorbed > v.armor) {
+            out += (absorbed - v.armor) * 2.0;
+            absorbed = v.armor;
+         }
+
+         v.armor = Math.max(0.0, v.armor - absorbed);
+         if (v.armor <= 0.0) {
+            v.helmet = false;
+         }
+      }
+
+      return out;
+   }
+
+   /** Botlu maclarda ortak hasar yolu: kurban ya da saldirgan bot olabilir. */
+   void hitBy(Game.PS v, Game.PS a, Player ap, Weapon w, double dmg, boolean head, double pen) {
+      if (v == null || !v.alive || this.phase == Game.Phase.FREEZE || this.phase == Game.Phase.OVER) {
+         return;
+      }
+
+      if (a != null && a != v && !this.enemies(a, v)) {
+         return;
+      }
+
+      if (a != null && a != v && System.currentTimeMillis() < v.spawnSafeUntil) {
+         return;
+      }
+
+      v.hp -= this.afterArmor(v, dmg, head, pen);
+      if (ap != null) {
+         ap.playSound(ap.getLocation(), head ? Sound.BLOCK_NOTE_BLOCK_BELL : Sound.ENTITY_ARROW_HIT_PLAYER, 0.7F, head ? 1.8F : 1.2F);
+      }
+
+      if (v.bot != null) {
+         Bot b = v.bot;
+         if (b.ent != null) {
+            b.ent.playHurtAnimation(0.0F);
+            b.ent.getWorld().playSound(b.ent.getLocation(), head ? Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR : Sound.ENTITY_PLAYER_HURT, head ? 0.6F : 1.0F, head ? 1.8F : 1.0F);
+         }
+
+         if (v.hp <= 0.0) {
+            this.botKill(v, a, ap, w, head);
+         }
+      } else {
+         Player p = Bukkit.getPlayer(v.id);
+         if (p == null) {
+            return;
+         }
+
+         p.playHurtAnimation(0.0F);
+         p.getWorld().playSound(p.getLocation(), head ? Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR : Sound.ENTITY_PLAYER_HURT, head ? 0.6F : 1.0F, head ? 1.8F : 1.0F);
+         if (v.hp <= 0.0) {
+            this.kill(p, v, ap, a, w, head);
+         } else {
+            p.setHealth(Math.max(0.5, Math.min(20.0, v.hp / 5.0)));
+         }
+      }
+   }
+
+   void botKill(Game.PS v, Game.PS a, Player ap, Weapon w, boolean head) {
+      v.alive = false;
+      v.hp = 0.0;
+      v.deaths++;
+      String wn = w == null ? "dünya" : w.name;
+      if (a != null && a != v) {
+         a.kills++;
+         a.roundKills++;
+         if (head) {
+            a.hs++;
+         }
+
+         int reward = w == null ? 300 : w.reward;
+         if (!this.unlimited) {
+            a.money = Math.min(16000, a.money + reward);
+         }
+
+         if (ap != null) {
+            ap.playSound(ap.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.4F);
+            if (!this.unlimited) {
+               ap.sendMessage("§a+$" + reward + " §7(" + wn + " ile öldürme)");
+            }
+         }
+      }
+
+      this.say((a != null && a != v ? this.color(a) + a.name + " " : "") + "§7[" + wn + "]" + (head ? " §c⊕" : "") + " " + this.color(v) + v.name);
+      v.bot.die();
+      if (this.mode == Game.Mode.DM) {
+         v.respawnAt = System.currentTimeMillis() + 2500L;
+         if (a != null && a.kills >= this.toWin) {
+            this.end(a.name + " " + a.kills + " öldürmeyle kazandı");
+         }
+      } else if (this.mode == Game.Mode.DUEL && a != null && a != v) {
+         this.roundOver(a.group, a.name + " kazandı");
+      } else {
+         this.checkRoundEnd();
+      }
+   }
+
+   /** Bot bombayi kurdu. */
+   void plantAt(Game.PS ps, org.bukkit.block.Block where) {
+      where.setType(Material.TNT, false);
+      this.bomb = where.getLocation();
+      this.planter = ps.id;
+      this.plantedThisRound = true;
+      if (!this.unlimited) {
+         ps.money = Math.min(16000, ps.money + 300);
+      }
+
+      this.phase = Game.Phase.PLANTED;
+      this.ticks = 800;
+      String site = this.siteAt(where.getLocation()) == this.map.siteA ? "A" : "B";
+      for (Player p : this.online()) {
+         p.sendTitle("§c§lBOMBA KURULDU", "§7" + site + " bölgesi · 40 saniye", 5, 40, 10);
+      }
+
+      this.sound(Sound.ENTITY_TNT_PRIMED, 1.0F);
+   }
+
+   /** Bot bombayi imha etti. */
+   void defuseDone(Game.PS ps) {
+      if (this.bomb != null) {
+         this.bomb.getBlock().setType(Material.AIR);
+         this.bomb = null;
+      }
+
+      if (!this.unlimited) {
+         ps.money = Math.min(16000, ps.money + 300);
+      }
+
+      this.roundOver(ps.group, "bomba imha edildi");
    }
 
    /** Mac sonu kazanan grup: bir takim tamamen ayrildiysa digeri, yoksa skoru yuksek olan; esitse -1. */
@@ -209,6 +403,11 @@ final class Game {
             StrikeMap.keepLoaded(this.plugin, this.built.world, this.built.ox, this.built.oz, this.map.w, this.map.h, false);
          }
 
+         for (Bot var12 : this.bots) {
+            var12.despawn();
+         }
+
+         this.bots.clear();
          this.players.clear();
          this.plugin.gameOver(this);
       }
@@ -224,7 +423,7 @@ final class Game {
 
          this.say("§7" + var1.getName() + " maçtan ayrıldı.");
          if (this.phase != Game.Phase.OVER) {
-            if (this.players.isEmpty()) {
+            if (this.players.isEmpty() || this.online().isEmpty()) {
                this.end("herkes ayrıldı");
             } else {
                if (this.mode != Game.Mode.DM) {
@@ -283,7 +482,15 @@ final class Game {
 
          if (this.mode == Game.Mode.DM) {
             for (Game.PS var20 : this.players.values()) {
-               this.spawnDM(var20, true);
+               if (var20.bot == null) {
+                  this.spawnDM(var20, true);
+               }
+            }
+
+            List<Location> var23 = this.built.anywhere();
+            int var24 = 0;
+            for (Bot var25 : this.bots) {
+               var25.roundStart(var23.get(var24++ % var23.size()), false);
             }
 
             this.phase = Game.Phase.LIVE;
@@ -339,9 +546,28 @@ final class Game {
                }
             }
 
-            if (this.mode == Game.Mode.COMP && !var6.isEmpty() && this.map.siteA != null) {
-               Game.PS var21 = (Game.PS)var6.get(this.rnd.nextInt(var6.size()));
-               Player var22 = Bukkit.getPlayer(var21.id);
+            List<Bot> var26 = new ArrayList<>();
+            int var27 = 0;
+            for (Bot var28 : this.bots) {
+               boolean var29 = this.sideOf(var28.ps) == 1;
+               Location var30 = var29 ? (Location)var19.get(var5++ % var19.size()) : (Location)var16.get(var4++ % var16.size());
+               boolean var31 = var28.ps.alive && !var1;
+               var28.siteChoice = var27++;
+               var28.roundStart(var30, var31);
+               if (!var29) {
+                  var26.add(var28);
+               }
+            }
+
+            this.botSite = this.rnd.nextInt(2);
+            if (this.mode == Game.Mode.COMP && (!var6.isEmpty() || !var26.isEmpty()) && this.map.siteA != null) {
+               int var32 = this.rnd.nextInt(var6.size() + var26.size());
+               if (var32 >= var6.size()) {
+                  var26.get(var32 - var6.size()).hasBomb = true;
+               }
+
+               Game.PS var21 = var32 < var6.size() ? (Game.PS)var6.get(var32) : null;
+               Player var22 = var21 == null ? null : Bukkit.getPlayer(var21.id);
                if (var22 != null) {
                   var22.getInventory().setItem(4, this.plugin.item(Weapon.get("c4"), null));
                   var22.sendMessage("§6§lBomba sende! §7Bir bölgeye (A ya da B) git ve sağ tıkı basılı tutarak kur.");
@@ -397,6 +623,10 @@ final class Game {
             if (var5 != null) {
                this.tickPlayer(var5, var4, var1);
             }
+         }
+
+         for (Bot var7 : new ArrayList<>(this.bots)) {
+            var7.tick(var1);
          }
 
          this.tickGrenades();
@@ -840,7 +1070,7 @@ final class Game {
 
       while (var12 < 3 && var8 > 0.0) {
          RayTraceResult var13 = var6.rayTrace(
-            var7, var5, var8, FluidCollisionMode.NEVER, true, 0.05, var2x -> var2x instanceof Player && !var2x.equals(var1) && this.alive((Player)var2x)
+            var7, var5, var8, FluidCollisionMode.NEVER, true, 0.05, var2x -> var2x instanceof Player && !var2x.equals(var1) && this.alive((Player)var2x) || Bot.isBot(var2x) && this.botOf(var2x) != null && this.botOf(var2x).ps.alive
          );
          Vector var14 = var13 == null ? var7.toVector().add(var5.clone().multiply(var8)) : var13.getHitPosition();
          if (Boolean.getBoolean("strike.debug")) {
@@ -866,6 +1096,18 @@ final class Game {
 
          this.tracer(var6, var7.toVector(), var14);
          if (var13 == null) {
+            return;
+         }
+
+         Bot var28 = var13.getHitEntity() == null ? null : this.botOf(var13.getHitEntity());
+         if (var28 != null) {
+            double var29 = var4.toVector().distance(var14);
+            double var31 = var14.getY() - var28.ent.getLocation().getY();
+            boolean var33 = var31 >= 1.42;
+            double var34 = var33 ? (double)(var3.kind == Weapon.Kind.SHOTGUN ? 2 : 4) : (var31 < 0.7 ? 0.75 : (var31 < 1.0 ? 1.25 : 1.0));
+            double var36 = var3.damage * Math.pow(var3.rangeMod, var29 * 40.0 / 500.0) * var10 * var34;
+            var6.spawnParticle(Particle.BLOCK_CRACK, var14.toLocation(var6), 8, 0.05, 0.05, 0.05, Material.REDSTONE_BLOCK.createBlockData());
+            this.hitBy(var28.ps, var2, var1, var3, var36, var33, var3.armorPen);
             return;
          }
 
@@ -1243,7 +1485,19 @@ final class Game {
                }
             }
 
-            this.roundOver(this.groupOfSide(0), "bomba patladı");
+            for (Bot var10 : new ArrayList<>(this.bots)) {
+               if (var10.on()) {
+                  double var11 = var10.ent.getLocation().distance(var3);
+                  if (var11 < 18.0) {
+                     var10.ps.armor = 0.0;
+                     this.hitBy(var10.ps, null, null, Weapon.get("c4"), 500.0 * Math.max(0.0, 1.0 - var11 / 18.0), false, 1.0);
+                  }
+               }
+            }
+
+            if (this.phase == Game.Phase.PLANTED) {
+               this.roundOver(this.groupOfSide(0), "bomba patladı");
+            }
          }
       }
    }
@@ -1282,6 +1536,19 @@ final class Game {
       }
    }
 
+   /** Bicakla bota vurus: tek atar (bekleme suresi oyuncuyla ayni). */
+   void knifeBot(Player var1, Bot var2) {
+      Game.PS var3 = this.players.get(var1.getUniqueId());
+      if (var3 != null && var3.alive && var2.ps.alive && this.canShoot()) {
+         long var4 = System.currentTimeMillis();
+         if (var4 >= var3.knifeReady) {
+            var3.knifeReady = var4 + 400L;
+            var1.getWorld().playSound(var1.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0F, 1.4F);
+            this.hitBy(var2.ps, var3, var1, Weapon.get("knife"), 1000.0, false, 0.85);
+         }
+      }
+   }
+
    void stab(Player var1) {
       RayTraceResult var2 = var1.getWorld()
          .rayTrace(
@@ -1291,10 +1558,12 @@ final class Game {
             FluidCollisionMode.NEVER,
             true,
             0.2,
-            var2x -> var2x instanceof Player && !var2x.equals(var1) && this.alive((Player)var2x)
+            var2x -> var2x instanceof Player && !var2x.equals(var1) && this.alive((Player)var2x) || Bot.isBot(var2x) && this.botOf(var2x) != null && this.botOf(var2x).ps.alive
          );
       if (var2 != null && var2.getHitEntity() instanceof Player var3) {
          this.knife(var1, var3, true);
+      } else if (var2 != null && var2.getHitEntity() != null && this.botOf(var2.getHitEntity()) != null) {
+         this.knifeBot(var1, this.botOf(var2.getHitEntity()));
       }
    }
 
@@ -1313,12 +1582,16 @@ final class Game {
                   FluidCollisionMode.NEVER,
                   true,
                   0.25,
-                  var2x -> var2x instanceof Player && !var2x.equals(var1) && this.alive((Player)var2x)
+                  var2x -> var2x instanceof Player && !var2x.equals(var1) && this.alive((Player)var2x) || Bot.isBot(var2x) && this.botOf(var2x) != null && this.botOf(var2x).ps.alive
                );
             Vector var5 = var4 == null ? var1.getEyeLocation().toVector().add(var1.getEyeLocation().getDirection().multiply(4.5)) : var4.getHitPosition();
             this.tracer(var1.getWorld(), var1.getEyeLocation().toVector(), var5);
             if (var4 != null && var4.getHitEntity() instanceof Player var6) {
                this.damage(var6, this.players.get(var6.getUniqueId()), var1, Weapon.get("zeus"), 500.0, false, 1.0);
+            }
+            Bot var7 = var4 == null || var4.getHitEntity() == null ? null : this.botOf(var4.getHitEntity());
+            if (var7 != null) {
+               this.hitBy(var7.ps, var2, var1, Weapon.get("zeus"), 500.0, false, 1.0);
             }
          }
       }
@@ -1474,6 +1747,15 @@ final class Game {
    }
 
    void explodeHE(Location var1, UUID var2) {
+      for (Bot var12 : new ArrayList<>(this.bots)) {
+         if (var12.on()) {
+            double var13 = var12.ent.getLocation().add(0.0, 1.0, 0.0).distance(var1);
+            if (var13 <= 8.0 && this.sees(var1, var12.ent.getEyeLocation())) {
+               this.hitBy(var12.ps, this.players.get(var2), Bukkit.getPlayer(var2), Weapon.get("he"), 98.0 * (1.0 - var13 / 8.0), false, 0.5);
+            }
+         }
+      }
+
       var1.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, var1, 3, 0.6, 0.4, 0.6, 0.0);
       var1.getWorld().playSound(var1, Sound.ENTITY_GENERIC_EXPLODE, 3.0F, 1.1F);
       Player var3 = Bukkit.getPlayer(var2);
@@ -1918,9 +2200,17 @@ final class Game {
       int defuseTicks;
       Location lastLoc;
 
+      /** bot ise kendisi, gercek oyuncuysa null */
+      Bot bot;
+
       PS(Player var1) {
          this.id = var1.getUniqueId();
          this.name = var1.getName();
+      }
+
+      PS(UUID var1, String var2) {
+         this.id = var1;
+         this.name = var2;
       }
    }
 

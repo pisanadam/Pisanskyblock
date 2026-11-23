@@ -312,11 +312,15 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
          }
 
          Game.Mode var10 = var2.mode;
-         if (var3.size() < 2) {
-            var1.sendMessage("§cMaç için en az 2 kişi gerekli. §7Parti Menüsü → Davet et.");
-         } else if (var10 == Game.Mode.DUEL && var3.size() != 2) {
+         if (var2.bots && var10 == Game.Mode.DUEL && var3.size() > 2) {
+            var1.sendMessage("§cBotlu düello en fazla 2 kişiyle oynanır.");
+         } else if (var2.bots && var3.isEmpty()) {
+            var1.sendMessage("§cMaç için çevrimiçi oyuncu yok.");
+         } else if (!var2.bots && var3.size() < 2) {
+            var1.sendMessage("§cMaç için en az 2 kişi gerekli. §7Parti Menüsü → Davet et. §7(ya da §e/botstrike §7ile botlarla oyna)");
+         } else if (!var2.bots && var10 == Game.Mode.DUEL && var3.size() != 2) {
             var1.sendMessage("§cDüello için partide tam 2 kişi olmalı (şu an " + var3.size() + ").");
-         } else if (var10 != Game.Mode.DM && !bothTeams(this.resolveTeams(var2, var3))) {
+         } else if (!var2.bots && var10 != Game.Mode.DM && !bothTeams(this.resolveTeams(var2, var3))) {
             var1.sendMessage("§cHer takımda en az 1 kişi olmalı. §7Parti Menüsü → Takımlar.");
          } else {
             StrikeMap var11 = StrikeMap.ALL.get(var2.map);
@@ -337,6 +341,19 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
             this.slots.add(var12);
             Game var7 = new Game(this, var2, var10, var11, var12);
             var7.preset = var10 == Game.Mode.DM ? null : this.resolveTeams(var2, var3);
+            if (var2.bots && var7.preset != null) {
+               int var13x = var10 == Game.Mode.DUEL ? 1 : var2.botSize;
+               int[] var14x = new int[2];
+               for (Map.Entry<UUID, Integer> var15x : var7.preset.entrySet()) {
+                  int var16x = var15x.getValue();
+                  if (var14x[var16x] >= var13x && var14x[1 - var16x] < var13x) {
+                     var16x = 1 - var16x;
+                     var15x.setValue(var16x);
+                  }
+
+                  var14x[var16x]++;
+               }
+            }
             for (Player var9x : var3) {
                this.ranked.remove(var9x.getUniqueId());
             }
@@ -588,6 +605,86 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       this.openTeams(pl);
    }
 
+   void openBots(Player pl) {
+      StrikePlugin.Party p = this.create(pl);
+      p.botMenu = true;
+      boolean lead = p.leader.equals(pl.getUniqueId());
+      String who = lead ? "§eTıkla: değiştir" : "§8Sadece lider değiştirebilir";
+      Inventory inv = this.menu("bots", 0, 27, "§6Botlarla Oyna");
+      StrikeMap map = StrikeMap.ALL.get(p.map);
+      int humans = this.onlineMembers(p).size();
+      String size = p.mode == Game.Mode.DUEL ? "1v1" : p.botSize + "v" + p.botSize;
+      inv.setItem(10, this.ui(Material.IRON_SWORD, "b:mode", "§f§lMod: §e" + modeName(p.mode), "§7Rekabetçi: bomba kur/imha et.", "§7Düello: 1v1 tur tur.", "§7Ölüm maçı: herkes herkese.", who));
+      inv.setItem(11, this.ui(Material.FILLED_MAP, "b:map", "§f§lHarita: §e" + map.name, "§7" + map.desc, who));
+      inv.setItem(12, this.ui(Material.PLAYER_HEAD, "b:size", "§f§lKadro: §e" + size,
+         "§71v1, 2v2, 3v3, 4v4, 5v5.", "§7Partideki oyuncular yerleşir,", "§7boş yerler botlarla dolar (şu an " + humans + " oyuncu).", "§7Takımını Parti Menüsü → Takımlar'dan seç.", who));
+      inv.setItem(13, this.ui(p.botDiff == 0 ? Material.WOODEN_SWORD : (p.botDiff == 1 ? Material.STONE_SWORD : (p.botDiff == 2 ? Material.DIAMOND_SWORD : Material.NETHERITE_SWORD)),
+         "b:diff", "§f§lZorluk: " + Bot.DIFF_COLORS[p.botDiff] + Bot.DIFF_NAMES[p.botDiff],
+         "§aKolay§7: geç tepki, az isabet", "§eOrta§7: dengeli", "§6Zor§7: hızlı, isabetli", "§cUzman§7: çok hızlı, kafadan vurur, AWP alır", who));
+      inv.setItem(14, this.ui(Material.CLOCK, "b:rounds", "§f§lKazanmak için tur: §e" + p.toWin, "§75, 9 ya da 13.", who));
+      inv.setItem(15, this.ui(p.unlimited ? Material.GOLD_BLOCK : Material.GOLD_NUGGET, "b:money", "§f§lSınırsız para: " + (p.unlimited ? "§aAÇIK" : "§cKAPALI"), who));
+      if (lead) {
+         inv.setItem(16, this.ui(Material.LIME_CONCRETE, "b:start", "§a§lBOTLARLA BAŞLAT", "§7" + size + " · " + modeName(p.mode) + " · " + map.name + " · " + Bot.DIFF_COLORS[p.botDiff] + Bot.DIFF_NAMES[p.botDiff]));
+      }
+
+      inv.setItem(22, this.ui(Material.NETHER_STAR, "b:party", "§6§lParti Menüsü", "§7Arkadaş davet et, takımları ayarla."));
+      pl.openInventory(inv);
+   }
+
+   void botsClick(Player pl, String key) {
+      StrikePlugin.Party p = this.create(pl);
+      boolean lead = p.leader.equals(pl.getUniqueId());
+      switch (key) {
+         case "b:party":
+            p.botMenu = false;
+            this.openParty(pl);
+            return;
+         case "b:map":
+            if (lead) {
+               this.openMaps(pl);
+               return;
+            }
+            break;
+         case "b:start":
+            pl.closeInventory();
+            if (lead) {
+               p.bots = true;
+               try {
+                  this.startGame(pl, p);
+               } finally {
+                  p.bots = false;
+               }
+            }
+            return;
+         default:
+            if (lead) {
+               switch (key) {
+                  case "b:mode":
+                     p.mode = Game.Mode.values()[(p.mode.ordinal() + 1) % 3];
+                     if (p.mode == Game.Mode.DUEL) {
+                        p.map = "arena";
+                     } else if ("arena".equals(p.map) && p.mode == Game.Mode.COMP) {
+                        p.map = "col";
+                     }
+                     break;
+                  case "b:size":
+                     p.botSize = p.botSize % 5 + 1;
+                     break;
+                  case "b:diff":
+                     p.botDiff = (p.botDiff + 1) % 4;
+                     break;
+                  case "b:rounds":
+                     p.toWin = p.toWin == 5 ? 9 : (p.toWin == 9 ? 13 : 5);
+                     break;
+                  case "b:money":
+                     p.unlimited = !p.unlimited;
+               }
+            }
+      }
+
+      this.openBots(pl);
+   }
+
    void openParty(Player var1) {
       StrikePlugin.Party var2 = this.partyOf.get(var1.getUniqueId());
       Inventory var3 = this.menu("party", 0, 45, "§6Parti");
@@ -697,6 +794,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
             );
          }
 
+         var3.setItem(35, this.ui(Material.ZOMBIE_HEAD, "p:bots", "§b§lBotlarla oyna", "§7Boş yerleri botlarla doldur,", "§7zorluğu seç (Kolay, Orta, Zor, Uzman).", "§7Kısayol: §e/botstrike"));
          var3.setItem(40, this.ui(Material.BARRIER, "p:leave", "§c§lPartiden ayrıl"));
          var1.openInventory(var3);
       }
@@ -842,6 +940,8 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
                         var2.getInventory().addItem(new ItemStack[]{var17});
                         var2.playSound(var2.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.6F, 1.3F);
                      }
+                  } else if (var6 != null && var4.kind.equals("bots")) {
+                     this.botsClick(var2, var6);
                   } else if (var6 != null && var4.kind.equals("teams")) {
                      if (var7 != null) {
                         this.teamClick(var2, var7, var6, var1.isRightClick());
@@ -874,7 +974,11 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
                            this.partySay(var7, "§eHarita: §f" + StrikeMap.ALL.get(var7.map).name);
                         }
 
-                        this.openParty(var2);
+                        if (var7 != null && var7.botMenu) {
+                           this.openBots(var2);
+                        } else {
+                           this.openParty(var2);
+                        }
                      } else if (var6.startsWith("inv:")) {
                         Player var9 = Bukkit.getPlayer(UUID.fromString(var6.substring(4)));
                         if (var9 != null) {
@@ -941,6 +1045,9 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
                               break;
                            case "p:teams":
                               this.openTeams(var2);
+                              break;
+                           case "p:bots":
+                              this.openBots(var2);
                               break;
                            case "p:invite":
                               if (var7 == null) {
@@ -1046,6 +1153,11 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
             if (var5) {
                switch (var4) {
                   case "party":
+                     StrikePlugin.Party var20x = this.partyOf.get(var2.getUniqueId());
+                     if (var20x != null) {
+                        var20x.botMenu = false;
+                     }
+
                      this.openParty(var2);
                      break;
                   case "ranked":
@@ -1092,6 +1204,27 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       priority = EventPriority.HIGH
    )
    public void hit(EntityDamageByEntityEvent var1) {
+      if (Bot.isBot(var1.getEntity())) {
+         var1.setCancelled(true);
+         if (var1.getDamager() instanceof Player var9) {
+            Game var10 = this.gameOf.get(var9.getUniqueId());
+            Weapon var11 = this.weaponOf(var9.getInventory().getItemInMainHand());
+            Bot var12 = var10 == null ? null : var10.botOf(var1.getEntity());
+            if (var12 != null && var11 != null && var11.kind == Weapon.Kind.KNIFE) {
+               var10.knifeBot(var9, var12);
+            } else if (var12 != null && var11 != null && var11.scope) {
+               var10.toggleScope(var9);
+            }
+         }
+
+         return;
+      }
+
+      if (var1.getDamager() != null && Bot.isBot(var1.getDamager())) {
+         var1.setCancelled(true);
+         return;
+      }
+
       if (var1.getEntity() instanceof Player var2) {
          var1.setCancelled(true);
          if (var1.getDamager() instanceof Player var6) {
@@ -1112,6 +1245,11 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       priority = EventPriority.HIGH
    )
    public void damage(EntityDamageEvent var1) {
+      if (Bot.isBot(var1.getEntity())) {
+         var1.setCancelled(true);
+         return;
+      }
+
       if (var1.getEntity() instanceof Player var2 && !(var1 instanceof EntityDamageByEntityEvent)) {
          var1.setCancelled(true);
          Game var5 = this.gameOf.get(var2.getUniqueId());
@@ -1326,6 +1464,20 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       this.webVerified.remove(var2.getUniqueId());
    }
 
+   @EventHandler
+   public void botTarget(org.bukkit.event.entity.EntityTargetEvent var1) {
+      if (Bot.isBot(var1.getEntity())) {
+         var1.setCancelled(true);
+      }
+   }
+
+   @EventHandler
+   public void botBurn(org.bukkit.event.entity.EntityCombustEvent var1) {
+      if (Bot.isBot(var1.getEntity())) {
+         var1.setCancelled(true);
+      }
+   }
+
    void help(Player var1) {
       var1.sendMessage("§6§lPISAN STRIKE §7— CS2 tarzı oyun");
       var1.sendMessage("§e1. §fParti Menüsü (yıldız) → Parti kur → Davet et.");
@@ -1335,7 +1487,8 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       var1.sendMessage("§e5. §fTeröristler bombayı A ya da B'ye kurar (sağ tık basılı), Anti-Teröristler bombaya sağ tıkı basılı tutarak imha eder.");
       var1.sendMessage("§e6. §fParti Menüsü → Takımlar: kimin hangi takımda olacağını seç (1v1'den 5v5'e, 1v5 gibi).");
       var1.sendMessage("§e7. §fDereceli (elmas): 1v1-5v5 kuyruğu, ELO ve rütbe.");
-      var1.sendMessage("§7Komutlar: /parti, /market, /dereceli, /ayril");
+      var1.sendMessage("§e8. §f/botstrike: seçtiğin modu botlarla oyna, zorluğu seç.");
+      var1.sendMessage("§7Komutlar: /parti, /market, /dereceli, /botstrike, /ayril");
    }
 
    public boolean onCommand(CommandSender var1, Command var2, String var3, String[] var4) {
@@ -1344,6 +1497,14 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
          switch (var6) {
             case "market":
                this.openShop(var5);
+               break;
+            case "botstrike":
+               if (this.gameOf.containsKey(var5.getUniqueId())) {
+                  var5.sendMessage("§cZaten maçtasın.");
+               } else {
+                  this.ranked.remove(var5.getUniqueId());
+                  this.openBots(var5);
+               }
                break;
             case "dereceli":
                if (var4.length == 0) {
@@ -1485,6 +1646,14 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       final Map<UUID, Integer> team = new HashMap<>();
       /** 0 = normal parti mac, 1..5 = dereceli NvN */
       int ranked = 0;
+      /** bot maci: bos yerler botlarla doldurulur */
+      boolean bots = false;
+      /** takim basina kisi (1..5); 2 = 2v2 */
+      int botSize = 5;
+      /** 0 Kolay, 1 Orta, 2 Zor, 3 Uzman */
+      int botDiff = 1;
+      /** harita secince hangi menuye donulecek */
+      boolean botMenu = false;
 
       Party(UUID var1) {
          this.leader = var1;
