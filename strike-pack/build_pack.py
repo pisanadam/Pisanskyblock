@@ -308,6 +308,7 @@ OTHER = {  # materyal -> {cmd: (ad, model)}
     "fire_charge": {1084: ("molotov", grenade(bottle=True))},
     "blaze_powder": {1085: ("incendiary", grenade("red", "metal", tall=True))},
     "tnt_minecart": {1091: ("c4", c4())},
+    "carved_pumpkin": {1099: ("scope_hidden", None)},
 }
 
 def dual():
@@ -358,6 +359,25 @@ def display(kind, span):
         "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [s] * 3},
     }
 
+def scope_overlay_png():
+    """CS2 tarzi durbun: siyah ekran, ortada daire, ince arti cizgileri.
+    Minecraft bu dokuyu (pumpkinblur) tum ekrana gerer; 16:9 ekranda daire gorunsun diye elips cizilir."""
+    from PIL import ImageDraw
+    W = H = 1024
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 255))
+    d = ImageDraw.Draw(img)
+    rx, ry = int(W * 9 / 16 / 2 * 0.98), int(H / 2 * 0.98)
+    cx, cy = W // 2, H // 2
+    d.ellipse([cx - rx, cy - ry, cx + rx, cy + ry], fill=(0, 0, 0, 0))
+    # kenarda hafif golge halkasi
+    for i, a in enumerate((150, 110, 70, 35)):
+        k = 1 - (i + 1) * 0.012
+        d.ellipse([cx - rx, cy - ry, cx + rx, cy + ry], outline=(0, 0, 0, a), width=max(1, int(6 * (4 - i))))
+    # ince arti cizgileri (tum ekran boyunca)
+    d.rectangle([cx - 1, 0, cx, H], fill=(0, 0, 0, 255))
+    d.rectangle([0, cy - 1, W, cy + 1], fill=(0, 0, 0, 255))
+    buf = io.BytesIO(); img.save(buf, "PNG"); return buf.getvalue()
+
 def model_json(m, kind):
     span = m.fit()
     return {"credit": "Pisan Strike", "texture_size": [16, 16],
@@ -385,11 +405,15 @@ VANILLA = {
     "fire_charge": {"parent": "item/generated", "textures": {"layer0": "item/fire_charge"}},
     "blaze_powder": {"parent": "item/generated", "textures": {"layer0": "item/blaze_powder"}},
     "tnt_minecart": {"parent": "item/generated", "textures": {"layer0": "item/tnt_minecart"}},
+    "carved_pumpkin": {"parent": "block/carved_pumpkin"},
 }
 
 def build(out):
     files = {}
     files[f"assets/{NS}/textures/item/palette.png"] = palette_png()
+    files["assets/minecraft/textures/misc/pumpkinblur.png"] = scope_overlay_png()
+    # durbun acikken basa takilan balkabagi baskalarina gorunmesin: bos model
+    files[f"assets/{NS}/models/item/scope_hidden.json"] = json.dumps({"textures": {"particle": f"{NS}:item/palette"}, "elements": []}).encode()
     groups = {"crossbow": {cmd: v for cmd, v in GUNS.items()}}
     groups.update(OTHER)
     for item, entries in groups.items():
@@ -399,7 +423,8 @@ def build(out):
         for cmd in sorted(entries):
             name, m = entries[cmd]
             kind = "gun" if item in ("crossbow", "iron_sword", "lightning_rod") else "thing"
-            files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(model_json(m, kind), separators=(",", ":")).encode()
+            if m is not None:
+                files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(model_json(m, kind), separators=(",", ":")).encode()
             base["overrides"].append({"predicate": {"custom_model_data": cmd}, "model": f"{NS}:item/{name}"})
             cases.append((cmd, f"{NS}:item/{name}"))
         files[f"assets/minecraft/models/item/{item}.json"] = json.dumps(base, indent=1).encode()
