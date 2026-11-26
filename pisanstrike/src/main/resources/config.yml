@@ -1,3 +1,8 @@
 # Pisan Strike
 # Tarayici/telefon oyunculari icin Pisan koprusunun anahtari (Pisan Lig'deki web-relay-key ile ayni).
 web-relay-key: ""
+
+# 3D silah kaynak paketi (plugin her oyuncuya girişte gönderir)
+resource-pack-url: ""
+resource-pack-sha1: ""
+resource-pack-prompt: "§63D silah modelleri için paketi kabul et!"

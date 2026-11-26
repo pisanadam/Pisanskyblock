@@ -184,7 +184,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
          );
       var1.getInventory().setItem(2, this.ui(Material.DIAMOND, "ranked", "§b§lDereceli §7(sağ tık)", "§71v1 · 2v2 · 3v3 · 4v4 · 5v5", "§7Kuyruğa gir, ELO kazan, rütbe atla."));
       var1.getInventory().setItem(4, this.ui(Material.BOOK, "help", "§e§lNasıl oynanır §7(sağ tık)"));
-      var1.getInventory().setItem(8, this.ui(Material.DIAMOND_SWORD, "quick", "§b§lHızlı Düello §7(sağ tık)", "§7Partideki biriyle hemen 1v1."));
+      var1.getInventory().setItem(8, this.ui(Material.DIAMOND_SWORD, "quick", "§b§lHızlı Maç §7(sağ tık)", "§71v1 · 2v2 · 3v3 · 4v4 · 5v5", "§7Dereceliyle aynı kuyruk, ELO değişmez."));
    }
 
    void resetPlayer(Player var1) {
@@ -312,14 +312,10 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
          }
 
          Game.Mode var10 = var2.mode;
-         if (var2.bots && var10 == Game.Mode.DUEL && var3.size() > 2) {
-            var1.sendMessage("§cBotlu düello en fazla 2 kişiyle oynanır.");
-         } else if (var2.bots && var3.isEmpty()) {
+         if (var2.bots && var3.isEmpty()) {
             var1.sendMessage("§cMaç için çevrimiçi oyuncu yok.");
          } else if (!var2.bots && var3.size() < 2) {
             var1.sendMessage("§cMaç için en az 2 kişi gerekli. §7Parti Menüsü → Davet et. §7(ya da §e/botstrike §7ile botlarla oyna)");
-         } else if (!var2.bots && var10 == Game.Mode.DUEL && var3.size() != 2) {
-            var1.sendMessage("§cDüello için partide tam 2 kişi olmalı (şu an " + var3.size() + ").");
          } else if (!var2.bots && var10 != Game.Mode.DM && !bothTeams(this.resolveTeams(var2, var3))) {
             var1.sendMessage("§cHer takımda en az 1 kişi olmalı. §7Parti Menüsü → Takımlar.");
          } else {
@@ -342,7 +338,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
             Game var7 = new Game(this, var2, var10, var11, var12);
             var7.preset = var10 == Game.Mode.DM ? null : this.resolveTeams(var2, var3);
             if (var2.bots && var7.preset != null) {
-               int var13x = var10 == Game.Mode.DUEL ? 1 : var2.botSize;
+               int var13x = var2.botSize;
                int[] var14x = new int[2];
                for (Map.Entry<UUID, Integer> var15x : var7.preset.entrySet()) {
                   int var16x = var15x.getValue();
@@ -613,8 +609,8 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       Inventory inv = this.menu("bots", 0, 27, "§6Botlarla Oyna");
       StrikeMap map = StrikeMap.ALL.get(p.map);
       int humans = this.onlineMembers(p).size();
-      String size = p.mode == Game.Mode.DUEL ? "1v1" : p.botSize + "v" + p.botSize;
-      inv.setItem(10, this.ui(Material.IRON_SWORD, "b:mode", "§f§lMod: §e" + modeName(p.mode), "§7Rekabetçi: bomba kur/imha et.", "§7Düello: 1v1 tur tur.", "§7Ölüm maçı: herkes herkese.", who));
+      String size = p.mode == Game.Mode.DM ? (p.botSize * 2) + " kişi" : p.botSize + "v" + p.botSize;
+      inv.setItem(10, this.ui(Material.IRON_SWORD, "b:mode", "§f§lMod: §e" + modeName(p.mode), "§7Rekabetçi: bomba kur/imha et.", "§7Düello: bomba yok, 1v1-5v5 tur tur.", "§7Ölüm maçı: herkes herkese.", who));
       inv.setItem(11, this.ui(Material.FILLED_MAP, "b:map", "§f§lHarita: §e" + map.name, "§7" + map.desc, who));
       inv.setItem(12, this.ui(Material.PLAYER_HEAD, "b:size", "§f§lKadro: §e" + size,
          "§71v1, 2v2, 3v3, 4v4, 5v5.", "§7Partideki oyuncular yerleşir,", "§7boş yerler botlarla dolar (şu an " + humans + " oyuncu).", "§7Takımını Parti Menüsü → Takımlar'dan seç.", who));
@@ -741,7 +737,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
                "p:mode",
                "§f§lMod: §e" + modeName(var2.mode),
                "§7Rekabetçi: bomba kur/imha et, iki devre.",
-               "§71v1 Düello: iki kişi, tur tur.",
+               "§7Düello: bomba yok, takım elenene kadar tur tur.",
                "§7Ölüm maçı: herkes herkese, 30 öldüren kazanır.",
                var13
             )
@@ -947,6 +943,18 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
                         this.teamClick(var2, var7, var6, var1.isRightClick());
                      } else {
                         var2.closeInventory();
+                     }
+                  } else if (var6 != null && var4.kind.equals("quick")) {
+                     if (var6.equals("q:leave")) {
+                        this.ranked.leave(var2, true);
+                        this.ranked.openQuick(var2);
+                     } else if (var6.startsWith("q:") && var6.length() == 3 && Character.isDigit(var6.charAt(2))) {
+                        this.ranked.join(var2, Ranked.CASUAL + (var6.charAt(2) - '0'));
+                        if (!this.gameOf.containsKey(var2.getUniqueId())) {
+                           this.ranked.openQuick(var2);
+                        } else {
+                           var2.closeInventory();
+                        }
                      }
                   } else if (var6 != null && var4.kind.equals("ranked")) {
                      if (var6.equals("r:leave")) {
@@ -1167,14 +1175,7 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
                      this.help(var2);
                      break;
                   case "quick":
-                     StrikePlugin.Party var9 = this.create(var2);
-                     if (var9.members.size() == 2 && var9.leader.equals(var2.getUniqueId())) {
-                        var9.mode = Game.Mode.DUEL;
-                        var9.map = "arena";
-                        this.startGame(var2, var9);
-                     } else {
-                        var2.sendMessage("§7Hızlı düello: partide tam 2 kişi olun (Parti Menüsü → Davet et), sonra tekrar tıkla.");
-                     }
+                     this.ranked.openQuick(var2);
                      break;
                   case "shop":
                      this.openShop(var2);
@@ -1440,12 +1441,46 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
          this.toLobby(var2);
          var2.sendTitle("§6§lPISAN §f§lSTRIKE", "§7Parti Menüsü ile maç kur", 10, 60, 20);
       });
+      Bukkit.getScheduler().runTaskLater(this, () -> this.sendPack(var2), 20L);
       if (var2.getName().startsWith("(mobil)")) {
          Bukkit.getScheduler().runTaskLater(this, () -> {
             if (var2.isOnline() && !this.webVerified.contains(var2.getUniqueId())) {
                var2.kickPlayer("Bu ad sadece tarayıcıdan girenler için.");
             }
          }, 200L);
+      }
+   }
+
+   /** 3D silah paketini oyuncuya gonderir (server.properties'e bagli kalmadan). */
+   void sendPack(Player p) {
+      String url = this.getConfig().getString("resource-pack-url", "");
+      String sha = this.getConfig().getString("resource-pack-sha1", "");
+      if (!p.isOnline() || url == null || url.isBlank()) {
+         return;
+      }
+
+      byte[] hash = null;
+      if (sha != null && sha.matches("[0-9a-fA-F]{40}")) {
+         hash = new byte[20];
+         for (int i = 0; i < 20; i++) {
+            hash[i] = (byte) Integer.parseInt(sha.substring(i * 2, i * 2 + 2), 16);
+         }
+      }
+
+      p.setResourcePack(url, hash, this.getConfig().getString("resource-pack-prompt", "§63D silah modelleri için paketi kabul et!"), false);
+   }
+
+   @EventHandler
+   public void resourcePackStatus(org.bukkit.event.player.PlayerResourcePackStatusEvent e) {
+      switch (e.getStatus()) {
+         case DECLINED:
+            e.getPlayer().sendMessage("§eSilah paketini reddettin; silahlar arbalet görünecek. §7Sunucu listesinde Strike → Düzenle → Sunucu kaynak paketleri: Açık yapıp tekrar gir.");
+            break;
+         case FAILED_DOWNLOAD:
+            e.getPlayer().sendMessage("§cSilah paketi indirilemedi. §7Tekrar girmeyi dene.");
+            this.getLogger().warning(e.getPlayer().getName() + " kaynak paketini indiremedi.");
+            break;
+         default:
       }
    }
 
@@ -1487,8 +1522,9 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       var1.sendMessage("§e5. §fTeröristler bombayı A ya da B'ye kurar (sağ tık basılı), Anti-Teröristler bombaya sağ tıkı basılı tutarak imha eder.");
       var1.sendMessage("§e6. §fParti Menüsü → Takımlar: kimin hangi takımda olacağını seç (1v1'den 5v5'e, 1v5 gibi).");
       var1.sendMessage("§e7. §fDereceli (elmas): 1v1-5v5 kuyruğu, ELO ve rütbe.");
-      var1.sendMessage("§e8. §f/botstrike: seçtiğin modu botlarla oyna, zorluğu seç.");
-      var1.sendMessage("§7Komutlar: /parti, /market, /dereceli, /botstrike, /ayril");
+      var1.sendMessage("§e8. §fHızlı Maç (elmas kılıç): dereceliyle aynı 1v1-5v5 kuyruğu, derecesiz.");
+      var1.sendMessage("§e9. §f/botstrike: seçtiğin modu botlarla oyna, zorluğu seç.");
+      var1.sendMessage("§7Komutlar: /parti, /market, /hizli, /dereceli, /botstrike, /ayril");
    }
 
    public boolean onCommand(CommandSender var1, Command var2, String var3, String[] var4) {
@@ -1497,6 +1533,15 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
          switch (var6) {
             case "market":
                this.openShop(var5);
+               break;
+            case "hizli":
+               if (var4.length > 0 && var4[0].matches("[1-5](v[1-5])?")) {
+                  this.ranked.join(var5, Ranked.CASUAL + (var4[0].charAt(0) - '0'));
+               } else if (var4.length > 0 && (var4[0].equalsIgnoreCase("ayril") || var4[0].equalsIgnoreCase("cik"))) {
+                  this.ranked.leave(var5, true);
+               } else {
+                  this.ranked.openQuick(var5);
+               }
                break;
             case "botstrike":
                if (this.gameOf.containsKey(var5.getUniqueId())) {

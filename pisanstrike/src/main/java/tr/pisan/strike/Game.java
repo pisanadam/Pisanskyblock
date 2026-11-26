@@ -162,7 +162,7 @@ final class Game {
             want.add(-1);
          }
       } else {
-         int per = this.mode == Game.Mode.DUEL ? 1 : size;
+         int per = size;
          for (int grp = 0; grp < 2; grp++) {
             for (int i = cnt[grp]; i < per; i++) {
                want.add(grp);
@@ -290,8 +290,6 @@ final class Game {
          if (a != null && a.kills >= this.toWin) {
             this.end(a.name + " " + a.kills + " öldürmeyle kazandı");
          }
-      } else if (this.mode == Game.Mode.DUEL && a != null && a != v) {
-         this.roundOver(a.group, a.name + " kazandı");
       } else {
          this.checkRoundEnd();
       }
@@ -919,6 +917,8 @@ final class Game {
             } else {
                var2.scoped = true;
                var1.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 1000000, 3, false, false, false));
+               var1.getInventory().setHelmet(scopeItem());
+               this.setModel(var1.getInventory().getItemInMainHand(), 1098);
                var1.playSound(var1.getLocation(), Sound.ITEM_SPYGLASS_USE, 1.0F, 1.0F);
                this.speed(var1);
             }
@@ -926,10 +926,41 @@ final class Game {
       }
    }
 
+   /** Durbun ekrani: kaynak paketi oyma balkabaginin ekran katmanini CS2 tarzi durbunle degistirir;
+    *  CustomModelData 1099 kafadaki balkabagini baskalarina gorunmez yapar. */
+   static ItemStack scopeItem() {
+      ItemStack it = new ItemStack(Material.CARVED_PUMPKIN);
+      org.bukkit.inventory.meta.ItemMeta m = it.getItemMeta();
+      m.setCustomModelData(1099);
+      m.setDisplayName("§7Dürbün");
+      it.setItemMeta(m);
+      return it;
+   }
+
    void unscope(Player var1, Game.PS var2) {
       var2.scoped = false;
+      ItemStack var3 = var1.getInventory().getHelmet();
+      if (var3 != null && var3.getType() == Material.CARVED_PUMPKIN) {
+         var1.getInventory().setHelmet(var2.helmet ? new ItemStack(Material.IRON_HELMET) : null);
+      }
+
+      for (ItemStack var4 : var1.getInventory().getContents()) {
+         if (var4 != null && var4.hasItemMeta() && var4.getItemMeta().hasCustomModelData() && var4.getItemMeta().getCustomModelData() == 1098) {
+            Weapon var5 = this.plugin.weaponOf(var4);
+            this.setModel(var4, var5 == null ? 0 : var5.model);
+         }
+      }
+
       var1.removePotionEffect(PotionEffectType.SLOW);
       this.speed(var1);
+   }
+
+   void setModel(ItemStack it, int model) {
+      if (it != null && it.hasItemMeta()) {
+         org.bukkit.inventory.meta.ItemMeta m = it.getItemMeta();
+         m.setCustomModelData(model == 0 ? null : model);
+         it.setItemMeta(m);
+      }
    }
 
    void speed(Player var1) {
@@ -965,11 +996,14 @@ final class Game {
          var8 *= 0.6;
       }
 
-      var8 += var3.recoil * (double)Math.min(var2.spray, 12) * 0.35;
+      // CS tarzi: sapma uzun spreyde biraz artar ama asil kayma sabit desenden gelir
+      var8 += var3.recoil * (double)Math.min(var2.spray, 12) * 0.08;
       Vector var10 = var4.getDirection();
-      double var11 = Math.toRadians(var3.recoil * (double)Math.min(var2.spray, 8) * 0.45);
-      double var13 = var2.spray > 8 ? Math.toRadians(Math.sin((double)var2.spray * 0.6) * var3.recoil * 2.2) : 0.0;
+      double[] var40 = Spray.offset(var3, var2.spray);
+      double var11 = Math.toRadians(var40[1]);
+      double var13 = Math.toRadians(var40[0]);
       var10 = rotate(var10, var11, var13);
+      this.aimPunch(var1, var3, var2.spray);
 
       for (int var15 = 0; var15 < var3.pellets; var15++) {
          this.bullet(var1, var2, var3, var4, cone(var10, var8, this.rnd));
@@ -1024,6 +1058,35 @@ final class Game {
       return new Vector(-Math.sin(var5) * Math.cos(var7), -Math.sin(var7), Math.cos(var5) * Math.cos(var7));
    }
 
+   /** Kamera tepmesi: desenin sonraki adiminin yarisi kadar nisani yukari/yana iter (CS'teki aim punch). */
+   void aimPunch(Player p, Weapon w, int n) {
+      if (!this.plugin.getConfig().getBoolean("aim-punch", true)) {
+         return;
+      }
+
+      double[] a = Spray.offset(w, n);
+      double[] b = Spray.offset(w, n + 1);
+      float dYaw = (float) ((b[0] - a[0]) * 0.5);
+      float dPitch = (float) ((b[1] - a[1]) * 0.5);
+      if (w.kind == Weapon.Kind.SNIPER || w.kind == Weapon.Kind.SHOTGUN) {
+         dPitch = w.kind == Weapon.Kind.SNIPER ? 1.6F : 1.2F;
+      }
+
+      if (Math.abs(dYaw) < 0.01F && Math.abs(dPitch) < 0.01F) {
+         return;
+      }
+
+      try {
+         Location to = p.getLocation();
+         to.setYaw(to.getYaw() - dYaw);
+         to.setPitch(Math.max(-90.0F, to.getPitch() - dPitch));
+         p.teleport(to,
+            io.papermc.paper.entity.TeleportFlag.Relative.X, io.papermc.paper.entity.TeleportFlag.Relative.Y, io.papermc.paper.entity.TeleportFlag.Relative.Z,
+            io.papermc.paper.entity.TeleportFlag.Relative.YAW, io.papermc.paper.entity.TeleportFlag.Relative.PITCH);
+      } catch (Throwable ignored) {
+      }
+   }
+
    static Vector cone(Vector var0, double var1, Random var3) {
       if (var1 <= 0.0) {
          return var0.clone();
@@ -1067,8 +1130,9 @@ final class Game {
       double var8 = 120.0;
       double var10 = 1.0;
       int var12 = 0;
+      double var38 = -1.0;
 
-      while (var12 < 3 && var8 > 0.0) {
+      while (var12 < 4 && var8 > 0.0) {
          RayTraceResult var13 = var6.rayTrace(
             var7, var5, var8, FluidCollisionMode.NEVER, true, 0.05, var2x -> var2x instanceof Player && !var2x.equals(var1) && this.alive((Player)var2x) || Bot.isBot(var2x) && this.botOf(var2x) != null && this.botOf(var2x).ps.alive
          );
@@ -1131,10 +1195,31 @@ final class Game {
                var6.playSound(var14.toLocation(var6), var15.getBlockData().getSoundGroup().getHitSound(), 0.6F, 1.2F);
             }
 
-            if (penetrable(var15.getType()) && !(var3.armorPen < 0.6)) {
-               var10 *= 0.5;
-               var8 -= var7.toVector().distance(var14) + 1.1;
-               var7 = var14.clone().add(var5.clone().multiply(1.1)).toLocation(var6);
+            if (var38 < 0.0) {
+               var38 = Spray.power(var3);
+            }
+
+            // kalinlik: mermi blok(lar)in icinden cikana kadar ilerle
+            Vector var41 = var14.clone();
+            double var42 = 0.0;
+            double var43 = 0.0;
+            while (var42 < 3.0) {
+               var41.add(var5.clone().multiply(0.1));
+               var42 += 0.1;
+               Block var44 = var41.toLocation(var6).getBlock();
+               if (var44.isPassable()) {
+                  break;
+               }
+
+               var43 += 0.1 * Spray.hardness(var44.getType());
+            }
+
+            if (var42 < 3.0 && var43 <= var38 && var12 < 3) {
+               var38 -= var43;
+               var10 *= Math.max(0.1, 1.0 - (0.15 + var43 * 0.32));
+               var8 -= var7.toVector().distance(var14) + var42;
+               var7 = var41.toLocation(var6);
+               var6.spawnParticle(Particle.BLOCK_CRACK, var7, 4, 0.05, 0.05, 0.05, var15.getBlockData());
                var12++;
                continue;
             }
@@ -1259,8 +1344,6 @@ final class Game {
          if (var4 != null && var4.kills >= this.toWin) {
             this.end(var4.name + " " + var4.kills + " öldürmeyle kazandı");
          }
-      } else if (this.mode == Game.Mode.DUEL && var4 != null && var4 != var2) {
-         this.roundOver(var4.group, var4.name + " kazandı");
       } else {
          this.checkRoundEnd();
       }

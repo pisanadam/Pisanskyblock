@@ -28,6 +28,8 @@ import org.bukkit.persistence.PersistentDataType;
  */
 final class Ranked {
    static final int START_ELO = 1000;
+   /** kuyruk anahtari: 1..5 dereceli NvN, 11..15 hizli mac (derecesiz) NvN */
+   static final int CASUAL = 10;
    static final int K = 32;
    static final String[] TIER_NAMES = {"Demir", "Bronz", "Gümüş", "Altın", "Platin", "Elmas", "Usta", "Efsane"};
    static final String[] TIER_COLORS = {"§8", "§6", "§7", "§e", "§3", "§b", "§d", "§c"};
@@ -52,6 +54,7 @@ final class Ranked {
       this.plugin = plugin;
       for (int i = 1; i <= 5; i++) {
          this.queues.put(i, new LinkedHashSet<>());
+         this.queues.put(CASUAL + i, new LinkedHashSet<>());
       }
 
       this.file = new File(plugin.getDataFolder(), "ranked.yml");
@@ -138,8 +141,17 @@ final class Ranked {
       return 0;
    }
 
-   void join(Player p, int n) {
+   static boolean casual(int key) {
+      return key > CASUAL;
+   }
+
+   static String label(int key) {
+      return casual(key) ? "Hızlı maç" : "Dereceli";
+   }
+
+   void join(Player p, int key) {
       UUID id = p.getUniqueId();
+      int n = key % CASUAL;
       if (n < 1 || n > 5) {
          p.sendMessage("§cGeçersiz mod. §71v1 ile 5v5 arası seç.");
          return;
@@ -151,12 +163,12 @@ final class Ranked {
       }
 
       if (this.plugin.partyOf.containsKey(id)) {
-         p.sendMessage("§cDereceli kuyruk tek kişilik. §7Önce partiden ayrıl (Parti Menüsü → Partiden ayrıl).");
+         p.sendMessage("§c" + label(key) + " kuyruğu tek kişilik. §7Önce partiden ayrıl (Parti Menüsü → Partiden ayrıl).");
          return;
       }
 
       int cur = this.queueOf(id);
-      if (cur == n) {
+      if (cur == key) {
          this.leave(p, true);
          return;
       }
@@ -166,11 +178,11 @@ final class Ranked {
       }
 
       this.of(id, p.getName());
-      this.queues.get(n).add(id);
+      this.queues.get(key).add(id);
       this.queuedAt.put(id, System.currentTimeMillis());
-      p.sendMessage("§aDereceli " + n + "v" + n + " kuyruğuna girdin. §7(" + this.queues.get(n).size() + "/" + n * 2 + ")");
+      p.sendMessage("§a" + label(key) + " " + n + "v" + n + " kuyruğuna girdin. §7(" + this.queues.get(key).size() + "/" + n * 2 + ")" + (casual(key) ? " §8derecesiz, ELO değişmez" : ""));
       p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.6F);
-      this.tryMatch(n);
+      this.tryMatch(key);
    }
 
    void leave(Player p, boolean tell) {
@@ -179,7 +191,7 @@ final class Ranked {
          this.queues.get(cur).remove(p.getUniqueId());
          this.queuedAt.remove(p.getUniqueId());
          if (tell) {
-            p.sendMessage("§7Dereceli kuyruktan çıktın.");
+            p.sendMessage("§7" + label(cur) + " kuyruğundan çıktın.");
          }
       } else if (tell) {
          p.sendMessage("§7Kuyrukta değilsin.");
@@ -194,8 +206,10 @@ final class Ranked {
       this.queuedAt.remove(id);
    }
 
-   void tryMatch(int n) {
-      LinkedHashSet<UUID> q = this.queues.get(n);
+   void tryMatch(int key) {
+      int n = key % CASUAL;
+      boolean casual = casual(key);
+      LinkedHashSet<UUID> q = this.queues.get(key);
       q.removeIf(id -> {
          Player p = Bukkit.getPlayer(id);
          return p == null || this.plugin.gameOf.containsKey(id) || this.plugin.partyOf.containsKey(id);
@@ -227,7 +241,7 @@ final class Ranked {
          party.team.put(id, pattern[i % 4]);
       }
 
-      party.ranked = n;
+      party.ranked = casual ? 0 : n;
       party.toWin = n == 1 ? 5 : 9;
       if (n == 1) {
          party.mode = Game.Mode.DUEL;
@@ -248,8 +262,8 @@ final class Ranked {
       int[] avg = this.teamAverages(party);
       for (Player p : picked) {
          int g = party.team.get(p.getUniqueId());
-         p.sendTitle("§6§lDERECELİ " + n + "v" + n, "§7Rakip bulundu · " + StrikeMap.ALL.get(party.map).name, 5, 50, 10);
-         p.sendMessage("§6Dereceli " + n + "v" + n + " başlıyor. §7Takım ortalaması: §f" + avg[g] + " §7— rakip: §f" + avg[1 - g]);
+         p.sendTitle((casual ? "§b§lHIZLI MAÇ " : "§6§lDERECELİ ") + n + "v" + n, "§7Rakip bulundu · " + StrikeMap.ALL.get(party.map).name, 5, 50, 10);
+         p.sendMessage(casual ? "§bHızlı maç " + n + "v" + n + " başlıyor. §7Derecesiz, ELO değişmez." : "§6Dereceli " + n + "v" + n + " başlıyor. §7Takım ortalaması: §f" + avg[g] + " §7— rakip: §f" + avg[1 - g]);
       }
 
       this.plugin.startGame(picked.get(0), party);
@@ -352,17 +366,39 @@ final class Ranked {
       p.openInventory(inv);
    }
 
+   /** Hizli mac: dereceliyle ayni 1v1..5v5 kuyruklari, ELO degismez. */
+   void openQuick(Player p) {
+      Inventory inv = this.plugin.menu("quick", 0, 27, "§bHızlı Maç §8(derecesiz)");
+      int mine = this.queueOf(p.getUniqueId());
+      Material[] icons = {Material.IRON_SWORD, Material.GOLDEN_SWORD, Material.DIAMOND_SWORD, Material.NETHERITE_SWORD, Material.NETHER_STAR};
+      for (int n = 1; n <= 5; n++) {
+         int key = CASUAL + n;
+         int size = this.queues.get(key).size();
+         String state = mine == key ? "§a● Kuyruktasın §7— tıkla: çık" : "§eTıkla: kuyruğa gir";
+         String desc = n == 1 ? "§7Düello arenası, 5 tur kazanan." : "§7Rastgele bomba haritası, 9 tur kazanan.";
+         inv.setItem(10 + n, this.plugin.ui(icons[n - 1], "q:" + n, "§b§l" + n + "v" + n + " Hızlı Maç", desc, "§7Derecesiz: ELO ve rütbe değişmez.", "§7Kuyrukta: §f" + size + "/" + n * 2, state));
+      }
+
+      inv.setItem(4, this.plugin.ui(Material.BOOK, "q:info", "§f§lHızlı Maç", "§7Dereceliyle aynı eşleştirme,", "§7ama puan kaybetmeden ısın.", "§7Dereceli için lobideki elmas."));
+      if (mine != 0) {
+         inv.setItem(26, this.plugin.ui(Material.BARRIER, "q:leave", "§c§lKuyruktan çık"));
+      }
+
+      p.openInventory(inv);
+   }
+
    /** Kuyruktakilere durum cubugu. */
    void hud() {
       long now = System.currentTimeMillis();
       for (Map.Entry<Integer, LinkedHashSet<UUID>> e : this.queues.entrySet()) {
-         int n = e.getKey();
+         int key = e.getKey();
+         int n = key % CASUAL;
          for (UUID id : e.getValue()) {
             Player p = Bukkit.getPlayer(id);
             if (p != null) {
                long s = (now - this.queuedAt.getOrDefault(id, now)) / 1000L;
                p.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
-                  net.md_5.bungee.api.chat.TextComponent.fromLegacyText("§6Dereceli " + n + "v" + n + " §7kuyruğu: §f" + e.getValue().size() + "/" + n * 2 + " §7· " + s / 60 + ":" + String.format("%02d", s % 60)));
+                  net.md_5.bungee.api.chat.TextComponent.fromLegacyText((casual(key) ? "§bHızlı maç " : "§6Dereceli ") + n + "v" + n + " §7kuyruğu: §f" + e.getValue().size() + "/" + n * 2 + " §7· " + s / 60 + ":" + String.format("%02d", s % 60)));
             }
          }
       }

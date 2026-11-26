@@ -321,6 +321,8 @@ def dual():
             m.el.append(c)
     return m
 GUNS[1004] = ("dualies", dual())
+# durbun acikken eldeki silah gizlenir (CS2'deki gibi); plugin CustomModelData'yi gecici olarak 1098 yapar
+GUNS[1098] = ("scope_hidden", None)
 
 # ---------------------------------------------------------------- gosterim (display) ayarlari
 # Elde gorunum ayarlari; Minecraft 1.20.1 istemcisinde gozle ayarlandi (bkz. strike-pack/README).
@@ -369,10 +371,6 @@ def scope_overlay_png():
     rx, ry = int(W * 9 / 16 / 2 * 0.98), int(H / 2 * 0.98)
     cx, cy = W // 2, H // 2
     d.ellipse([cx - rx, cy - ry, cx + rx, cy + ry], fill=(0, 0, 0, 0))
-    # kenarda hafif golge halkasi
-    for i, a in enumerate((150, 110, 70, 35)):
-        k = 1 - (i + 1) * 0.012
-        d.ellipse([cx - rx, cy - ry, cx + rx, cy + ry], outline=(0, 0, 0, a), width=max(1, int(6 * (4 - i))))
     # ince arti cizgileri (tum ekran boyunca)
     d.rectangle([cx - 1, 0, cx, H], fill=(0, 0, 0, 255))
     d.rectangle([0, cy - 1, W, cy + 1], fill=(0, 0, 0, 255))
