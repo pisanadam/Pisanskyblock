@@ -227,7 +227,15 @@ final class Game {
          return;
       }
 
+      boolean armoredBefore = v.armor > 0.0;
       v.hp -= this.afterArmor(v, dmg, head, pen);
+      if (w != null && w.gun()) {
+         Location hl = v.bot != null && v.bot.ent != null ? v.bot.ent.getLocation() : (Bukkit.getPlayer(v.id) != null ? Bukkit.getPlayer(v.id).getLocation() : null);
+         if (hl != null) {
+            this.ccRaw(hl, head ? (v.helmet ? "combat.bullet.headshot_armor" : "combat.bullet.headshot") : (armoredBefore ? "combat.bullet.kevlar" : "combat.bullet.body"), head ? 1.4F : 1.0F);
+         }
+      }
+
       if (ap != null) {
          ap.playSound(ap.getLocation(), head ? Sound.BLOCK_NOTE_BLOCK_BELL : Sound.ENTITY_ARROW_HIT_PLAYER, 0.7F, head ? 1.8F : 1.2F);
       }
@@ -821,7 +829,9 @@ final class Game {
             }
 
             var2.reloadingItem = null;
-            var1.playSound(var1.getLocation(), Sound.ITEM_CROSSBOW_LOADING_END, 0.8F, 1.3F);
+            if (!this.ccSound(var1.getLocation(), var6, "clip_in", 0.9F)) {
+               var1.playSound(var1.getLocation(), Sound.ITEM_CROSSBOW_LOADING_END, 0.8F, 1.3F);
+            }
          }
 
          if (var2.reloadingItem != null && (var7 == null || !var7.equals(var2.reloadingItem))) {
@@ -915,7 +925,9 @@ final class Game {
             this.unscope(var1, var2);
          }
 
-         var1.getWorld().playSound(var1.getLocation(), Sound.ITEM_CROSSBOW_LOADING_START, 0.8F, 1.2F);
+         if (!this.ccSound(var1.getLocation(), var3, "clip_out", 0.9F)) {
+            var1.getWorld().playSound(var1.getLocation(), Sound.ITEM_CROSSBOW_LOADING_START, 0.8F, 1.2F);
+         }
       }
    }
 
@@ -1046,8 +1058,10 @@ final class Game {
       }
 
       boolean var17 = var3.id.equals("usp") || var3.id.equals("m4a1s");
-      var1.getWorld().playSound(var4, var21, var17 ? 0.6F : 2.5F, var17 ? var16 + 0.4F : var16);
-      var1.getWorld().playSound(var4, Sound.BLOCK_IRON_TRAPDOOR_CLOSE, var17 ? 0.3F : 0.8F, 2.0F);
+      if (!this.ccSound(var4, var3, "fire", var17 ? 1.2F : (var3.kind == Weapon.Kind.SNIPER ? 4.0F : 3.0F))) {
+         var1.getWorld().playSound(var4, var21, var17 ? 0.6F : 2.5F, var17 ? var16 + 0.4F : var16);
+         var1.getWorld().playSound(var4, Sound.BLOCK_IRON_TRAPDOOR_CLOSE, var17 ? 0.3F : 0.8F, 2.0F);
+      }
       Location var18 = var4.clone()
          .add(var10.clone().multiply(0.8))
          .add(rotate(var10, 0.0, 1.5707963267948966).setY(0).normalize().multiply(-0.25))
@@ -1068,6 +1082,49 @@ final class Game {
       var7 -= var1;
       var5 += var3;
       return new Vector(-Math.sin(var5) * Math.cos(var7), -Math.sin(var7), Math.cos(var5) * Math.cos(var7));
+   }
+
+   // ------------------------------------------------------------------ Counter Craft sesleri
+   /** bizim silah id -> Counter Craft ses adi (strike-pack/countercraft/weapon_map.json ile ayni) */
+   static final java.util.Map<String, String> CC = java.util.Map.ofEntries(
+      java.util.Map.entry("glock", "glock"), java.util.Map.entry("usp", "usp_silencer"), java.util.Map.entry("p250", "p250"),
+      java.util.Map.entry("dualies", "elite"), java.util.Map.entry("fiveseven", "fiveseven"), java.util.Map.entry("tec9", "tec9"),
+      java.util.Map.entry("deagle", "desert_eagle"), java.util.Map.entry("mac10", "mac10"), java.util.Map.entry("mp9", "mp9"),
+      java.util.Map.entry("mp7", "mp7"), java.util.Map.entry("ump", "ump45"), java.util.Map.entry("p90", "p90"),
+      java.util.Map.entry("galil", "galilar"), java.util.Map.entry("famas", "famas"), java.util.Map.entry("ak47", "ak47"),
+      java.util.Map.entry("m4a4", "m4a4"), java.util.Map.entry("m4a1s", "m4a1_silencer"), java.util.Map.entry("sg553", "sg556"),
+      java.util.Map.entry("aug", "aug"), java.util.Map.entry("ssg08", "ssg08"), java.util.Map.entry("awp", "awp"),
+      java.util.Map.entry("nova", "nova"), java.util.Map.entry("xm1014", "xm1014"), java.util.Map.entry("mag7", "mag7"),
+      java.util.Map.entry("sawedoff", "sawedoff"), java.util.Map.entry("negev", "negev"), java.util.Map.entry("m249", "m249"));
+
+   boolean ccOn() {
+      return this.plugin.getConfig().getBoolean("cc-sounds", true);
+   }
+
+   /** Silah olayi sesi (fire, clip_out, clip_in...). Counter Craft sesi yoksa false doner. */
+   boolean ccSound(Location at, Weapon w, String ev, float vol) {
+      String n = w == null ? null : CC.get(w.id);
+      if (!this.ccOn() || n == null || at == null) {
+         return false;
+      }
+
+      at.getWorld().playSound(at, "tactical_arsenal:weapon." + n + "." + ev, org.bukkit.SoundCategory.PLAYERS, vol, 1.0F);
+      return true;
+   }
+
+   void ccRaw(Location at, String key, float vol) {
+      if (this.ccOn() && at != null) {
+         at.getWorld().playSound(at, "tactical_arsenal:" + key, org.bukkit.SoundCategory.PLAYERS, vol, 1.0F);
+      }
+   }
+
+   /** Mermi isabet sesi: kafa / kaskli kafa / yelek / vucut. */
+   void hitSound(Location at, Game.PS v, boolean head) {
+      if (head) {
+         this.ccRaw(at, v.helmet ? "combat.bullet.headshot_armor" : "combat.bullet.headshot", 1.4F);
+      } else {
+         this.ccRaw(at, v.armor > 0.0 ? "combat.bullet.kevlar" : "combat.bullet.body", 1.0F);
+      }
    }
 
    /** Kamera tepmesi: desenin sonraki adiminin yarisi kadar nisani yukari/yana iter (CS'teki aim punch). */
@@ -1297,6 +1354,10 @@ final class Game {
                }
 
                var2.hp -= var11;
+               if (var4 != null && var4.gun()) {
+                  this.ccRaw(var1.getLocation(), var7 ? (var2.helmet ? "combat.bullet.headshot_armor" : "combat.bullet.headshot") : (var13 ? "combat.bullet.kevlar" : "combat.bullet.body"), var7 ? 1.4F : 1.0F);
+               }
+
                var1.playHurtAnimation(0.0F);
                var1.getWorld()
                   .playSound(var1.getLocation(), var7 ? Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR : Sound.ENTITY_PLAYER_HURT, var7 ? 0.6F : 1.0F, var7 ? 1.8F : 1.0F);
@@ -1625,7 +1686,11 @@ final class Game {
             boolean var10 = var8.lengthSquared() > 0.0 && var9.lengthSquared() > 0.0 && var8.normalize().dot(var9.normalize()) > 0.5;
             // Bicak her vurusta tek atar (zirhli rakip dahil). Eski CS2 degerleri: sag tik 65/180, sol tik 40/90.
             double var11 = 1000.0;
-            var1.getWorld().playSound(var1.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0F, 1.4F);
+            if (this.ccOn()) {
+               this.ccRaw(var1.getLocation(), "weapon.knife.hit_flesh", 1.0F);
+            } else {
+               var1.getWorld().playSound(var1.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0F, 1.4F);
+            }
             this.damage(var2, var5, var1, Weapon.get("knife"), var11, false, 0.85);
          }
       }
@@ -1638,7 +1703,11 @@ final class Game {
          long var4 = System.currentTimeMillis();
          if (var4 >= var3.knifeReady) {
             var3.knifeReady = var4 + 400L;
-            var1.getWorld().playSound(var1.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0F, 1.4F);
+            if (this.ccOn()) {
+               this.ccRaw(var1.getLocation(), "weapon.knife.hit_flesh", 1.0F);
+            } else {
+               var1.getWorld().playSound(var1.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0F, 1.4F);
+            }
             this.hitBy(var2.ps, var3, var1, Weapon.get("knife"), 1000.0, false, 0.85);
          }
       }

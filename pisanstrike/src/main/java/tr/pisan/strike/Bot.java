@@ -382,7 +382,9 @@ final class Bot {
       this.nextShot = now + gap + (3 - this.diff) * 40L;
       World world = this.ent.getWorld();
       Location from = this.ent.getEyeLocation();
-      world.playSound(from, w.kind == Weapon.Kind.SNIPER ? Sound.ENTITY_GENERIC_EXPLODE : Sound.ENTITY_FIREWORK_ROCKET_BLAST, w.kind == Weapon.Kind.SNIPER ? 1.2F : 2.0F, w.kind == Weapon.Kind.PISTOL ? 1.6F : 1.2F);
+      if (!this.g.ccSound(from, w, "fire", w.id.equals("usp") || w.id.equals("m4a1s") ? 1.2F : 3.0F)) {
+         world.playSound(from, w.kind == Weapon.Kind.SNIPER ? Sound.ENTITY_GENERIC_EXPLODE : Sound.ENTITY_FIREWORK_ROCKET_BLAST, w.kind == Weapon.Kind.SNIPER ? 1.2F : 2.0F, w.kind == Weapon.Kind.PISTOL ? 1.6F : 1.2F);
+      }
       // isabet: zorluk x mesafe x hedefin hareketi x silahin sapmasi
       double acc = ACCURACY[this.diff];
       acc *= dist < 10.0 ? 1.0 : Math.max(0.35, 1.0 - (dist - 10.0) / 90.0);

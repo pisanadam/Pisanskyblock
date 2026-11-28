@@ -6,3 +6,6 @@ web-relay-key: ""
 resource-pack-url: ""
 resource-pack-sha1: ""
 resource-pack-prompt: "§63D silah modelleri için paketi kabul et!"
+
+# Counter Craft silah sesleri (kaynak paketinde); false = Minecraft sesleri
+cc-sounds: true

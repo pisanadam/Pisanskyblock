@@ -377,6 +377,51 @@ def scope_overlay_png():
     d.rectangle([0, cy - 1, W, cy + 1], fill=(0, 0, 0, 255))
     buf = io.BytesIO(); img.save(buf, "PNG"); return buf.getvalue()
 
+CC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "countercraft")
+CC_NS = "tactical_arsenal"
+
+def cc_available():
+    return os.path.isdir(CC_DIR) and os.path.exists(os.path.join(CC_DIR, "weapon_map.json"))
+
+def cc_model(wid):
+    """Counter Craft silahinin govde+mekanizma+sarjor parcalarini tek modelde birlestirir."""
+    cc = json.load(open(os.path.join(CC_DIR, "weapon_map.json"))).get(wid)
+    if cc is None:
+        return None
+    elements, textures = [], {}
+    for part in ("body", "action", "magazine"):
+        path = os.path.join(CC_DIR, "models", "item", f"{cc}_{part}.json")
+        if not os.path.exists(path):
+            continue
+        d = json.load(open(path))
+        tex = d["textures"].get("tex")
+        textures[part] = tex
+        for e in d.get("elements", []):
+            e = json.loads(json.dumps(e))
+            for f in e.get("faces", {}).values():
+                f["texture"] = "#" + part
+            elements.append(e)
+    if not elements:
+        return None
+    textures["particle"] = textures.get("body") or next(iter(textures.values()))
+    xs = [v for e in elements for v in (e["from"][0], e["to"][0])]
+    ys = [v for e in elements for v in (e["from"][1], e["to"][1])]
+    span = max(max(xs) - min(xs), max(ys) - min(ys))
+    return {"credit": "Counter Craft (Tactical Arsenal)", "textures": textures, "elements": elements, "display": display("gun", span)}
+
+def cc_files():
+    """Counter Craft dokulari, sesleri ve sounds.json (paket yolu -> bayt)."""
+    out = {}
+    for sub in ("textures", "sounds"):
+        root = os.path.join(CC_DIR, sub)
+        for dp, _, fs in os.walk(root):
+            for fn in fs:
+                full = os.path.join(dp, fn)
+                rel = os.path.relpath(full, CC_DIR).replace(os.sep, "/")
+                out[f"assets/{CC_NS}/{rel}"] = open(full, "rb").read()
+    out[f"assets/{CC_NS}/sounds.json"] = open(os.path.join(CC_DIR, "sounds.json"), "rb").read()
+    return out
+
 def model_json(m, kind):
     span = m.fit()
     return {"credit": "Pisan Strike", "texture_size": [16, 16],
@@ -425,7 +470,10 @@ def build(out):
         for cmd in sorted(entries):
             name, m = entries[cmd]
             kind = "gun" if item in (GUN_ITEM, "iron_sword", "lightning_rod") else "thing"
-            if m is not None:
+            ccm = cc_model(name) if (item == GUN_ITEM and cc_available()) else None
+            if ccm is not None:
+                files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(ccm, separators=(",", ":")).encode()
+            elif m is not None:
                 files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(model_json(m, kind), separators=(",", ":")).encode()
             base["overrides"].append({"predicate": {"custom_model_data": cmd}, "model": f"{NS}:item/{name}"})
             cases.append((cmd, f"{NS}:item/{name}"))
@@ -439,6 +487,8 @@ def build(out):
         # 1.21.4+ istemcide vanilla crossbow modeli override'siz olmali: ayni yolda sade modeli overlay'e koy
         files[f"ov_1214/assets/minecraft/models/item/{item}.json"] = json.dumps(
             {k: v for k, v in VANILLA[item].items() if k != "overrides"}, indent=1).encode()
+    if cc_available():
+        files.update(cc_files())
     files["pack.mcmeta"] = json.dumps({
         "pack": {"pack_format": 15, "supported_formats": [15, 999], "min_format": 15, "max_format": 999,
                  "description": "§6§lPISAN STRIKE §f3D silahlar"},
