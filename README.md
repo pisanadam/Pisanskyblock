@@ -1,6 +1,13 @@
-# Pisanskyblock
+# Pisan Skyblock/SMP
 
-Hypixel Skyblock'tan ilham alan Java skyblock sunucusu (Exaroton, Paper 26.3, 1.20.1+ istemci desteği).
+Tek sunucuda iki mod (Exaroton `Pisanskyblock`, Paper 26.3, 1.20.1+ istemci desteği):
+- **Skyblock** – Hypixel Skyblock'tan ilham alan ada modu.
+- **SMP** – 25.000 x 25.000 sınırlı hayatta kalma dünyası (`pisan_smp`, kendi nether'ı (sınır 3.125) ve end'i ile).
+
+Girişte **Mod Seçimi** lobisine gelinir ve menü açılır: Skyblock → Sky Lobi, SMP → SMP Lobi
+(kapılardan yürüyerek de geçilir). Coin, market, pazar, kasalar/anahtarlar, skill, duel, takas ve arkadaşlar
+iki modda ortaktır; envanter de ortaktır. Minyonlar sadece adada çalışır.
+SMP'den çıkınca son konum saklanır, `/smp` ile kaldığın yere dönersin.
 
 ## Klasörler
 - `pisancore/` – Sunucuya özel plugin (Maven): coin ekonomisi (Vault), taş jeneratörü ödülleri, 10 kademe kasa sistemi.
@@ -33,11 +40,13 @@ Ada koruma alanı: 500x500 (protection-range 250).
 | `/is level`, `/is top` | Ada puanını hesapla / ada sıralaması (BentoBox Level) |
 | `/sb` | Scoreboard aç/kapat |
 | `/arkadas` | Arkadaş menüsü (`ekle`, `kabul`, `red`, `git`, `sil`, `liste`, `izinler`). Sol tık: adasına git, sağ tık: senin adandaki yetkisi |
-| `/lobi` (`/spawn`) | Lobiye ışınlan. Lobideki kasalara sol tık: anahtarla aç, sağ tık: içerik ve şanslar |
+| `/menu` (`/hub`) | Mod seçimi (Skyblock / SMP) |
+| `/smp` | SMP dünyasına gir (kaldığın yer, ilk seferde SMP spawn) |
+| `/lobi` (`/spawn`) | Bulunduğun modun lobisine ışınlan (`/skylobi`, `/smplobi`). Lobideki kasalara sol tık: anahtarla aç, sağ tık: içerik ve şanslar |
 | `/bal`, `/pay <oyuncu> <miktar>`, `/baltop` | Coin |
 
 ## Admin komutları
-`/kasa ver <oyuncu> <kasa> [adet]`, `/minyon ver <oyuncu> <tür> [seviye] [adet]`, `/event satis|kazma|anahtar <değer> <dk>`, `/event gorev <kaz|oldur|hasat> <adet> <dk>` (ödül: eldeki eşya), `/event huni <kat> <gün>` (spigot.yml, yeniden başlatınca), `/event durdur`, `/lobi spawnayarla|yenidenkur|kasaayarla <kasa>`, `/eco give|take|set <oyuncu> <miktar>`, `/pisancore reload`
+`/kasa ver <oyuncu> <kasa> [adet]`, `/minyon ver <oyuncu> <tür> [seviye] [adet]`, `/event satis|kazma|anahtar <değer> <dk>`, `/event gorev <kaz|oldur|hasat> <adet> <dk>` (ödül: eldeki eşya), `/event huni <kat> <gün>` (spigot.yml, yeniden başlatınca), `/event durdur`, `/lobi spawnayarla` (bulunduğun lobi alanı), `/lobi yenidenkur [sky|smp|hub]`, `/lobi kasaayarla <kasa>`, `/smp spawnayarla|spawn|bilgi`, `/eco give|take|set <oyuncu> <miktar>`, `/pisancore reload`
 
 ## PisanCore derleme
 ```

@@ -1,6 +1,15 @@
 # ==============================
-#  PisanCore - Pisanskyblock
+#  PisanCore - Pisan Skyblock/SMP
 # ==============================
+
+# Giriste mod secim lobisine (hub) isinla ve menuyu ac
+hub:
+  on-join: true
+
+# SMP dunyasi (pisan_smp + pisan_smp_nether + pisan_smp_the_end)
+smp:
+  border-size: 25000   # 25.000 x 25.000 (nether: 1/8)
+  difficulty: NORMAL
 
 economy:
   currency-singular: "Coin"

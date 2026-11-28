@@ -39,7 +39,7 @@ public final class ScoreboardManager implements Listener, CommandExecutor, TabCo
     private void setup(Player p) {
         if (!p.isOnline() || hidden.contains(p.getUniqueId())) return;
         Scoreboard sb = Bukkit.getScoreboardManager().getNewScoreboard();
-        Objective o = sb.registerNewObjective("pisan", Criteria.DUMMY, PisanCore.color("&6&l✦ PISAN SKYBLOCK ✦"));
+        Objective o = sb.registerNewObjective("pisan", Criteria.DUMMY, PisanCore.color("&6&l✦ PISAN SKY/SMP ✦"));
         o.setDisplaySlot(DisplaySlot.SIDEBAR);
         boards.put(p.getUniqueId(), sb);
         p.setScoreboard(sb);
@@ -58,6 +58,12 @@ public final class ScoreboardManager implements Listener, CommandExecutor, TabCo
         for (Player p : Bukkit.getOnlinePlayers()) update(p);
     }
 
+    private String mode(Player p) {
+        if (plugin.smp() != null && plugin.smp().isSmp(p.getWorld())) return "&aSMP";
+        if (plugin.lobbyWorld(p.getWorld())) return "&eLobi";
+        return "&bSkyblock";
+    }
+
     private static String rank(int r) { return r <= 0 ? "&7-" : "&e#" + r; }
 
     private void update(Player p) {
@@ -70,6 +76,7 @@ public final class ScoreboardManager implements Listener, CommandExecutor, TabCo
         List<String> lines = List.of(
                 "&8&m-------------------",
                 "&f" + p.getName(),
+                "&7Mod: " + mode(p),
                 "",
                 "&7Para: &6" + PisanCore.fmt(Math.floor(plugin.store().get(id))) + " ⛁",
                 "&7Para Sırası: " + rank(moneyRank.getOrDefault(id, 0)),

@@ -3,7 +3,7 @@ version: ${project.version}
 main: com.pisan.core.PisanCore
 api-version: '1.21'
 author: Pisan
-description: Pisanskyblock - coin ekonomisi, tas jeneratoru odulleri, kasa anahtarlari
+description: Pisan Skyblock/SMP - coin ekonomisi, tas jeneratoru odulleri, kasa anahtarlari, SMP dunyasi
 depend: [Vault]
 loadbefore: [AuctionHouse, EconomyShopGUI, BentoBox]
 commands:
@@ -44,8 +44,20 @@ commands:
     aliases: [arkadaş, arkadaslar, friend, friends, f]
     description: Arkadas sistemi
   lobi:
-    aliases: [lobby, spawn, hub]
-    description: Lobiye isinlan
+    aliases: [lobby, spawn]
+    description: Bulundugun modun lobisine isinlan
+  menu:
+    aliases: [hub, sec, secim, modsec, mod, sunucular]
+    description: Mod secimi (Skyblock / SMP)
+  skylobi:
+    aliases: [skylobby, sky, skyblock]
+    description: Skyblock lobisine isinlan
+  smplobi:
+    aliases: [smplobby]
+    description: SMP lobisine isinlan
+  smp:
+    aliases: [survival]
+    description: SMP dunyasina gir (kaldigin yer)
   market:
     aliases: [satinal, al, buy]
     description: Esyanin satin alma ekranini ac

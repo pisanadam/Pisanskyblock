@@ -20,6 +20,7 @@ public final class PisanCore extends JavaPlugin {
     private LobbyManager lobby;
     private EventManager events;
     private SellManager sell;
+    private SmpManager smp;
 
     @Override
     public void onEnable() {
@@ -39,11 +40,14 @@ public final class PisanCore extends JavaPlugin {
         getCommand("kasa").setTabCompleter(menu);
         Bukkit.getPluginManager().registerEvents(menu, this);
         Bukkit.getPluginManager().registerEvents(new KeyProtectListener(this, menu), this);
+        smp = new SmpManager(this);
+        Bukkit.getPluginManager().registerEvents(smp, this);
+        getCommand("smp").setExecutor(smp);
+        getCommand("smp").setTabCompleter(smp);
         lobby = new LobbyManager(this, menu);
         Bukkit.getPluginManager().registerEvents(lobby, this);
-        getCommand("lobi").setExecutor(lobby);
-        getCommand("lobi").setTabCompleter(lobby);
-        Bukkit.getScheduler().runTask(this, lobby::init);
+        for (String c : new String[]{"lobi", "menu", "skylobi", "smplobi"}) { getCommand(c).setExecutor(lobby); getCommand(c).setTabCompleter(lobby); }
+        Bukkit.getScheduler().runTask(this, () -> { smp.init(); lobby.init(); });
 
         duel = new DuelManager(this);
         getCommand("duel").setExecutor(duel);
@@ -152,6 +156,8 @@ public final class PisanCore extends JavaPlugin {
     public SkillManager skills() { return skills; }
     public GeneratorListener generator() { return generator; }
     public EventManager events() { return events; }
+    public SmpManager smp() { return smp; }
+    public LobbyManager lobby() { return lobby; }
     public boolean lobbyWorld(org.bukkit.World w) { return lobby != null && lobby.world() != null && lobby.world().equals(w); }
 
     public void giveKey(java.util.UUID player, String key, int amount) {
