@@ -500,15 +500,81 @@ def apply_zoff(d, zoff, fp_zoff=None):
             r = list(v["rotation"]); r[2] = r[2] + add; v["rotation"] = r
     return out
 
+def gui_full(mj, m):
+    """Envanter/menu ikonu: modelin en uzun kenari slotu (16 px) doldurur, isik onden gelir."""
+    out = dict(mj)
+    xs = [v for e in mj["elements"] for v in (e["from"][0], e["to"][0])] if mj.get("elements") else [0, 16]
+    ys = [v for e in mj["elements"] for v in (e["from"][1], e["to"][1])] if mj.get("elements") else [0, 16]
+    span = max(max(xs) - min(xs), max(ys) - min(ys), 1.0)
+    sc = round(min(1.6, 15.0 / span), 4)
+    disp = json.loads(json.dumps(out["display"]))
+    cx = (max(xs) + min(xs)) / 2 - 8; cy = (max(ys) + min(ys)) / 2 - 8
+    gui = dict(disp.get("gui", {})); gui["scale"] = [sc] * 3
+    gui["translation"] = [round(-cx * sc, 3), round(-cy * sc, 3), 0]
+    disp["gui"] = gui
+    out["display"] = disp
+    out["gui_light"] = "front"
+    return out
+
 def new_display(d):
-    """1.21.4+ istemciler icin el tutma acilari (26.3'te goruntuyle dogrulandi)."""
-    out = json.loads(json.dumps(d))
+    """1.21.4+ istemciler icin el tutma acilari (26.3'te goruntuyle dogrulandi).
+    Sadece el gorunumleri doner; envanter (gui) vb. ust modelden miras kalir."""
+    out = {k: v for k, v in json.loads(json.dumps(d)).items() if k.startswith(("firstperson", "thirdperson"))}
     rot = {"firstperson_righthand": [0, -84, 0], "firstperson_lefthand": [0, 84, 0],
            "thirdperson_righthand": [0, 0, -90], "thirdperson_lefthand": [0, 0, 90]}
     for k, r in rot.items():
         if k in out:
             out[k]["rotation"] = r
     return out
+
+# ------------------------------------------------------------------ ozel alim menusu (CS2 tarzi)
+# Sandik menusu basligina ozel yazi tipiyle tam boy bir arka plan cizilir (mod gerektirmez).
+MENU_ROWS = [((214, 140, 60), "pistol"), ((86, 160, 222), "smg"), ((222, 92, 70), "rifle"),
+             ((150, 110, 210), "heavy"), ((96, 190, 120), "gear")]
+
+def _picto(d, kind, x, y, c):
+    """14x14 kucuk kategori simgesi."""
+    if kind == "pistol":
+        d.rectangle([x + 2, y + 4, x + 12, y + 6], fill=c); d.rectangle([x + 3, y + 7, x + 5, y + 11], fill=c)
+    elif kind == "smg":
+        d.rectangle([x + 1, y + 4, x + 13, y + 6], fill=c); d.rectangle([x + 4, y + 7, x + 5, y + 11], fill=c); d.rectangle([x + 8, y + 7, x + 9, y + 12], fill=c)
+    elif kind == "rifle":
+        d.rectangle([x, y + 5, x + 13, y + 6], fill=c); d.rectangle([x, y + 4, x + 3, y + 8], fill=c); d.rectangle([x + 6, y + 7, x + 7, y + 11], fill=c); d.rectangle([x + 9, y + 7, x + 10, y + 10], fill=c)
+    elif kind == "heavy":
+        d.rectangle([x, y + 5, x + 13, y + 7], fill=c); d.rectangle([x + 4, y + 3, x + 9, y + 4], fill=c); d.rectangle([x + 5, y + 8, x + 8, y + 12], fill=c)
+    else:
+        d.ellipse([x + 3, y + 4, x + 10, y + 12], fill=c); d.rectangle([x + 5, y + 1, x + 8, y + 4], fill=c)
+
+def buy_menu_png():
+    from PIL import ImageDraw
+    W, H = 176, 222
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    # ust panel (sandigin 6 satiri) - alt kisim (oyuncu envanteri) seffaf kalir, oyunun kendi dokusu gorunur
+    d.rounded_rectangle([0, 0, W - 1, 126], radius=4, fill=(24, 27, 32, 255), outline=(10, 11, 13, 255))
+    d.rectangle([1, 1, W - 2, 15], fill=(16, 18, 22, 255))
+    d.rectangle([1, 15, W - 2, 16], fill=(230, 140, 40, 255))
+    for r in range(6):
+        y = 17 + r * 18
+        for c in range(9):
+            x = 7 + c * 18
+            if r < len(MENU_ROWS) and c == 0:
+                col, kind = MENU_ROWS[r]
+                d.rectangle([x, y, x + 17, y + 17], fill=tuple(int(v * 0.35) for v in col) + (255,), outline=col + (255,))
+                _picto(d, kind, x + 2, y + 2, col + (255,))
+            elif r == 5:
+                d.rectangle([x, y, x + 17, y + 17], fill=(30, 34, 40, 255), outline=(44, 50, 58, 255))
+            else:
+                col = MENU_ROWS[r][0] if r < len(MENU_ROWS) else (60, 60, 60)
+                d.rectangle([x, y, x + 17, y + 17], fill=(36, 41, 48, 255), outline=(52, 59, 68, 255))
+                d.line([x + 1, y + 16, x + 16, y + 16], fill=tuple(int(v * 0.55) for v in col) + (255,))
+    buf = io.BytesIO(); img.save(buf, "PNG"); return buf.getvalue()
+
+def menu_font_json():
+    return {"providers": [
+        {"type": "space", "advances": {"\uf801": -1, "\uf808": -8, "\uf8b1": -177}},
+        {"type": "bitmap", "file": f"{NS}:font/buy_menu.png", "ascent": 13, "height": 222, "chars": ["\ue000"]},
+    ]}
 
 def model_json(m, kind):
     span = m.fit()
@@ -545,6 +611,8 @@ def build(out):
     files = {}
     files[f"assets/{NS}/textures/item/palette.png"] = palette_png()
     files["assets/minecraft/textures/misc/pumpkinblur.png"] = scope_overlay_png()
+    files[f"assets/{NS}/textures/font/buy_menu.png"] = buy_menu_png()
+    files[f"assets/{NS}/font/menu.json"] = json.dumps(menu_font_json(), indent=1).encode()
     # durbun acikken basa takilan balkabagi baskalarina gorunmesin: bos model
     files[f"assets/{NS}/models/item/scope_hidden.json"] = json.dumps({"textures": {"particle": f"{NS}:item/palette"}, "elements": []}).encode()
     # silahlar demir at zirhi uzerinde: arbalet gibi "germe" animasyonu olmadigi icin istemci
@@ -570,6 +638,8 @@ def build(out):
             if mj is not None and zoff:
                 # 1.20.1: 1. sahis 26.x'e gore ters doner (ikisi de oyunda goruntuyle dogrulandi)
                 mj = dict(mj); mj["display"] = apply_zoff(orig_display, zoff, fp_zoff=-zoff)
+            if mj is not None and kind == "gun" and "display" in mj:
+                mj = gui_full(mj, m)
             if mj is not None:
                 files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(mj, separators=(",", ":")).encode()
             base["overrides"].append({"predicate": {"custom_model_data": cmd}, "model": f"{NS}:item/{name}"})

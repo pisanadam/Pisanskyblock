@@ -844,47 +844,90 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
       var1.openInventory(var2);
    }
 
+   /** Menu (Adventure basligiyla): ozel yazi tipindeki arka plan icin. */
+   Inventory menuC(String kind, int page, int size, net.kyori.adventure.text.Component title) {
+      StrikePlugin.Menu m = new StrikePlugin.Menu(kind, page);
+      m.inv = Bukkit.createInventory(m, size, title);
+      return m.inv;
+   }
+
+   /**
+    * CS2 tarzi alim menusu. Arka plan kaynak paketindeki ozel yazi tipiyle basliga cizilir
+    * (strike-pack: assets/pisanstrike/font/menu.json, textures/font/buy_menu.png).
+    * Satirlar: 0 tabanca, 1 SMG, 2 tufek, 3 keskin/pompali/agir, 4 ekipman ve bombalar;
+    * her satirin ilk kutusu kategori simgesi (arka planda), silahlar 2-9. kutularda.
+    */
    void openShop(Player var1) {
       Game var2 = this.gameOf.get(var1.getUniqueId());
       if (var2 == null) {
          var1.sendMessage("§7Market sadece maçta açılır.");
-      } else {
-         Game.PS var3 = var2.players.get(var1.getUniqueId());
-         if (var2.canBuy(var1, var3, true)) {
-            int var4 = var2.sideOf(var3);
-            Inventory var5 = this.menu("shop", 0, 54, "§aMarket §7· §a$" + (var2.unlimited ? "∞" : var3.money));
-            int[] var6 = new int[6];
-
-            for (Weapon var8 : Weapon.SHOP) {
-               if ((var8.side != Weapon.Side.T || var4 != 1) && (var8.side != Weapon.Side.CT || var4 != 0)) {
-                  byte var9 = switch (var8.kind) {
-                     case PISTOL -> 0;
-                     case SMG -> 1;
-                     case SHOTGUN, HEAVY -> 2;
-                     case RIFLE, SNIPER -> 3;
-                     default -> 4;
-                  };
-                  if (var6[var9] < 9) {
-                     ItemStack var10 = this.item(var8, null);
-                     ItemMeta var11 = var10.getItemMeta();
-                     ArrayList var12 = new ArrayList(var11.getLore() == null ? List.of() : var11.getLore());
-                     boolean var13 = var2.unlimited || var3.money >= var8.price;
-                     var12.add(0, (var13 ? "§a" : "§c") + "$" + var8.price + (var8.reward != 300 && var8.gun() ? " §7· öldürme ödülü §f$" + var8.reward : ""));
-                     var11.setLore(var12);
-                     var11.getPersistentDataContainer().set(this.KEY_UI, PersistentDataType.STRING, "buy:" + var8.id);
-                     var10.setItemMeta(var11);
-                     var5.setItem(var9 * 9 + var6[var9]++, var10);
-                  }
-               }
-            }
-
-            if (var2.anyItem) {
-               var5.setItem(53, this.ui(Material.ENDER_CHEST, "allitems", "§d§lBütün eşyalar", "§7Minecraft'ın her eşyası (bedava)."));
-            }
-
-            var1.openInventory(var5);
-         }
+         return;
       }
+
+      Game.PS var3 = var2.players.get(var1.getUniqueId());
+      if (!var2.canBuy(var1, var3, true)) {
+         return;
+      }
+
+      int side = var2.sideOf(var3);
+      String money = var2.unlimited ? "∞" : String.valueOf(var3.money);
+      net.kyori.adventure.text.Component title = net.kyori.adventure.text.Component.text("\uf808\ue000\uf8b1")
+         .font(net.kyori.adventure.key.Key.key("pisanstrike", "menu"))
+         .color(net.kyori.adventure.text.format.NamedTextColor.WHITE)
+         .append(net.kyori.adventure.text.Component.text("  ALIŞ-VERİŞ").font(net.kyori.adventure.key.Key.key("minecraft", "default"))
+            .color(net.kyori.adventure.text.format.TextColor.color(0xF0A040)).decorate(net.kyori.adventure.text.format.TextDecoration.BOLD))
+         .append(net.kyori.adventure.text.Component.text("  " + (side == 1 ? "CT" : "T") + "  ").font(net.kyori.adventure.key.Key.key("minecraft", "default"))
+            .color(side == 1 ? net.kyori.adventure.text.format.TextColor.color(0x5AA0E0) : net.kyori.adventure.text.format.TextColor.color(0xE09A3C)))
+         .append(net.kyori.adventure.text.Component.text("$" + money).font(net.kyori.adventure.key.Key.key("minecraft", "default"))
+            .color(net.kyori.adventure.text.format.TextColor.color(0x7CE07C)));
+      Inventory inv = this.menuC("shop", 0, 54, title);
+      String[] rowNames = {"§6§lTabancalar", "§b§lHafif makineli", "§c§lTüfekler", "§d§lKeskin nişancı · Pompalı · Ağır", "§a§lEkipman · Bombalar"};
+      int[] col = new int[5];
+      for (Weapon w : Weapon.SHOP) {
+         if (w.side == Weapon.Side.T && side == 1 || w.side == Weapon.Side.CT && side == 0) {
+            continue;
+         }
+
+         int row = switch (w.kind) {
+            case PISTOL -> 0;
+            case SMG -> 1;
+            case RIFLE -> 2;
+            case SNIPER, SHOTGUN, HEAVY -> 3;
+            case KNIFE, BOMB -> -1;
+            default -> 4;
+         };
+         if (row < 0 || col[row] >= 8) {
+            continue;
+         }
+
+         ItemStack it = this.item(w, null);
+         ItemMeta meta = it.getItemMeta();
+         boolean afford = var2.unlimited || var3.money >= w.price;
+         List<String> lore = new ArrayList<>();
+         lore.add(rowNames[row]);
+         lore.add((afford ? "§a" : "§c") + "§l$" + w.price + (afford ? "" : " §7(paran yetmiyor)"));
+         if (w.gun()) {
+            lore.add("§7Hasar §f" + (int) w.damage + (w.pellets > 1 ? " ×" + w.pellets : "") + "  §7Şarjör §f" + w.mag + "/" + w.reserve);
+            lore.add("§7Atış hızı §f" + w.rpm + "/dk  §7Zırh delme §f%" + Math.round(w.armorPen * 100));
+            if (w.reward != 300) {
+               lore.add("§7Öldürme ödülü §e$" + w.reward);
+            }
+         }
+
+         lore.add(afford ? "§eTıkla: satın al" : "§8Satın alınamaz");
+         meta.setLore(lore);
+         meta.getPersistentDataContainer().set(this.KEY_UI, PersistentDataType.STRING, "buy:" + w.id);
+         it.setItemMeta(meta);
+         inv.setItem(row * 9 + 1 + col[row]++, it);
+      }
+
+      inv.setItem(45, this.ui(Material.GOLD_NUGGET, "shopinfo", "§a§lParan: $" + money,
+         "§7Satın alma sadece tur başında ve", "§7doğduğun bölgede yapılabilir.", "§7Kısayol: §e/market"));
+      if (var2.anyItem) {
+         inv.setItem(53, this.ui(Material.ENDER_CHEST, "allitems", "§d§lBütün eşyalar", "§7Minecraft'ın her eşyası (bedava)."));
+      }
+
+      var1.openInventory(inv);
    }
 
    void openAllItems(Player var1, int var2) {
