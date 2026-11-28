@@ -13,6 +13,7 @@ import io, json, os, sys, zipfile, hashlib
 from PIL import Image
 
 NS = "pisanstrike"
+GUN_ITEM = "iron_horse_armor"
 
 # ---------------------------------------------------------------- palet (16x16, 4x4 kareler)
 PALETTE = {
@@ -394,6 +395,7 @@ VANILLA = {
                                {"predicate": {"pulling": 1, "pull": 1.0}, "model": "item/crossbow_pulling_2"},
                                {"predicate": {"charged": 1}, "model": "item/crossbow_arrow"},
                                {"predicate": {"charged": 1, "firework": 1}, "model": "item/crossbow_firework"}]},
+    "iron_horse_armor": {"parent": "item/generated", "textures": {"layer0": "item/iron_horse_armor"}},
     "iron_sword": {"parent": "item/handheld", "textures": {"layer0": "item/iron_sword"}},
     "shears": {"parent": "item/generated", "textures": {"layer0": "item/shears"}},
     "lightning_rod": {"parent": "block/lightning_rod"},
@@ -412,7 +414,9 @@ def build(out):
     files["assets/minecraft/textures/misc/pumpkinblur.png"] = scope_overlay_png()
     # durbun acikken basa takilan balkabagi baskalarina gorunmesin: bos model
     files[f"assets/{NS}/models/item/scope_hidden.json"] = json.dumps({"textures": {"particle": f"{NS}:item/palette"}, "elements": []}).encode()
-    groups = {"crossbow": {cmd: v for cmd, v in GUNS.items()}}
+    # silahlar demir at zirhi uzerinde: arbalet gibi "germe" animasyonu olmadigi icin istemci
+    # sag tik basiliyken duzenli sinyal yollar (arbalette tek atislik silahlar takiliyordu)
+    groups = {GUN_ITEM: {cmd: v for cmd, v in GUNS.items()}}
     groups.update(OTHER)
     for item, entries in groups.items():
         base = json.loads(json.dumps(VANILLA[item]))
@@ -420,7 +424,7 @@ def build(out):
         cases = []
         for cmd in sorted(entries):
             name, m = entries[cmd]
-            kind = "gun" if item in ("crossbow", "iron_sword", "lightning_rod") else "thing"
+            kind = "gun" if item in (GUN_ITEM, "iron_sword", "lightning_rod") else "thing"
             if m is not None:
                 files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(model_json(m, kind), separators=(",", ":")).encode()
             base["overrides"].append({"predicate": {"custom_model_data": cmd}, "model": f"{NS}:item/{name}"})
@@ -428,8 +432,6 @@ def build(out):
         files[f"assets/minecraft/models/item/{item}.json"] = json.dumps(base, indent=1).encode()
         # 1.21.4+ : items/<item>.json (overlay)
         fallback = {"type": "minecraft:model", "model": f"minecraft:item/{item}"}
-        if item == "crossbow":
-            fallback = {"type": "minecraft:model", "model": "minecraft:item/crossbow"}
         entries_new = [{"threshold": cmd, "model": {"type": "minecraft:model", "model": mdl}} for cmd, mdl in cases]
         files[f"ov_1214/assets/minecraft/items/{item}.json"] = json.dumps(
             {"model": {"type": "minecraft:range_dispatch", "property": "minecraft:custom_model_data", "index": 0,

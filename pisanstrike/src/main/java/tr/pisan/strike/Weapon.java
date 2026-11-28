@@ -150,7 +150,7 @@ final class Weapon {
          var25,
          var26,
          var27,
-         Material.CROSSBOW,
+         Material.IRON_HORSE_ARMOR,
          var28
       );
       ALL.put(var0, var29);
@@ -197,7 +197,7 @@ final class Weapon {
          var17,
          var16,
          false,
-         Material.CROSSBOW,
+         Material.IRON_HORSE_ARMOR,
          var18
       );
       ALL.put(var0, var19);

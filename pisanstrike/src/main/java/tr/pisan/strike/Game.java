@@ -828,22 +828,35 @@ final class Game {
             var2.reloadingItem = null;
          }
 
-         if (var6 != null && var6.gun() && var7 != null && var3 < var2.triggerUntil && this.canShoot()) {
-            if ((var6.auto || !var2.pressUsed) && var3 >= var2.nextShot && var2.reloadingItem == null) {
+         // Otomatik silah: tetik basili kaldikca (istemci ~200 ms'de bir sinyal yollar) ates eder.
+         // Tek atislik silah: her tiklama bir atis istegidir; silahin atis hizi dolunca o istek atilir.
+         boolean var39 = var6 != null && var6.gun() && var7 != null && this.canShoot()
+            && (var6.auto ? var3 < var2.triggerUntil : var2.shotRequests > 0 && var3 - var2.lastTrigger < 400L);
+         if (!var39 && var6 != null && !var6.auto && var3 - var2.lastTrigger >= 400L) {
+            var2.shotRequests = 0;
+         }
+
+         if (var39) {
+            // sunucu saniyede 20 kez guncellenir; 600 mermi/dk'dan hizli silahlar ayni guncellemede
+            // birden fazla mermi atabilsin diye sonraki atis zamani birikimli tutulur
+            for (int var45 = 0; var45 < (var6.auto ? 3 : 1) && var3 >= var2.nextShot && var2.reloadingItem == null; var45++) {
                int[] var11 = this.ammo.computeIfAbsent(var7, var1x -> new int[]{var6.mag, var6.reserve});
                if (var11[0] <= 0) {
                   var1.playSound(var1.getLocation(), Sound.BLOCK_LEVER_CLICK, 1.0F, 1.8F);
                   this.reload(var1, var2, var6, var7);
-                  var2.pressUsed = true;
+                  var2.shotRequests = 0;
+                  break;
                } else {
                   var11[0]--;
                   this.fire(var1, var2, var6);
-                  var2.nextShot = var3 + var6.shotMillis();
-                  var2.pressUsed = true;
+                  var2.nextShot = Math.max(var2.nextShot, var3 - 60L) + var6.shotMillis();
                   var2.spray++;
+                  if (!var6.auto) {
+                     var2.shotRequests = Math.max(0, var2.shotRequests - 1);
+                  }
                }
             }
-         } else if (var3 > var2.triggerUntil + 250L) {
+         } else if (var3 > Math.max(var2.triggerUntil, var2.lastTrigger + 150L) + 250L) {
             var2.spray = Math.max(0, var2.spray - 1);
          }
 
@@ -885,12 +898,11 @@ final class Game {
       Game.PS var2 = this.players.get(var1.getUniqueId());
       if (var2 != null && var2.alive) {
          long var3 = System.currentTimeMillis();
-         if (var3 - var2.lastTrigger > 260L) {
-            var2.pressUsed = false;
-         }
-
          var2.lastTrigger = var3;
-         var2.triggerUntil = var3 + 240L;
+         // istemci basili tutarken ~200 ms'de bir sinyal yollar; gecikmeye pay birak
+         var2.triggerUntil = var3 + 270L;
+         // tek atislik silahlarda ust uste tiklamalar birikmesin (en fazla 2 bekleyen atis)
+         var2.shotRequests = Math.min(2, var2.shotRequests + 1);
       }
    }
 
@@ -2276,6 +2288,7 @@ final class Game {
       long respawnAt;
       long spawnSafeUntil;
       boolean pressUsed;
+      int shotRequests;
       boolean scoped;
       String reloadingItem;
       int spray;

@@ -1534,6 +1534,20 @@ public final class StrikePlugin extends JavaPlugin implements Listener {
             case "market":
                this.openShop(var5);
                break;
+            case "strikeadmin":
+               if (!var5.hasPermission("pisanstrike.admin")) {
+                  var5.sendMessage("§cYetkin yok.");
+               } else if (var4.length >= 2 && var4[0].equalsIgnoreCase("ver") && Weapon.get(var4[1]) != null) {
+                  Player var30x = var4.length >= 3 ? Bukkit.getPlayerExact(var4[2]) : var5;
+                  if (var30x != null) {
+                     Game var31x = this.gameOf.get(var30x.getUniqueId());
+                     var30x.getInventory().addItem(new ItemStack[]{var31x != null ? var31x.newWeapon(Weapon.get(var4[1])) : this.item(Weapon.get(var4[1]), null)});
+                     var5.sendMessage("§a" + Weapon.get(var4[1]).name + " verildi: " + var30x.getName());
+                  }
+               } else {
+                  var5.sendMessage("§7/strikeadmin ver <silah> [oyuncu] · silahlar: " + String.join(", ", Weapon.ALL.keySet()));
+               }
+               break;
             case "hizli":
                if (var4.length > 0 && var4[0].matches("[1-5](v[1-5])?")) {
                   this.ranked.join(var5, Ranked.CASUAL + (var4[0].charAt(0) - '0'));
