@@ -5,8 +5,8 @@ exaroton-token: "BURAYA_TOKEN"
 # auth-secret bos birakilirsa ilk acilista uretilir. Ayni deger hedeflerdeki PisanHub ayarina yazilmali. GIT'E KOYMA.
 auth-secret: ""
 auth:
-  # ayni IP'den bu kadar dakika icinde tekrar gelince sifre sorulmaz
-  session-minutes: 720
+  # Ayni IP ile 2 hafta boyunca sifre sorulmaz; IP degisince veya sure dolunca tekrar sorulur
+  session-minutes: 20160
   max-accounts-per-ip: 3
 # Bilet gecerlilik suresi (saniye)
 ticket-seconds: 120

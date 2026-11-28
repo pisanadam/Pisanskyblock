@@ -264,7 +264,7 @@ public final class Auth implements Listener {
     private synchronized void rememberSession(String name, String ip) {
         if (ip.isEmpty()) return;
         db.set("accounts." + key(name) + ".session-ip", ip);
-        db.set("accounts." + key(name) + ".session-until", System.currentTimeMillis() + plugin.getConfig().getInt("auth.session-minutes", 720) * 60_000L);
+        db.set("accounts." + key(name) + ".session-until", System.currentTimeMillis() + plugin.getConfig().getInt("auth.session-minutes", 20160) * 60_000L);
         save();
     }
 

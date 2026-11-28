@@ -52,7 +52,7 @@ Komutlar: `/oyun [pvp|skyblock|sfleague|strike]`, `/pvp`, `/skyblock`, `/sfleagu
 Kurulum: `cd pisangames && mvn package`, jar'ı `plugins/` içine at. `plugins/PisanGames/config.yml` içinde `exaroton-token` ayarla (git'e koyma). Hedef sunucularda transfer açık olmalı: Paper'da `accepts-transfers=true`, Velocity'de `accepts-transfers = true`.
 
 ### Crack giriş, şifre ekranı ve biletli geçiş (PisanGames 2.0)
-- Lobi `online-mode=false`. 1.21.6+ istemcilere oyuna girmeden **Kayıt / Giriş penceresi** (dialog) çıkar; eski sürümlerde sohbetten `/kayit <şifre> <şifre>`, `/giris <şifre>`. `/sifredegistir <eski> <yeni>`. Hesaplar `plugins/PisanGames/accounts.yml` (PBKDF2). Aynı IP'den 12 saat içinde dönen oyuncuya şifre sorulmaz.
+- Lobi `online-mode=false`. 1.21.6+ istemcilere oyuna girmeden **Kayıt / Giriş penceresi** (dialog) çıkar; eski sürümlerde sohbetten `/kayit <şifre> <şifre>`, `/giris <şifre>`. `/sifredegistir <eski> <yeni>`. Hesaplar `plugins/PisanGames/accounts.yml` (PBKDF2). Şifre 2 haftada bir sorulur; IP adresi değişirse hemen tekrar sorulur.
 - Transferden önce lobi istemciye imzalı bir **bilet** çerezi (`pisan:ticket`, HMAC-SHA256, 2 dk) yazar. Hedefte şifre sorulmaz:
   - Pisanskyblock: `online-mode=false` + PisanHub `require-ticket: true` → biletsiz giriş reddedilir; eski oyuncuların UUID'leri `uuids.yml` ile korunur (ilk açılışta `usercache.json`'dan).
   - pisanpvp (Velocity): online-mode açık kalır (doğrudan gelen premium/1.8 oyuncular eskisi gibi); lobiden **transfer** ile gelen bağlantı Mojang doğrulaması olmadan alınır ve bilet zorunludur.
