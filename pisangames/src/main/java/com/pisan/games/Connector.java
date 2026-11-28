@@ -36,12 +36,9 @@ public final class Connector {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 ExarotonClient.ServerInfo info = api.get(gs.id());
-                if (info.status() == ExarotonClient.ONLINE) {
+                if (ready(gs, info)) {
                     Bukkit.getScheduler().runTask(plugin, () -> send(p, gs, info));
                     return;
-                }
-                if (info.status() == ExarotonClient.OFFLINE || info.status() == ExarotonClient.CRASHED) {
-                    api.start(gs.id());
                 }
                 Bukkit.getScheduler().runTask(plugin, () -> enqueue(p, gs));
             } catch (Exception e) {
@@ -62,7 +59,7 @@ public final class Connector {
                 0f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
         p.showBossBar(bar);
         p.sendMessage(Component.text("» ", NamedTextColor.DARK_GRAY).append(gs.displayName())
-                .append(Component.text(" kapaliydi, baslatiliyor. Acilinca otomatik gonderileceksin.", NamedTextColor.YELLOW)));
+                .append(Component.text(" hazirlaniyor. Hazir olunca otomatik gonderileceksin.", NamedTextColor.YELLOW)));
         if (set.size() == 1) poll(gs, System.currentTimeMillis());
     }
 
@@ -72,19 +69,21 @@ public final class Connector {
             Set<UUID> set = waiting.get(gs.key());
             if (set == null || set.isEmpty()) { removeBar(gs.key()); return; }
             ExarotonClient.ServerInfo info;
-            try { info = plugin.api().get(gs.id()); }
+            boolean ok = false;
+            try { info = plugin.api().get(gs.id()); ok = ready(gs, info); }
             catch (Exception e) { info = null; plugin.getLogger().warning("exaroton durum hatasi: " + e.getMessage()); }
+            final boolean allReady = ok;
             long elapsed = System.currentTimeMillis() - startedAt;
             final ExarotonClient.ServerInfo fi = info;
             Bukkit.getScheduler().runTask(plugin, () -> {
                 BossBar bar = bars.get(gs.key());
-                if (fi != null && fi.status() == ExarotonClient.ONLINE) {
-                    // Sunucu "online" olduktan sonra pluginlerin yuklenmesi icin kisa bir bekleme
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> flush(gs, fi), 60L);
+                if (allReady) {
+                    // "online" olduktan sonra pluginlerin (ve proxy'nin backend'i listeye eklemesinin) bitmesi icin bekleme
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> flush(gs, fi), gs.requires().isEmpty() ? 60L : 140L);
                     if (bar != null) { bar.progress(1f); bar.name(gs.displayName().append(Component.text(" acildi! Gonderiliyorsun...", NamedTextColor.GREEN))); bar.color(BossBar.Color.GREEN); }
                     return;
                 }
-                if (elapsed > timeoutMs || (fi != null && fi.status() == ExarotonClient.CRASHED)) {
+                if (elapsed > timeoutMs) {
                     for (UUID u : new ArrayList<>(set)) {
                         Player p = Bukkit.getPlayer(u);
                         if (p != null) p.sendMessage(Component.text(gs.plainName() + " acilamadi, biraz sonra tekrar dene.", NamedTextColor.RED));
@@ -99,6 +98,29 @@ public final class Connector {
                 poll(gs, startedAt);
             });
         }, 60L);
+    }
+
+    /**
+     * Ana sunucu ve gerekli tum arka sunucular acik mi? Degilse kapali/cokmus olanlari baslatir.
+     * Ornek: PvP bir Velocity proxy; backend'ler kapaliyken oyuncu gelirse proxy
+     * "Ag kisa sureli bakimda" diye atiyor. Bu yuzden hepsi acilmadan aktarma yapilmaz.
+     */
+    private boolean ready(GameServer gs, ExarotonClient.ServerInfo main) throws Exception {
+        boolean ok = startIfDown(gs.id(), main.status()) && main.status() == ExarotonClient.ONLINE;
+        for (String dep : gs.requires()) {
+            ExarotonClient.ServerInfo d = plugin.api().get(dep);
+            if (!startIfDown(dep, d.status()) || d.status() != ExarotonClient.ONLINE) ok = false;
+        }
+        return ok;
+    }
+
+    /** Kapali/cokmusse baslatir; false = su an acik degil. */
+    private boolean startIfDown(String id, int status) throws Exception {
+        if (status == ExarotonClient.OFFLINE || status == ExarotonClient.CRASHED) {
+            plugin.api().start(id);
+            return false;
+        }
+        return status == ExarotonClient.ONLINE;
     }
 
     private void flush(GameServer gs, ExarotonClient.ServerInfo info) {
@@ -148,6 +170,7 @@ public final class Connector {
     private static String statusText(ExarotonClient.ServerInfo i) {
         if (i == null) return "bekleniyor";
         return switch (i.status()) {
+            case ExarotonClient.ONLINE -> "oyun sunuculari aciliyor";
             case ExarotonClient.STARTING -> "baslatiliyor";
             case ExarotonClient.LOADING -> "yukleniyor";
             case ExarotonClient.PREPARING, ExarotonClient.PENDING -> "hazirlaniyor";

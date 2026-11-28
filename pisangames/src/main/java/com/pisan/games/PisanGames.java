@@ -48,7 +48,8 @@ public final class PisanGames extends JavaPlugin {
             ConfigurationSection s = sec.getConfigurationSection(k);
             Material icon = Material.matchMaterial(s.getString("icon", "COMPASS"));
             servers.put(k, new GameServer(k, s.getString("id"), s.getString("name", k),
-                    icon == null ? Material.COMPASS : icon, s.getInt("slot", 13), s.getStringList("lore")));
+                    icon == null ? Material.COMPASS : icon, s.getInt("slot", 13), s.getStringList("lore"),
+                    s.getStringList("requires")));
         }
     }
 

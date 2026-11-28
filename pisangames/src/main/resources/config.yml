@@ -20,6 +20,8 @@ servers:
     name: "&c&lPisan PvP"
     icon: DIAMOND_SWORD
     slot: 10
+    # Proxy'nin arka sunuculari: hepsi acilmadan aktarma yapilmaz
+    requires: [jjIPSedKM9u4zEiX, rXCwX8k1YmYNqRAi]
     lore:
       - "&7Duello, FFA ve turnuva"
       - "&71.8 + guncel surumler"

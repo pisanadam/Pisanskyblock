@@ -6,7 +6,9 @@ import org.bukkit.Material;
 
 import java.util.List;
 
-public record GameServer(String key, String id, String name, Material icon, int slot, List<String> lore) {
+public record GameServer(String key, String id, String name, Material icon, int slot, List<String> lore,
+                         /** Bu sunucunun calismasi icin acik olmasi gereken arka sunucular (or. proxy'nin backendleri). */
+                         List<String> requires) {
     private static final LegacyComponentSerializer L = LegacyComponentSerializer.legacyAmpersand();
     public Component displayName() { return L.deserialize(name); }
     public String plainName() { return name.replaceAll("&[0-9a-fk-orA-FK-OR]", ""); }
