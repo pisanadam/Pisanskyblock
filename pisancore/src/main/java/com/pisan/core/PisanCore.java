@@ -22,6 +22,7 @@ public final class PisanCore extends JavaPlugin {
     private SellManager sell;
     private SmpManager smp;
     private InventoryManager invs;
+    private AuctionManager auction;
 
     @Override
     public void onEnable() {
@@ -111,6 +112,12 @@ public final class PisanCore extends JavaPlugin {
         getCommand("sat").setTabCompleter(sell);
         Bukkit.getScheduler().runTaskLater(this, sell::load, 60L);
 
+        auction = new AuctionManager(this);
+        Bukkit.getPluginManager().registerEvents(auction, this);
+        getCommand("ah").setExecutor(auction);
+        getCommand("ah").setTabCompleter(auction);
+        Bukkit.getScheduler().runTaskLater(this, auction::start, 20L);
+
         EcoCommands eco = new EcoCommands(this, store);
         for (String c : new String[]{"bal", "pay", "baltop", "eco", "pisancore"}) {
             getCommand(c).setExecutor(eco);
@@ -128,6 +135,7 @@ public final class PisanCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (auction != null) auction.saveNow();
         if (events != null) events.shutdown();
         if (trade != null) trade.shutdown();
         if (minions != null) minions.shutdown();

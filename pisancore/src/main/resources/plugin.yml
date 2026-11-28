@@ -5,7 +5,7 @@ api-version: '1.21'
 author: Pisan
 description: Pisan Skyblock/SMP - coin ekonomisi, tas jeneratoru odulleri, kasa anahtarlari, SMP dunyasi
 depend: [Vault]
-loadbefore: [AuctionHouse, EconomyShopGUI, BentoBox]
+loadbefore: [EconomyShopGUI, BentoBox]
 commands:
   bal:
     aliases: [balance, para, coin, money]
@@ -67,6 +67,9 @@ commands:
   sat:
     aliases: [sell, satis]
     description: Satis penceresi (/sat el, /sat fiyat)
+  ah:
+    aliases: [pazar, auction, auctionhouse, ihale]
+    description: Oyuncu pazari (Skyblock ve SMP ayri)
   pisancore:
     description: Admin komutu (reload)
     permission: pisancore.admin

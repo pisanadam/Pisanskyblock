@@ -16,6 +16,15 @@ economy:
   currency-plural: "Coin"
   starting-balance: 500.0
 
+# Oyuncu pazari (/ah). Skyblock ve SMP pazarlari ayridir.
+auction:
+  tax: 0.03            # satistan kesilen vergi (%3)
+  max-listings: 10     # mod basina oyuncu ilan siniri
+  duration-hours: 48
+  min-price: 1
+  max-price: 1000000000
+  blocked-materials: [ENCHANTED_BOOK]   # iki pazarda da satilamaz
+
 # Yeni oyuncuya verilecek baslangic anahtarlari
 starter-keys:
   enabled: true

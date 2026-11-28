@@ -20,7 +20,7 @@ SMP'den çıkınca son konum saklanır, `/smp` ile kaldığın yere dönersin.
 
 ## Sunucudaki pluginler
 ViaVersion + ViaBackwards, BentoBox + BSkyBlock, LuckPerms, VaultUnlocked, PlaceholderAPI,
-EconomyShopGUI (market), AuctionHouse (oyuncu pazarı), GrimAC (anti-hile), PisanCore.
+EconomyShopGUI (market), GrimAC (anti-hile), PisanCore (oyuncu pazarı `/ah` dahil; eski AuctionHouse eklentisi kaldırıldı).
 
 Ada koruma alanı: 500x500 (protection-range 250).
 
@@ -32,7 +32,7 @@ Ada koruma alanı: 500x500 (protection-range 250).
 | `/sat` (`/sell`) | Satış penceresi (büyülü eşya/kitaplar dahil). `/sat el`: elindekini sat, `/sat fiyat`: değerine bak |
 | `/sellall <inventory\|hand\|eşya>` (`/hepsinisat`) | Toplu satış |
 | `/market <eşya>` | O eşyanın satın alma ekranını direkt açar (ör. `/market elmas`, `/market hopper`, `/market efficiency`) |
-| `/ah` | Oyuncu pazarı (`/ah sell <fiyat>` elindekini satışa koyar) |
+| `/ah` (`/pazar`) | Oyuncu pazarı. **Skyblock ve SMP pazarları ayrı.** `/ah sat <fiyat>` elindekini satışa koyar, `/ah ilanlarim`, `/ah kutu` (teslim kutusu). Büyü kitabı satılamaz. Vergi %3, 48 saat, mod başına 10 ilan |
 | `/kasa` | Kasa menüsü (sol tık aç, sağ tık içerik) |
 | `/kasa anahtar` | Anahtarlarını listeler |
 | `/duel <oyuncu>` | Eşyalı duel isteği (`/duel kabul`, `/duel red`, `/duel pes`). Kazanan kaybedenin tüm eşyalarını alır |
