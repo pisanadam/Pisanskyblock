@@ -1,7 +1,7 @@
 name: PisanGames
 version: ${project.version}
 main: com.pisan.games.PisanGames
-api-version: '1.21'
+api-version: '26.3'
 author: Pisan
 description: Pisan Games lobisi - PisanPvP, Pisanskyblock, Pisan SF League ve Pisan Strike'a gecis
 softdepend: [ViaVersion]
@@ -26,3 +26,12 @@ commands:
   pisangames:
     description: Admin (reload, setspawn, rebuild)
     permission: pisangames.admin
+  giris:
+    aliases: [login, l]
+    description: Lobiye giris yap
+  kayit:
+    aliases: [register, reg]
+    description: Kayit ol
+  sifredegistir:
+    aliases: [changepassword]
+    description: Sifreni degistir

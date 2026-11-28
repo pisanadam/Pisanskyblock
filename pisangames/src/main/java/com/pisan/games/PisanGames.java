@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class PisanGames extends JavaPlugin {
     private ExarotonClient api;
     private Connector connector;
+    private Auth auth;
     private final Map<String, GameServer> servers = new LinkedHashMap<>();
     /** sunucu anahtari -> son bilinen durum (menude gosterilir) */
     private final Map<String, ExarotonClient.ServerInfo> status = new ConcurrentHashMap<>();
@@ -25,6 +26,14 @@ public final class PisanGames extends JavaPlugin {
         saveDefaultConfig();
         load();
         connector = new Connector(this);
+        auth = new Auth(this);
+        getServer().getPluginManager().registerEvents(auth, this);
+        if (getConfig().getString("auth-secret", "").length() < 16) {
+            byte[] b = new byte[32]; new java.security.SecureRandom().nextBytes(b);
+            getConfig().set("auth-secret", java.util.HexFormat.of().formatHex(b));
+            saveConfig();
+            getLogger().warning("Yeni auth-secret uretildi; ayni degeri hedef sunucularin PisanHub ayarina koy.");
+        }
         LobbyListener listener = new LobbyListener(this);
         getServer().getPluginManager().registerEvents(listener, this);
         Bukkit.getScheduler().runTask(this, () -> {
@@ -33,7 +42,7 @@ public final class PisanGames extends JavaPlugin {
                 new LobbyBuilder(this).build(spawn());
                 getConfig().set("built", true);
                 saveConfig();
-            }
+            } else new LobbyBuilder(this).labels(spawn());
         });
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::refreshStatus, 20L, 20L * 15);
         if (!api.hasToken()) getLogger().warning("config.yml icinde exaroton-token ayarlanmamis!");
@@ -78,6 +87,11 @@ public final class PisanGames extends JavaPlugin {
 
     public ExarotonClient api() { return api; }
     public Connector connector() { return connector; }
+    public Auth auth() { return auth; }
+    public String secret() { return getConfig().getString("auth-secret", ""); }
+    public String probeName() { return getConfig().getString("probe-name", "PisanTest"); }
+    @SuppressWarnings("deprecation")
+    public int protocol() { return Bukkit.getUnsafe().getProtocolVersion(); }
     public Collection<GameServer> servers() { return servers.values(); }
     public GameServer server(String key) { return servers.get(key); }
     public ExarotonClient.ServerInfo status(String key) { return status.get(key); }
@@ -96,6 +110,8 @@ public final class PisanGames extends JavaPlugin {
         String name = cmd.getName().toLowerCase(Locale.ROOT);
         if (name.equals("pisangames")) return admin(sender, args);
         if (!(sender instanceof Player p)) { sender.sendMessage("Sadece oyuncular."); return true; }
+        if (name.equals("giris") || name.equals("kayit") || name.equals("sifredegistir")) { auth.command(p, name, args); return true; }
+        if (!auth.isAuthed(p)) { p.sendMessage(Component.text("Önce giriş yap.", NamedTextColor.RED)); return true; }
         switch (name) {
             case "lobi" -> p.teleport(spawn());
             case "pvp", "skyblock", "sfleague", "strike" -> go(p, name);

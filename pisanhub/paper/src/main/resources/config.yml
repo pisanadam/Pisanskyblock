@@ -3,3 +3,11 @@ exaroton-token: "BURAYA_TOKEN"
 # Pisan Games lobi sunucusu
 lobby-id: kYqtelwqpRHsIbWp
 start-timeout-seconds: 180
+
+# Pisan Games lobisinin imzali bileti (lobideki auth-secret ile ayni olmali). GIT'E KOYMA.
+ticket-secret: ""
+# true: sadece lobiden (bilet ile) gelenler girebilir. online-mode=false sunucularda ac.
+require-ticket: false
+lobby-address: Pisangames.exaroton.me
+# lobinin giris testi oyuncusu (join/quit mesaji gosterilmez)
+probe-name: PisanTest

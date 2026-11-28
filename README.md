@@ -51,6 +51,16 @@ Komutlar: `/oyun [pvp|skyblock|sfleague|strike]`, `/pvp`, `/skyblock`, `/sfleagu
 
 Kurulum: `cd pisangames && mvn package`, jar'ı `plugins/` içine at. `plugins/PisanGames/config.yml` içinde `exaroton-token` ayarla (git'e koyma). Hedef sunucularda transfer açık olmalı: Paper'da `accepts-transfers=true`, Velocity'de `accepts-transfers = true`.
 
+### Crack giriş, şifre ekranı ve biletli geçiş (PisanGames 2.0)
+- Lobi `online-mode=false`. 1.21.6+ istemcilere oyuna girmeden **Kayıt / Giriş penceresi** (dialog) çıkar; eski sürümlerde sohbetten `/kayit <şifre> <şifre>`, `/giris <şifre>`. `/sifredegistir <eski> <yeni>`. Hesaplar `plugins/PisanGames/accounts.yml` (PBKDF2). Aynı IP'den 12 saat içinde dönen oyuncuya şifre sorulmaz.
+- Transferden önce lobi istemciye imzalı bir **bilet** çerezi (`pisan:ticket`, HMAC-SHA256, 2 dk) yazar. Hedefte şifre sorulmaz:
+  - Pisanskyblock: `online-mode=false` + PisanHub `require-ticket: true` → biletsiz giriş reddedilir; eski oyuncuların UUID'leri `uuids.yml` ile korunur (ilk açılışta `usercache.json`'dan).
+  - pisanpvp (Velocity): online-mode açık kalır (doğrudan gelen premium/1.8 oyuncular eskisi gibi); lobiden **transfer** ile gelen bağlantı Mojang doğrulaması olmadan alınır ve bilet zorunludur.
+  - SF League / Strike zaten offline.
+  - Gizli anahtar: lobide `auth-secret`, PisanHub'da `ticket-secret` (aynı değer, git'e koyma).
+- **Giriş testi:** oyuncu gönderilmeden önce lobi hedefe `PisanTest` adlı test oyuncusuyla gerçekten bağlanır (proxy'de arka sunucuya kadar). Test oyuncusu girebilirse oyuncular gönderilir, atılırsa beklemeye devam edilir. Böylece "Ağ kısa süreli bakımda" gibi kesilmeler oyuncuya yansımaz.
+- Lobideki yazılar her açılışta silinip yeniden oluşturulur (eski/üst üste yazılar kalmaz).
+
 ## `/analobi` (diğer sunuculardan Pisan Games lobisine dönüş)
 - `pisanhub/paper/` – Paper plugini (PisanHub). Pisanskyblock (26.3), Pisan SF League (1.20.1) ve Pisan Strike (1.20.1) üzerinde. 26.3'te Paper'ın transfer metodunu, 1.20.1'de transfer paketini ViaVersion üzerinden gönderir. Ayar: `plugins/PisanHub/config.yml`.
 - `pisanhub/velocity/` – Velocity 4.3 plugini (pisanpvp proxy'si, legacy + modern dahil). Ayar: `plugins/pisanhub/config.properties`. Derleme JDK 25 ister: `JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64 mvn package`.

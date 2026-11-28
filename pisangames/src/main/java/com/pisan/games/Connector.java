@@ -28,6 +28,7 @@ public final class Connector {
     public void connect(Player p, GameServer gs) {
         ExarotonClient api = plugin.api();
         if (!api.hasToken()) { p.sendMessage(Component.text("Lobi ayarlanmamis (exaroton-token yok).", NamedTextColor.RED)); return; }
+        if (!plugin.auth().isAuthed(p)) { p.sendMessage(Component.text("Önce giriş yap.", NamedTextColor.RED)); return; }
         String prev = playerTarget.get(p.getUniqueId());
         if (gs.key().equals(prev)) { p.sendMessage(Component.text("Zaten " + gs.plainName() + " icin siradasin, bekle...", NamedTextColor.YELLOW)); return; }
         if (prev != null) leave(p.getUniqueId());
@@ -36,7 +37,7 @@ public final class Connector {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 ExarotonClient.ServerInfo info = api.get(gs.id());
-                if (ready(gs, info)) {
+                if (ready(gs, info) && probe(gs, info)) {
                     Bukkit.getScheduler().runTask(plugin, () -> send(p, gs, info));
                     return;
                 }
@@ -70,7 +71,7 @@ public final class Connector {
             if (set == null || set.isEmpty()) { removeBar(gs.key()); return; }
             ExarotonClient.ServerInfo info;
             boolean ok = false;
-            try { info = plugin.api().get(gs.id()); ok = ready(gs, info); }
+            try { info = plugin.api().get(gs.id()); ok = ready(gs, info) && probe(gs, info); }
             catch (Exception e) { info = null; plugin.getLogger().warning("exaroton durum hatasi: " + e.getMessage()); }
             final boolean allReady = ok;
             long elapsed = System.currentTimeMillis() - startedAt;
@@ -78,8 +79,8 @@ public final class Connector {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 BossBar bar = bars.get(gs.key());
                 if (allReady) {
-                    // "online" olduktan sonra pluginlerin (ve proxy'nin backend'i listeye eklemesinin) bitmesi icin bekleme
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> flush(gs, fi), gs.requires().isEmpty() ? 60L : 140L);
+                    // test oyuncusu girebildi: herkesi gonder
+                    flush(gs, fi);
                     if (bar != null) { bar.progress(1f); bar.name(gs.displayName().append(Component.text(" acildi! Gonderiliyorsun...", NamedTextColor.GREEN))); bar.color(BossBar.Color.GREEN); }
                     return;
                 }
@@ -98,6 +99,24 @@ public final class Connector {
                 poll(gs, startedAt);
             });
         }, 60L);
+    }
+
+    /** Son basarili test zamani (sunucu anahtari -> ms); kisa sure icinde tekrar test edilmez. */
+    private final Map<String, Long> probedAt = new ConcurrentHashMap<>();
+
+    /**
+     * Test oyuncusuyla gercekten girilebiliyor mu? Basarisizsa oyuncu gonderilmez, beklemeye devam edilir.
+     * Async thread'den cagir.
+     */
+    private boolean probe(GameServer gs, ExarotonClient.ServerInfo info) {
+        Long last = probedAt.get(gs.key());
+        if (last != null && System.currentTimeMillis() - last < 45_000) return true;
+        String name = plugin.probeName();
+        Probe.Result r = Probe.check(info.connectHost(), info.port(), plugin.protocol(), name,
+                key -> key.equals(Ticket.NAMESPACE + ":" + Ticket.KEY) ? Ticket.create(plugin.secret(), name, 60_000) : null);
+        if (r.ok()) probedAt.put(gs.key(), System.currentTimeMillis());
+        else { probedAt.remove(gs.key()); plugin.getLogger().info("Giris testi " + gs.key() + ": " + r.detail()); }
+        return r.ok();
     }
 
     /**
@@ -149,6 +168,9 @@ public final class Connector {
         }
         p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1.2f);
         p.sendMessage(Component.text("» ", NamedTextColor.DARK_GRAY).append(gs.displayName()).append(Component.text(" sunucusuna gonderiliyorsun...", NamedTextColor.GREEN)));
+        // imzali bilet: hedef sunucu tekrar sifre sormadan oyuncuyu tanir
+        p.storeCookie(new org.bukkit.NamespacedKey(Ticket.NAMESPACE, Ticket.KEY),
+                Ticket.create(plugin.secret(), p.getName(), plugin.getConfig().getInt("ticket-seconds", 120) * 1000L));
         p.transfer(info.connectHost(), info.port());
     }
 
@@ -170,7 +192,7 @@ public final class Connector {
     private static String statusText(ExarotonClient.ServerInfo i) {
         if (i == null) return "bekleniyor";
         return switch (i.status()) {
-            case ExarotonClient.ONLINE -> "oyun sunuculari aciliyor";
+            case ExarotonClient.ONLINE -> "giris test ediliyor";
             case ExarotonClient.STARTING -> "baslatiliyor";
             case ExarotonClient.LOADING -> "yukleniyor";
             case ExarotonClient.PREPARING, ExarotonClient.PENDING -> "hazirlaniyor";

@@ -3,10 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.pisan</groupId>
   <artifactId>PisanGames</artifactId>
-  <version>1.1.0</version>
+  <version>2.0.0</version>
   <packaging>jar</packaging>
   <properties>
-    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <repositories>
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>1.21.4-R0.1-SNAPSHOT</version>
+      <version>26.3.build.264-stable</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

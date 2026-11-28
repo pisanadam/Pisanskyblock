@@ -65,27 +65,50 @@ public final class LobbyBuilder {
             plate.setType(Material.HEAVY_WEIGHTED_PRESSURE_PLATE, false);
             plugin.getConfig().set("plates." + gs.key(), w.getName() + "," + sx + "," + (cy + 1) + "," + sz);
 
-            TextDisplay td = w.spawn(new Location(w, sx + 0.5, cy + 3.2, sz + 0.5), TextDisplay.class);
-            td.text(gs.displayName().appendNewline().append(Component.text("Plakaya bas!", NamedTextColor.GRAY)));
-            td.setBillboard(Display.Billboard.CENTER);
-            td.addScoreboardTag(TAG);
-            td.setPersistent(true);
         }
 
-        // Baslik
-        TextDisplay title = w.spawn(new Location(w, cx + 0.5, cy + 6.5, cz - 12 + 0.5), TextDisplay.class);
-        title.text(Component.text("✦ PISAN GAMES ✦", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD).appendNewline()
-                .append(Component.text("Bir oyun sec: plakaya bas ya da pusulayi kullan", NamedTextColor.WHITE)));
-        title.setBillboard(Display.Billboard.CENTER);
-        title.addScoreboardTag(TAG);
-        title.setPersistent(true);
-        title.setTransformation(new org.bukkit.util.Transformation(
-                new org.joml.Vector3f(), new org.joml.AxisAngle4f(), new org.joml.Vector3f(2f, 2f, 2f), new org.joml.AxisAngle4f()));
+        labels(spawn);
 
         Location s = spawn.clone();
         s.setYaw(180f); s.setPitch(0f);
         plugin.getConfig().set("spawn.yaw", 180.0);
         plugin.saveConfig();
+    }
+
+    /**
+     * Yazilari (TextDisplay) temizleyip yeniden olusturur. Her acilista cagrilir; yazilar kalici
+     * kaydedilmez, boylece eski kurulumlardan kalan / ust uste binen yazilar birikmez.
+     */
+    public void labels(Location spawn) {
+        World w = spawn.getWorld();
+        int cx = spawn.getBlockX(), cy = spawn.getBlockY() - 1, cz = spawn.getBlockZ();
+        for (int x = -4; x <= 4; x++) for (int z = -4; z <= 4; z++) w.getChunkAt((cx >> 4) + x, (cz >> 4) + z).load();
+        int removed = 0;
+        for (Entity e : w.getEntities()) {
+            if (e instanceof TextDisplay || e instanceof org.bukkit.entity.ArmorStand && e.customName() != null && ((org.bukkit.entity.ArmorStand) e).isInvisible()) {
+                if (e.getLocation().distanceSquared(spawn) < 64 * 64) { e.remove(); removed++; }
+            }
+        }
+        if (removed > 0) plugin.getLogger().info("Lobi yazilari yenilendi (" + removed + " eski yazi silindi).");
+        var sec = plugin.getConfig().getConfigurationSection("plates");
+        for (GameServer gs : plugin.servers()) {
+            String v = sec == null ? null : sec.getString(gs.key());
+            if (v == null) continue;
+            String[] p = v.split(",");
+            TextDisplay td = w.spawn(new Location(w, Integer.parseInt(p[1]) + 0.5, Integer.parseInt(p[2]) + 2.2, Integer.parseInt(p[3]) + 0.5), TextDisplay.class);
+            td.text(gs.displayName().appendNewline().append(Component.text("Plakaya bas!", NamedTextColor.GRAY)));
+            td.setBillboard(Display.Billboard.CENTER);
+            td.addScoreboardTag(TAG);
+            td.setPersistent(false);
+        }
+        TextDisplay title = w.spawn(new Location(w, cx + 0.5, cy + 6.5, cz - 12 + 0.5), TextDisplay.class);
+        title.text(Component.text("✦ PISAN GAMES ✦", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD).appendNewline()
+                .append(Component.text("Bir oyun sec: plakaya bas ya da pusulayi kullan", NamedTextColor.WHITE)));
+        title.setBillboard(Display.Billboard.CENTER);
+        title.addScoreboardTag(TAG);
+        title.setPersistent(false);
+        title.setTransformation(new org.bukkit.util.Transformation(
+                new org.joml.Vector3f(), new org.joml.AxisAngle4f(), new org.joml.Vector3f(2f, 2f, 2f), new org.joml.AxisAngle4f()));
     }
 
     private static void set(World w, int x, int y, int z, Material m) {

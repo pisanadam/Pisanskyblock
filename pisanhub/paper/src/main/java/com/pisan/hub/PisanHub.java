@@ -26,6 +26,7 @@ public final class PisanHub extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         api = new LobbyApi(getConfig().getString("exaroton-token"), getConfig().getString("lobby-id", "kYqtelwqpRHsIbWp"));
+        getServer().getPluginManager().registerEvents(new TicketGate(this), this);
         if (!api.ready()) getLogger().warning("config.yml icinde exaroton-token ayarlanmamis!");
     }
 

@@ -1,6 +1,18 @@
 # Exaroton API anahtari (https://exaroton.com/account/ -> API). GIT'E KOYMA.
 exaroton-token: "BURAYA_TOKEN"
 
+# Lobi online-mode=false calisir; giris sistemi ve hedef sunuculara giden imzali bilet.
+# auth-secret bos birakilirsa ilk acilista uretilir. Ayni deger hedeflerdeki PisanHub ayarina yazilmali. GIT'E KOYMA.
+auth-secret: ""
+auth:
+  # ayni IP'den bu kadar dakika icinde tekrar gelince sifre sorulmaz
+  session-minutes: 720
+  max-accounts-per-ip: 3
+# Bilet gecerlilik suresi (saniye)
+ticket-seconds: 120
+# Aktarmadan once girisi test eden oyuncunun adi (bu isim ayrilmistir)
+probe-name: PisanTest
+
 # Hedef sunucu en fazla kac saniye icinde acilmazsa vazgecilsin
 start-timeout-seconds: 240
 

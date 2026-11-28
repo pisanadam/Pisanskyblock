@@ -4,7 +4,17 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.SimpleCommand;
+import com.velocitypowered.api.event.EventTask;
+import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.LoginEvent;
+import com.velocitypowered.api.event.connection.PreLoginEvent;
+import com.velocitypowered.api.event.player.CookieReceiveEvent;
+import com.velocitypowered.api.event.player.GameProfileRequestEvent;
+import com.velocitypowered.api.network.HandshakeIntent;
+import com.velocitypowered.api.util.GameProfile;
+import net.kyori.adventure.key.Key;
+import java.util.concurrent.CompletableFuture;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
@@ -29,7 +39,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "pisanhub", name = "PisanHub", version = "1.0.0", authors = {"Pisan"},
+@Plugin(id = "pisanhub", name = "PisanHub", version = "1.1.0", authors = {"Pisan"},
         description = "/analobi - Pisan Games ana lobisine donus")
 public final class PisanHubVelocity {
     private static final int TRANSFER_MIN_PROTOCOL = 766; // 1.20.5
@@ -39,7 +49,10 @@ public final class PisanHubVelocity {
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     private final Set<UUID> waiting = ConcurrentHashMap.newKeySet();
     private volatile boolean polling;
-    private String token, lobbyId;
+    private String token, lobbyId, secret, lobbyAddress;
+    private final Properties uuids = new Properties();
+    private final Map<UUID, CompletableFuture<byte[]>> cookieWait = new ConcurrentHashMap<>();
+    private static final Key TICKET = Key.key("pisan", "ticket");
     private int timeoutSec;
 
     private record Target(int status, String host, int port, String address) {}
@@ -58,9 +71,14 @@ public final class PisanHubVelocity {
         p.putIfAbsent("exaroton-token", "BURAYA_TOKEN");
         p.putIfAbsent("lobby-id", "kYqtelwqpRHsIbWp");
         p.putIfAbsent("start-timeout-seconds", "180");
+        p.putIfAbsent("ticket-secret", "");
+        p.putIfAbsent("lobby-address", "Pisangames.exaroton.me");
         try (Writer w = Files.newBufferedWriter(cfg)) { p.store(w, "PisanHub - exaroton-token GIT'E KOYMA"); }
         token = p.getProperty("exaroton-token"); lobbyId = p.getProperty("lobby-id");
         timeoutSec = Integer.parseInt(p.getProperty("start-timeout-seconds"));
+        secret = p.getProperty("ticket-secret"); lobbyAddress = p.getProperty("lobby-address");
+        Path up = dir.resolve("uuids.properties");
+        if (Files.exists(up)) try (Reader r = Files.newBufferedReader(up)) { uuids.load(r); }
         if (token.startsWith("BURAYA")) log.warn("config.properties icinde exaroton-token ayarlanmamis!");
 
         proxy.getCommandManager().register(proxy.getCommandManager().metaBuilder("analobi").aliases("anamenu", "pisangames").plugin(this).build(),
@@ -68,6 +86,67 @@ public final class PisanHubVelocity {
                     if (inv.source() instanceof Player pl) analobi(pl);
                     else inv.source().sendMessage(Component.text("Sadece oyuncular."));
                 });
+    }
+
+    // ------------------------------------------------------------------ lobiden crack giris
+    /**
+     * Proxy online-mode kalir (dogrudan gelen premium/1.8 oyuncular eskisi gibi).
+     * Lobiden transfer ile gelen baglanti ise Mojang dogrulamasi olmadan alinir ve
+     * LoginEvent'te lobinin imzali bileti (pisan:ticket cerezi) zorunlu tutulur.
+     */
+    @Subscribe
+    public void onPreLogin(PreLoginEvent e) {
+        if (secret == null || secret.isBlank() || !e.getResult().isAllowed()) return;
+        if (e.getConnection().getHandshakeIntent() == HandshakeIntent.TRANSFER
+                && e.getConnection().getProtocolVersion().getProtocol() >= TRANSFER_MIN_PROTOCOL) {
+            e.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
+        }
+    }
+
+    /** Ayni ismin premium girislerdeki UUID'si korunur (istatistikler kaybolmasin). */
+    @Subscribe
+    public void onProfile(GameProfileRequestEvent e) {
+        String k = e.getUsername().toLowerCase(Locale.ROOT);
+        if (e.isOnlineMode()) {
+            if (!e.getGameProfile().getId().toString().equals(uuids.getProperty(k))) {
+                uuids.setProperty(k, e.getGameProfile().getId().toString());
+                saveUuids();
+            }
+            return;
+        }
+        String v = uuids.getProperty(k);
+        if (v != null) e.setGameProfile(e.getGameProfile().withId(UUID.fromString(v)));
+    }
+
+    @Subscribe
+    public EventTask onLogin(LoginEvent e) {
+        Player p = e.getPlayer();
+        if (p.isOnlineMode() || !e.getResult().isAllowed()) return null;
+        CompletableFuture<byte[]> f = new CompletableFuture<>();
+        cookieWait.put(p.getUniqueId(), f);
+        p.requestCookie(TICKET);
+        return EventTask.resumeWhenComplete(f.completeOnTimeout(null, 5, TimeUnit.SECONDS).handle((data, err) -> {
+            cookieWait.remove(p.getUniqueId());
+            String who = err == null ? Ticket.verify(secret, data) : null;
+            if (who == null || !who.equalsIgnoreCase(p.getUsername())) {
+                log.info("{} bilet olmadan girmeye calisti ({})", p.getUsername(), data == null ? "cerez yok" : "gecersiz bilet");
+                e.setResult(ResultedEvent.ComponentResult.denied(Component.text("Bu sunucuya Pisan Games lobisinden gir: ", NamedTextColor.RED)
+                        .append(Component.text(lobbyAddress, NamedTextColor.AQUA))));
+            }
+            return null;
+        }));
+    }
+
+    @Subscribe
+    public void onCookie(CookieReceiveEvent e) {
+        if (!TICKET.equals(e.getOriginalKey())) return;
+        CompletableFuture<byte[]> f = cookieWait.get(e.getPlayer().getUniqueId());
+        if (f != null) { f.complete(e.getOriginalData()); e.setResult(CookieReceiveEvent.ForwardResult.handled()); }
+    }
+
+    private synchronized void saveUuids() {
+        try (Writer w = Files.newBufferedWriter(dir.resolve("uuids.properties"))) { uuids.store(w, "isim -> premium UUID"); }
+        catch (Exception ex) { log.warn("uuids.properties yazilamadi: {}", ex.getMessage()); }
     }
 
     private void analobi(Player p) {
