@@ -485,6 +485,21 @@ def reload_display(d, tilt=25):
             out[k]["translation"] = [t[0], t[1] - 2.5, t[2]]
     return out
 
+# Modeli dikey (Y ekseninde) olan ve dokusu bozulmasin diye dondurulmeyen esyalar: el acilarina
+# model ekseninde (ilk uygulanan z) bu kadar derece eklenir. Bicagin ucu modelde -Y yonunde.
+ZOFF = {"knife": 90}
+
+def apply_zoff(d, zoff, fp_zoff=None):
+    """fp_zoff: 1. sahis icin ayri deger (1.20.1'de 1. sahis 26.x'e gore ters donuyor)."""
+    if not zoff:
+        return d
+    out = json.loads(json.dumps(d))
+    for k, v in out.items():
+        if isinstance(v, dict) and "rotation" in v:
+            add = fp_zoff if (fp_zoff is not None and k.startswith("firstperson")) else zoff
+            r = list(v["rotation"]); r[2] = r[2] + add; v["rotation"] = r
+    return out
+
 def new_display(d):
     """1.21.4+ istemciler icin el tutma acilari (26.3'te goruntuyle dogrulandi)."""
     out = json.loads(json.dumps(d))
@@ -550,6 +565,11 @@ def build(out):
             if ccm is None and item == GUN_ITEM and cc_available():
                 ccm = cc_model(name, M_span(m) if (hq_available() and m is not None) else None)
             mj = ccm if ccm is not None else (model_json(m, kind) if m is not None else None)
+            zoff = ZOFF.get(name, 0) if ccm is not None else 0
+            orig_display = mj.get("display") if mj is not None else None
+            if mj is not None and zoff:
+                # 1.20.1: 1. sahis 26.x'e gore ters doner (ikisi de oyunda goruntuyle dogrulandi)
+                mj = dict(mj); mj["display"] = apply_zoff(orig_display, zoff, fp_zoff=-zoff)
             if mj is not None:
                 files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(mj, separators=(",", ":")).encode()
             base["overrides"].append({"predicate": {"custom_model_data": cmd}, "model": f"{NS}:item/{name}"})
@@ -566,7 +586,7 @@ def build(out):
                 # 1.21.4+ / 26.x istemciler elde tutma acisini 180 derece ters uyguluyor (26.3'te ekran
                 # goruntusuyle dogrulandi): ayni modeli sadece acilari degisen bir alt modelle kullan
                 files[f"assets/{NS}/models/item/n/{name}.json"] = json.dumps(
-                    {"parent": f"{NS}:item/{name}", "display": new_display(mj["display"])}, separators=(",", ":")).encode()
+                    {"parent": f"{NS}:item/{name}", "display": apply_zoff(new_display(orig_display), zoff)}, separators=(",", ":")).encode()
                 new_model = f"{NS}:item/n/{name}"
             cases.append((cmd, new_model))
             if reload_models:
