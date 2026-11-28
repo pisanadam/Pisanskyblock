@@ -329,8 +329,9 @@ GUNS[1098] = ("scope_hidden", None)
 # Elde gorunum ayarlari; Minecraft 1.20.1 istemcisinde gozle ayarlandi (bkz. strike-pack/README).
 DISPLAY_OVERRIDE = json.loads(os.environ.get("PISAN_DISPLAY", "null"))
 
-def display(kind, span):
-    s = min(1.0, 16 / max(span, 1))
+def display(kind, span, s=None):
+    if s is None:
+        s = min(1.0, 16 / max(span, 1))
     if DISPLAY_OVERRIDE and kind in DISPLAY_OVERRIDE:
         out = {}
         for k, v in DISPLAY_OVERRIDE[kind].items():
@@ -409,6 +410,35 @@ def cc_model(wid):
     span = max(max(xs) - min(xs), max(ys) - min(ys))
     return {"credit": "Counter Craft (Tactical Arsenal)", "textures": textures, "elements": elements, "display": display("gun", span)}
 
+# Yuksek detayli (HQ) modeller: tek dokulu, binlerce kupluk, hepsi 16 birim uzunluga olcekli.
+HQ_DIR = os.environ.get("PISAN_HQ_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "countercraft-hq")
+
+def hq_available():
+    return os.path.isdir(os.path.join(HQ_DIR, "models"))
+
+def hq_model(wid, real_span):
+    """HQ modeli bizim silahin gercek boyutuna gore olcekler (tabanca kucuk, tufek uzun)."""
+    cc = json.load(open(os.path.join(CC_DIR, "weapon_map.json"))).get(wid)
+    path = os.path.join(HQ_DIR, "models", "item", "hq", f"{cc}.json") if cc else None
+    if not path or not os.path.exists(path):
+        return None
+    d = json.load(open(path))
+    if not d.get("elements"):
+        return None
+    # bizim modelde silah 16/span olcekle cizilir ve uzunlugu min(span,16) birim gorunur; HQ model 16 birim
+    s = min(real_span, 16.0) / 16.0
+    return {"credit": "Counter Craft HQ", "textures": d["textures"], "elements": d["elements"],
+            "display": display("gun", real_span, s=s)}
+
+def hq_files():
+    out = {}
+    root = os.path.join(HQ_DIR, "textures")
+    for dp, _, fs in os.walk(root):
+        for fn in fs:
+            full = os.path.join(dp, fn)
+            out[f"assets/{CC_NS}/" + os.path.relpath(full, HQ_DIR).replace(os.sep, "/")] = open(full, "rb").read()
+    return out
+
 def cc_files():
     """Counter Craft dokulari, sesleri ve sounds.json (paket yolu -> bayt)."""
     out = {}
@@ -421,6 +451,11 @@ def cc_files():
                 out[f"assets/{CC_NS}/{rel}"] = open(full, "rb").read()
     out[f"assets/{CC_NS}/sounds.json"] = open(os.path.join(CC_DIR, "sounds.json"), "rb").read()
     return out
+
+def M_span(m):
+    xs = [p for e in m.el for p in (e["from"][0], e["to"][0])]
+    ys = [p for e in m.el for p in (e["from"][1], e["to"][1])]
+    return max(max(xs) - min(xs), max(ys) - min(ys))
 
 def model_json(m, kind):
     span = m.fit()
@@ -470,7 +505,11 @@ def build(out):
         for cmd in sorted(entries):
             name, m = entries[cmd]
             kind = "gun" if item in (GUN_ITEM, "iron_sword", "lightning_rod") else "thing"
-            ccm = cc_model(name) if (item == GUN_ITEM and cc_available()) else None
+            ccm = None
+            if item == GUN_ITEM and hq_available() and m is not None:
+                ccm = hq_model(name, M_span(m))
+            if ccm is None and item == GUN_ITEM and cc_available():
+                ccm = cc_model(name)
             if ccm is not None:
                 files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(ccm, separators=(",", ":")).encode()
             elif m is not None:
@@ -489,6 +528,8 @@ def build(out):
             {k: v for k, v in VANILLA[item].items() if k != "overrides"}, indent=1).encode()
     if cc_available():
         files.update(cc_files())
+    if hq_available():
+        files.update(hq_files())
     files["pack.mcmeta"] = json.dumps({
         "pack": {"pack_format": 15, "supported_formats": [15, 999], "min_format": 15, "max_format": 999,
                  "description": "§6§lPISAN STRIKE §f3D silahlar"},
