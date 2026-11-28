@@ -247,29 +247,7 @@ final class Weapon {
       gun("glock", "Glock-18", Weapon.Kind.PISTOL, Weapon.Side.T, 200, 300, 30.0, 0.47, 0.85, 400, 20, 120, 2.2, 0.25, 2.2, 6.0, 0.9, 240, false, false, 1001);
       gun("usp", "USP-S", Weapon.Kind.PISTOL, Weapon.Side.CT, 200, 300, 35.0, 0.505, 0.99, 352, 12, 24, 2.2, 0.15, 2.0, 6.0, 0.9, 240, false, false, 1002);
       gun("p250", "P250", Weapon.Kind.PISTOL, Weapon.Side.ANY, 300, 300, 38.0, 0.64, 0.85, 400, 13, 26, 2.2, 0.3, 2.3, 6.0, 1.1, 240, false, false, 1003);
-      gun(
-         "dualies",
-         "Dual Berettas",
-         Weapon.Kind.PISTOL,
-         Weapon.Side.ANY,
-         300,
-         300,
-         38.0,
-         0.575,
-         0.79,
-         500,
-         30,
-         120,
-         3.8,
-         0.4,
-         2.5,
-         6.0,
-         1.0,
-         240,
-         false,
-         false,
-         1004
-      );
+      // Dual Berettas kaldirildi (2026-11)
       gun(
          "fiveseven",
          "Five-SeveN",

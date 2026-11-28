@@ -1088,7 +1088,7 @@ final class Game {
    /** bizim silah id -> Counter Craft ses adi (strike-pack/countercraft/weapon_map.json ile ayni) */
    static final java.util.Map<String, String> CC = java.util.Map.ofEntries(
       java.util.Map.entry("glock", "glock"), java.util.Map.entry("usp", "usp_silencer"), java.util.Map.entry("p250", "p250"),
-      java.util.Map.entry("dualies", "elite"), java.util.Map.entry("fiveseven", "fiveseven"), java.util.Map.entry("tec9", "tec9"),
+      java.util.Map.entry("fiveseven", "fiveseven"), java.util.Map.entry("tec9", "tec9"),
       java.util.Map.entry("deagle", "desert_eagle"), java.util.Map.entry("mac10", "mac10"), java.util.Map.entry("mp9", "mp9"),
       java.util.Map.entry("mp7", "mp7"), java.util.Map.entry("ump", "ump45"), java.util.Map.entry("p90", "p90"),
       java.util.Map.entry("galil", "galilar"), java.util.Map.entry("famas", "famas"), java.util.Map.entry("ak47", "ak47"),

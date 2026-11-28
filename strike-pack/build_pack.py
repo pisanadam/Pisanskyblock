@@ -274,7 +274,6 @@ GUNS = {
     1001: ("glock", pistol(body="polymer", slide="black", grip_c="polymer")),
     1002: ("usp", pistol(body="black", slide="black", grip_c="polymer", slide_len=7.4, suppressor=5)),
     1003: ("p250", pistol(body="black", slide="metal", grip_c="black", slide_len=6.6)),
-    1004: ("dualies", None),
     1005: ("fiveseven", pistol(body="tan", slide="black", grip_c="tan", slide_len=7.4)),
     1006: ("tec9", pistol(body="black", slide="metal", grip_c="black", slide_len=6, barrel_ext=3, tec=True)),
     1007: ("deagle", pistol(body="silver", slide="silver", grip_c="black", slide_len=9, big=True)),
@@ -321,7 +320,7 @@ def dual():
             if "rotation" in c: c["rotation"]["origin"][2] += dz
             m.el.append(c)
     return m
-GUNS[1004] = ("dualies", dual())
+# 1004 (Dual Berettas) oyundan kaldirildi
 # durbun acikken eldeki silah gizlenir (CS2'deki gibi); plugin CustomModelData'yi gecici olarak 1098 yapar
 GUNS[1098] = ("scope_hidden", None)
 
@@ -441,11 +440,8 @@ def hq_model(wid, real_span):
             "display": display("gun", real_span, s=s, fp_small=fp_small)}
 
 HQ_SIZE = {}
-# iki tabanca yan yana oldugu icin Dual Berettas tek tabancadan iri gorunuyor (oyunda goruntuyle ayarlandi)
-CC_SIZE = {"dualies": 0.6}
-# HQ Dual Berettas modelinde iki tabanca birbirinden cok uzak; elde tek parca gibi durmuyor.
-# Bunun yerine Counter Craft'in standart (iki tabanca yan yana) modeli kullanilir.
-HQ_SKIP = {"dualies"}
+CC_SIZE = {}
+HQ_SKIP = set()
 
 def hq_files():
     out = {}
