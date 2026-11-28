@@ -88,6 +88,7 @@ public final class TradeManager implements Listener, CommandExecutor, TabComplet
         if (t == null) { p.sendMessage(pre() + "§cOyuncu çevrimiçi değil."); return; }
         if (t.equals(p)) { p.sendMessage(pre() + "§cKendinle takas yapamazsın."); return; }
         if (trades.containsKey(p.getUniqueId()) || trades.containsKey(t.getUniqueId())) { p.sendMessage(pre() + "§cSen ya da o zaten takasta."); return; }
+        if (!plugin.invs().sameMode(p, t)) { p.sendMessage(pre() + "§cFarklı moddasınız (Skyblock / SMP envanterleri ayrı)."); return; }
         requests.computeIfAbsent(t.getUniqueId(), k -> new HashMap<>()).put(p.getUniqueId(), System.currentTimeMillis());
         p.sendMessage(pre() + "§f" + t.getName() + " §7oyuncusuna takas isteği gönderildi. §8(60 sn)");
         t.sendMessage(pre() + "§6" + p.getName() + " §esana takas isteği gönderdi!");
@@ -112,6 +113,7 @@ public final class TradeManager implements Listener, CommandExecutor, TabComplet
         Player f = Bukkit.getPlayer(from);
         if (f == null) { p.sendMessage(pre() + "§cOyuncu çıkış yapmış."); return; }
         if (trades.containsKey(p.getUniqueId()) || trades.containsKey(f.getUniqueId())) { p.sendMessage(pre() + "§cSen ya da o zaten takasta."); return; }
+        if (!plugin.invs().sameMode(p, f)) { p.sendMessage(pre() + "§cFarklı moddasınız (Skyblock / SMP envanterleri ayrı)."); return; }
         Trade t = new Trade(f, p);
         trades.put(f.getUniqueId(), t);
         trades.put(p.getUniqueId(), t);

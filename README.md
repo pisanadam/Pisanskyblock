@@ -6,7 +6,10 @@ Tek sunucuda iki mod (Exaroton `Pisanskyblock`, Paper 26.3, 1.20.1+ istemci dest
 
 Girişte **Mod Seçimi** lobisine gelinir ve menü açılır: Skyblock → Sky Lobi, SMP → SMP Lobi
 (kapılardan yürüyerek de geçilir). Coin, market, pazar, kasalar/anahtarlar, skill, duel, takas ve arkadaşlar
-iki modda ortaktır; envanter de ortaktır. Minyonlar sadece adada çalışır.
+iki modda ortaktır. **Envanter modlara ayrıdır**: envanter, zırh, ender sandığı, XP, can/açlık ve efektler
+Skyblock ve SMP için ayrı tutulur (SMP Lobi = SMP envanteri, Sky Lobi = Skyblock envanteri, Mod Seçimi ve duel
+dünyası tarafsız). Farklı moddaki oyuncular duel/takas yapamaz; lobide eşya atılamaz/toplanamaz.
+Diğer modun envanteri `plugins/PisanCore/inventories/<uuid>.yml` dosyasında durur. Minyonlar sadece adada çalışır.
 SMP'den çıkınca son konum saklanır, `/smp` ile kaldığın yere dönersin.
 
 ## Klasörler

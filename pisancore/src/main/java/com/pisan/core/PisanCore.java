@@ -21,6 +21,7 @@ public final class PisanCore extends JavaPlugin {
     private EventManager events;
     private SellManager sell;
     private SmpManager smp;
+    private InventoryManager invs;
 
     @Override
     public void onEnable() {
@@ -40,6 +41,8 @@ public final class PisanCore extends JavaPlugin {
         getCommand("kasa").setTabCompleter(menu);
         Bukkit.getPluginManager().registerEvents(menu, this);
         Bukkit.getPluginManager().registerEvents(new KeyProtectListener(this, menu), this);
+        invs = new InventoryManager(this);
+        Bukkit.getPluginManager().registerEvents(invs, this);
         smp = new SmpManager(this);
         Bukkit.getPluginManager().registerEvents(smp, this);
         getCommand("smp").setExecutor(smp);
@@ -157,6 +160,7 @@ public final class PisanCore extends JavaPlugin {
     public GeneratorListener generator() { return generator; }
     public EventManager events() { return events; }
     public SmpManager smp() { return smp; }
+    public InventoryManager invs() { return invs; }
     public LobbyManager lobby() { return lobby; }
     public boolean lobbyWorld(org.bukkit.World w) { return lobby != null && lobby.world() != null && lobby.world().equals(w); }
 

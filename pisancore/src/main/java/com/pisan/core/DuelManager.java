@@ -26,7 +26,7 @@ import java.util.*;
  */
 public final class DuelManager implements Listener, CommandExecutor, TabCompleter {
 
-    private static final String WORLD = "pisan_duel";
+    static final String WORLD = "pisan_duel";
     private static final int SPACING = 300, HALF = 15, FLOOR_Y = 100, WALL = 8;
     private static final long REQUEST_MS = 60_000, MAX_DUEL_TICKS = 20L * 60 * 5;
 
@@ -120,6 +120,7 @@ public final class DuelManager implements Listener, CommandExecutor, TabComplete
         if (t == null) { p.sendMessage(pre() + "§cOyuncu çevrimiçi değil."); return; }
         if (t.equals(p)) { p.sendMessage(pre() + "§cKendinle duel yapamazsın."); return; }
         if (duels.containsKey(p.getUniqueId()) || duels.containsKey(t.getUniqueId())) { p.sendMessage(pre() + "§cSen ya da rakip zaten duelde."); return; }
+        if (!plugin.invs().sameMode(p, t)) { p.sendMessage(pre() + "§cFarklı moddasınız (Skyblock / SMP envanterleri ayrı)."); return; }
         requests.computeIfAbsent(t.getUniqueId(), k -> new HashMap<>()).put(p.getUniqueId(), new Request(p.getUniqueId(), System.currentTimeMillis()));
         p.sendMessage(pre() + "§f" + t.getName() + " §7oyuncusuna duel isteği gönderildi. §8(60 sn)");
         t.sendMessage(pre() + "§6" + p.getName() + " §esana duel isteği gönderdi!");
@@ -154,6 +155,7 @@ public final class DuelManager implements Listener, CommandExecutor, TabComplete
         if (f == null) { p.sendMessage(pre() + "§cRakip çıkış yapmış."); return; }
         if (duels.containsKey(p.getUniqueId()) || duels.containsKey(f.getUniqueId())) { p.sendMessage(pre() + "§cSen ya da rakip zaten duelde."); return; }
         for (Player x : List.of(p, f)) if (x.getGameMode() != GameMode.SURVIVAL || x.isDead()) { p.sendMessage(pre() + "§cİki oyuncu da hayatta kalma modunda olmalı."); return; }
+        if (!plugin.invs().sameMode(p, f)) { p.sendMessage(pre() + "§cFarklı moddasınız (Skyblock / SMP envanterleri ayrı)."); return; }
         start(f, p);
     }
 
