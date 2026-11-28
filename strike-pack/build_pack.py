@@ -425,7 +425,7 @@ def hq_model(wid, real_span):
     """HQ modeli bizim silahin gercek boyutuna gore olcekler (tabanca kucuk, tufek uzun)."""
     if wid in HQ_SKIP:
         return None
-    cc = json.load(open(os.path.join(CC_DIR, "weapon_map.json"))).get(wid)
+    cc = "knife" if wid == "knife" else json.load(open(os.path.join(CC_DIR, "weapon_map.json"))).get(wid)
     path = os.path.join(HQ_DIR, "models", "item", "hq", f"{cc}.json") if cc else None
     if not path or not os.path.exists(path):
         return None
@@ -469,6 +469,31 @@ def M_span(m):
     xs = [p for e in m.el for p in (e["from"][0], e["to"][0])]
     ys = [p for e in m.el for p in (e["from"][1], e["to"][1])]
     return max(max(xs) - min(xs), max(ys) - min(ys))
+
+# 26.3 istemci "max_format": 999 olan paketi gecersiz sayip hic yuklemiyordu
+PACK_MAX = int(os.environ.get("PISAN_PACK_MAX", "120"))
+
+RELOAD_OFFSET = 500   # plugin sarjor degistirirken CustomModelData'yi bu kadar arttirir
+
+def reload_display(d, tilt=25):
+    """Sarjor degistirme pozu: 1. sahista silah asagi iner, namlu yukari kalkar (26.3'te goruntuyle secildi)."""
+    out = json.loads(json.dumps(d))
+    for k, sign in (("firstperson_righthand", 1), ("firstperson_lefthand", -1)):
+        if k in out:
+            r = list(out[k].get("rotation", [0, 0, 0])); t = list(out[k].get("translation", [0, 0, 0]))
+            out[k]["rotation"] = [r[0], r[1], sign * tilt]
+            out[k]["translation"] = [t[0], t[1] - 2.5, t[2]]
+    return out
+
+def new_display(d):
+    """1.21.4+ istemciler icin el tutma acilari (26.3'te goruntuyle dogrulandi)."""
+    out = json.loads(json.dumps(d))
+    rot = {"firstperson_righthand": [0, -84, 0], "firstperson_lefthand": [0, 84, 0],
+           "thirdperson_righthand": [0, 0, -90], "thirdperson_lefthand": [0, 0, 90]}
+    for k, r in rot.items():
+        if k in out:
+            out[k]["rotation"] = r
+    return out
 
 def model_json(m, kind):
     span = m.fit()
@@ -515,39 +540,56 @@ def build(out):
         base = json.loads(json.dumps(VANILLA[item]))
         base.setdefault("overrides", [])
         cases = []
+        reload_cases = []
         for cmd in sorted(entries):
             name, m = entries[cmd]
             kind = "gun" if item in (GUN_ITEM, "iron_sword", "lightning_rod") else "thing"
             ccm = None
-            if item == GUN_ITEM and hq_available() and m is not None:
+            if item in (GUN_ITEM, "iron_sword") and hq_available() and m is not None:
                 ccm = hq_model(name, M_span(m))
             if ccm is None and item == GUN_ITEM and cc_available():
                 ccm = cc_model(name, M_span(m) if (hq_available() and m is not None) else None)
-            if ccm is not None:
-                files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(ccm, separators=(",", ":")).encode()
-            elif m is not None:
-                files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(model_json(m, kind), separators=(",", ":")).encode()
+            mj = ccm if ccm is not None else (model_json(m, kind) if m is not None else None)
+            if mj is not None:
+                files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(mj, separators=(",", ":")).encode()
             base["overrides"].append({"predicate": {"custom_model_data": cmd}, "model": f"{NS}:item/{name}"})
-            cases.append((cmd, f"{NS}:item/{name}"))
+            new_model = f"{NS}:item/{name}"
+            reload_models = None
+            if item == GUN_ITEM and mj is not None and "display" in mj:
+                # sarjor degistirme pozu (eski ve yeni istemci icin ayri acilar)
+                files[f"assets/{NS}/models/item/r/{name}.json"] = json.dumps(
+                    {"parent": f"{NS}:item/{name}", "display": reload_display(mj["display"], tilt=25)}, separators=(",", ":")).encode()
+                files[f"assets/{NS}/models/item/rn/{name}.json"] = json.dumps(
+                    {"parent": f"{NS}:item/{name}", "display": reload_display(new_display(mj["display"]), tilt=-25)}, separators=(",", ":")).encode()
+                reload_models = (cmd + RELOAD_OFFSET, f"{NS}:item/r/{name}", f"{NS}:item/rn/{name}")
+            if kind == "gun" and mj is not None and "display" in mj:
+                # 1.21.4+ / 26.x istemciler elde tutma acisini 180 derece ters uyguluyor (26.3'te ekran
+                # goruntusuyle dogrulandi): ayni modeli sadece acilari degisen bir alt modelle kullan
+                files[f"assets/{NS}/models/item/n/{name}.json"] = json.dumps(
+                    {"parent": f"{NS}:item/{name}", "display": new_display(mj["display"])}, separators=(",", ":")).encode()
+                new_model = f"{NS}:item/n/{name}"
+            cases.append((cmd, new_model))
+            if reload_models:
+                reload_cases.append(reload_models)
+        for rcmd, old_m, new_m in sorted(reload_cases):
+            base["overrides"].append({"predicate": {"custom_model_data": rcmd}, "model": old_m})
+            cases.append((rcmd, new_m))
+        cases.sort()
         files[f"assets/minecraft/models/item/{item}.json"] = json.dumps(base, indent=1).encode()
-        # 1.21.4+ : items/<item>.json (overlay)
+        # 1.21.4+ : items/<item>.json. Eski istemciler "items" klasorunu tanimaz, o yuzden dogrudan ana
+        # bolume konur (overlay gerekmez; 26.3 overlay/999 bicimindeki paketi tamamen reddediyordu).
         fallback = {"type": "minecraft:model", "model": f"minecraft:item/{item}"}
         entries_new = [{"threshold": cmd, "model": {"type": "minecraft:model", "model": mdl}} for cmd, mdl in cases]
-        files[f"ov_1214/assets/minecraft/items/{item}.json"] = json.dumps(
+        files[f"assets/minecraft/items/{item}.json"] = json.dumps(
             {"model": {"type": "minecraft:range_dispatch", "property": "minecraft:custom_model_data", "index": 0,
                        "fallback": fallback, "entries": entries_new}}, indent=1).encode()
-        # 1.21.4+ istemcide vanilla crossbow modeli override'siz olmali: ayni yolda sade modeli overlay'e koy
-        files[f"ov_1214/assets/minecraft/models/item/{item}.json"] = json.dumps(
-            {k: v for k, v in VANILLA[item].items() if k != "overrides"}, indent=1).encode()
     if cc_available():
         files.update(cc_files())
     if hq_available():
         files.update(hq_files())
     files["pack.mcmeta"] = json.dumps({
-        "pack": {"pack_format": 15, "supported_formats": [15, 999], "min_format": 15, "max_format": 999,
-                 "description": "§6§lPISAN STRIKE §f3D silahlar"},
-        "overlays": {"entries": [{"formats": [46, 999], "min_format": 46, "max_format": 999, "directory": "ov_1214"}]}},
-        indent=1).encode()
+        "pack": {"pack_format": 15, "supported_formats": [15, PACK_MAX], "min_format": 15, "max_format": PACK_MAX,
+                 "description": "§6§lPISAN STRIKE §f3D silahlar"}}, indent=1).encode()
     files["pack.png"] = open(os.path.join(os.path.dirname(__file__), "pack.png"), "rb").read() if os.path.exists(
         os.path.join(os.path.dirname(__file__), "pack.png")) else palette_png()
     buf = io.BytesIO()

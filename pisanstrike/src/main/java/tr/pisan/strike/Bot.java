@@ -410,6 +410,8 @@ final class Bot {
          to.add(new Vector(this.rnd.nextGaussian() * 0.9, this.rnd.nextGaussian() * 0.6, this.rnd.nextGaussian() * 0.9));
       }
 
+      Vector dir = to.clone().subtract(from.toVector()).normalize();
+      this.g.muzzleEffects(world, from.clone().add(dir.clone().multiply(0.8)).add(0.0, -0.25, 0.0), dir, w, w.id.equals("usp") || w.id.equals("m4a1s"));
       this.g.tracer(world, from.toVector(), to);
       if (hits > 0) {
          double dmg = w.damage * Math.pow(w.rangeMod, dist * 40.0 / 500.0) * hits;

@@ -829,6 +829,7 @@ final class Game {
             }
 
             var2.reloadingItem = null;
+            this.restoreModels(var1);
             if (!this.ccSound(var1.getLocation(), var6, "clip_in", 0.9F)) {
                var1.playSound(var1.getLocation(), Sound.ITEM_CROSSBOW_LOADING_END, 0.8F, 1.3F);
             }
@@ -836,6 +837,7 @@ final class Game {
 
          if (var2.reloadingItem != null && (var7 == null || !var7.equals(var2.reloadingItem))) {
             var2.reloadingItem = null;
+            this.restoreModels(var1);
          }
 
          // Otomatik silah: tetik basili kaldikca (istemci ~200 ms'de bir sinyal yollar) ates eder.
@@ -925,6 +927,8 @@ final class Game {
             this.unscope(var1, var2);
          }
 
+         // sarjor degistirme pozu (kaynak paketindeki CustomModelData + 500 modeli)
+         this.setModel(var1.getInventory().getItemInMainHand(), var3.model + RELOAD_MODEL_OFFSET);
          if (!this.ccSound(var1.getLocation(), var3, "clip_out", 0.9F)) {
             var1.getWorld().playSound(var1.getLocation(), Sound.ITEM_CROSSBOW_LOADING_START, 0.8F, 1.2F);
          }
@@ -977,6 +981,43 @@ final class Game {
 
       var1.removePotionEffect(PotionEffectType.SLOW);
       this.speed(var1);
+   }
+
+   static final int RELOAD_MODEL_OFFSET = 500;
+
+   /** Sarjor degistirme pozundaki silahlari normal modele geri dondurur. */
+   void restoreModels(Player p) {
+      for (ItemStack it : p.getInventory().getContents()) {
+         if (it != null && it.hasItemMeta() && it.getItemMeta().hasCustomModelData()) {
+            int c = it.getItemMeta().getCustomModelData();
+            if (c > RELOAD_MODEL_OFFSET + 1000 && c < RELOAD_MODEL_OFFSET + 1100) {
+               Weapon w = this.plugin.weaponOf(it);
+               this.setModel(it, w == null ? c - RELOAD_MODEL_OFFSET : w.model);
+            }
+         }
+      }
+   }
+
+   /** Atis efektleri: namlu alevi (susturucuda sadece duman), kivilcim ve sagdan firlayan kovan. */
+   void muzzleEffects(World w, Location muzzle, Vector dir, Weapon wpn, boolean silenced) {
+      w.spawnParticle(Particle.SMOKE_NORMAL, muzzle, silenced ? 3 : 2, 0.02, 0.02, 0.02, 0.01);
+      if (!silenced) {
+         boolean big = wpn.kind == Weapon.Kind.SNIPER || wpn.kind == Weapon.Kind.SHOTGUN || wpn.kind == Weapon.Kind.HEAVY;
+         float size = big ? 1.6F : (wpn.kind == Weapon.Kind.PISTOL ? 0.8F : 1.1F);
+         w.spawnParticle(Particle.DUST_COLOR_TRANSITION, muzzle.clone().add(dir.clone().multiply(0.15)), big ? 6 : 4, 0.04, 0.04, 0.04, 0.0,
+            new Particle.DustTransition(Color.fromRGB(255, 240, 150), Color.fromRGB(255, 120, 20), size));
+         w.spawnParticle(Particle.FLAME, muzzle, big ? 3 : 1, 0.02, 0.02, 0.02, 0.01);
+         w.spawnParticle(Particle.CRIT, muzzle, 2, 0.03, 0.03, 0.03, 0.15);
+      }
+
+      if (wpn.kind != Weapon.Kind.SHOTGUN || wpn.auto) {
+         Vector right = rotate(dir, 0.0, 1.5707963267948966).setY(0);
+         if (right.lengthSquared() > 1.0E-6) {
+            right.normalize().multiply(-0.18);
+            Location shell = muzzle.clone().add(dir.clone().multiply(-0.45)).add(right.clone().multiply(0.6));
+            w.spawnParticle(Particle.ITEM_CRACK, shell, 1, right.getX(), 0.12, right.getZ(), 0.25, new ItemStack(Material.GOLD_NUGGET));
+         }
+      }
    }
 
    void setModel(ItemStack it, int model) {
@@ -1066,10 +1107,7 @@ final class Game {
          .add(var10.clone().multiply(0.8))
          .add(rotate(var10, 0.0, 1.5707963267948966).setY(0).normalize().multiply(-0.25))
          .add(0.0, -0.2, 0.0);
-      var1.getWorld().spawnParticle(Particle.SMOKE_NORMAL, var18, 2, 0.02, 0.02, 0.02, 0.01);
-      if (!var17) {
-         var1.getWorld().spawnParticle(Particle.FLAME, var18, 1, 0.01, 0.01, 0.01, 0.005);
-      }
+      this.muzzleEffects(var1.getWorld(), var18, var10, var3, var17);
 
       if (var3.kind == Weapon.Kind.SNIPER && var2.scoped) {
          this.unscope(var1, var2);
