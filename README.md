@@ -59,7 +59,11 @@ Kurulum: `cd pisangames && mvn package`, jar'ı `plugins/` içine at. `plugins/P
   - SF League / Strike zaten offline.
   - Gizli anahtar: lobide `auth-secret`, PisanHub'da `ticket-secret` (aynı değer, git'e koyma).
 - **Giriş testi:** oyuncu gönderilmeden önce lobi hedefe `PisanTest` adlı test oyuncusuyla gerçekten bağlanır (proxy'de arka sunucuya kadar). Test oyuncusu girebilirse oyuncular gönderilir, atılırsa beklemeye devam edilir. Böylece "Ağ kısa süreli bakımda" gibi kesilmeler oyuncuya yansımaz.
+- Not: Exaroton `server.properties` dosyasını kendi ayarından geri yazar; `online-mode` paneldeki **Korsan** ayarından (veya API: `POST servers/{id}/files/config/server.properties` `{"online-mode": false}`) değiştirilmeli.
 - Lobideki yazılar her açılışta silinip yeniden oluşturulur (eski/üst üste yazılar kalmaz).
+
+## SkinsRestorer
+Tüm sunucularda SkinsRestorer 15.12.6 var (lobi, Skyblock, SF League, Strike, pisanpvp proxy'si ve pisan-legacy/pisan-modern; arka sunucular proxy modunda). Crack oyuncuların skini isimden otomatik gelir; `/skin <isim>` ile değiştirilebilir.
 
 ## `/analobi` (diğer sunuculardan Pisan Games lobisine dönüş)
 - `pisanhub/paper/` – Paper plugini (PisanHub). Pisanskyblock (26.3), Pisan SF League (1.20.1) ve Pisan Strike (1.20.1) üzerinde. 26.3'te Paper'ın transfer metodunu, 1.20.1'de transfer paketini ViaVersion üzerinden gönderir. Ayar: `plugins/PisanHub/config.yml`.
