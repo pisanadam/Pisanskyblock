@@ -329,7 +329,7 @@ GUNS[1098] = ("scope_hidden", None)
 # Elde gorunum ayarlari; Minecraft 1.20.1 istemcisinde gozle ayarlandi (bkz. strike-pack/README).
 DISPLAY_OVERRIDE = json.loads(os.environ.get("PISAN_DISPLAY", "null"))
 
-def display(kind, span, s=None):
+def display(kind, span, s=None, fp_small=None):
     if s is None:
         s = min(1.0, 16 / max(span, 1))
     if DISPLAY_OVERRIDE and kind in DISPLAY_OVERRIDE:
@@ -340,7 +340,7 @@ def display(kind, span, s=None):
     if kind == "gun":
         # Minecraft 1.20.1 istemcisinde (Xvfb) ekran goruntusuyle dogrulandi: namlu ileri, sarjor asagi.
         # kisa silahlar (tabanca, bicak, SMG) birinci sahista ekrani kaplamasin
-        small = 0.55 if span < 12 else (0.7 if span < 20 else 1.0)
+        small = fp_small if fp_small is not None else (0.55 if span < 12 else (0.7 if span < 20 else 1.0))
         fp = {"translation": [-0.5 + (1 - small) * 2, 4 + (1 - small) * 2, -0.5], "scale": [round(0.8 * s * small, 4)] * 3}
         tp = {"translation": [0, 3, 1], "scale": [1.0 * s] * 3}
         return {
@@ -384,7 +384,7 @@ CC_NS = "tactical_arsenal"
 def cc_available():
     return os.path.isdir(CC_DIR) and os.path.exists(os.path.join(CC_DIR, "weapon_map.json"))
 
-def cc_model(wid):
+def cc_model(wid, real_span=None):
     """Counter Craft silahinin govde+mekanizma+sarjor parcalarini tek modelde birlestirir."""
     cc = json.load(open(os.path.join(CC_DIR, "weapon_map.json"))).get(wid)
     if cc is None:
@@ -408,7 +408,13 @@ def cc_model(wid):
     xs = [v for e in elements for v in (e["from"][0], e["to"][0])]
     ys = [v for e in elements for v in (e["from"][1], e["to"][1])]
     span = max(max(xs) - min(xs), max(ys) - min(ys))
-    return {"credit": "Counter Craft (Tactical Arsenal)", "textures": textures, "elements": elements, "display": display("gun", span)}
+    if real_span is not None:
+        # gercek silah boyutuna gore olcekle (tabanca kucuk, tufek uzun)
+        sc = min(real_span, 16.0) / max(span, 1.0) * CC_SIZE.get(wid, 1.0)
+        disp = display("gun", real_span, s=sc, fp_small=0.95 if real_span < 12 else (0.85 if real_span < 20 else 1.0))
+    else:
+        disp = display("gun", span)
+    return {"credit": "Counter Craft (Tactical Arsenal)", "textures": textures, "elements": elements, "display": disp}
 
 # Yuksek detayli (HQ) modeller: tek dokulu, binlerce kupluk, hepsi 16 birim uzunluga olcekli.
 HQ_DIR = os.environ.get("PISAN_HQ_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "countercraft-hq")
@@ -418,6 +424,8 @@ def hq_available():
 
 def hq_model(wid, real_span):
     """HQ modeli bizim silahin gercek boyutuna gore olcekler (tabanca kucuk, tufek uzun)."""
+    if wid in HQ_SKIP:
+        return None
     cc = json.load(open(os.path.join(CC_DIR, "weapon_map.json"))).get(wid)
     path = os.path.join(HQ_DIR, "models", "item", "hq", f"{cc}.json") if cc else None
     if not path or not os.path.exists(path):
@@ -426,9 +434,18 @@ def hq_model(wid, real_span):
     if not d.get("elements"):
         return None
     # bizim modelde silah 16/span olcekle cizilir ve uzunlugu min(span,16) birim gorunur; HQ model 16 birim
-    s = min(real_span, 16.0) / 16.0
+    s = min(real_span, 16.0) / 16.0 * HQ_SIZE.get(wid, 1.0)
+    # HQ tabancalar 1. sahista fazla kucuk kaliyordu (oyunda goruntuyle ayarlandi)
+    fp_small = 0.95 if real_span < 12 else (0.85 if real_span < 20 else 1.0)
     return {"credit": "Counter Craft HQ", "textures": d["textures"], "elements": d["elements"],
-            "display": display("gun", real_span, s=s)}
+            "display": display("gun", real_span, s=s, fp_small=fp_small)}
+
+HQ_SIZE = {}
+# iki tabanca yan yana oldugu icin Dual Berettas tek tabancadan iri gorunuyor (oyunda goruntuyle ayarlandi)
+CC_SIZE = {"dualies": 0.6}
+# HQ Dual Berettas modelinde iki tabanca birbirinden cok uzak; elde tek parca gibi durmuyor.
+# Bunun yerine Counter Craft'in standart (iki tabanca yan yana) modeli kullanilir.
+HQ_SKIP = {"dualies"}
 
 def hq_files():
     out = {}
@@ -509,7 +526,7 @@ def build(out):
             if item == GUN_ITEM and hq_available() and m is not None:
                 ccm = hq_model(name, M_span(m))
             if ccm is None and item == GUN_ITEM and cc_available():
-                ccm = cc_model(name)
+                ccm = cc_model(name, M_span(m) if (hq_available() and m is not None) else None)
             if ccm is not None:
                 files[f"assets/{NS}/models/item/{name}.json"] = json.dumps(ccm, separators=(",", ":")).encode()
             elif m is not None:
